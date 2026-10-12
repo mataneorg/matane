@@ -1,7 +1,7 @@
 import type { HistoryEntry } from '@manga-reader/shared';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { EyeOff, History, Play, RotateCcw, Trash2 } from 'lucide-react';
+import { ExternalLink, EyeOff, History, Play, RotateCcw, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -15,6 +15,13 @@ import { ipc } from '../../lib/ipc';
 import { historyQuery } from '../../lib/reading';
 import { cn } from '../../lib/utils';
 import { type HistoryGroup, groupByDay } from './groups';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '../../components/ui/context-menu';
 
 /** One entry per manga, last read first, grouped by day (docs/BRAINSTORM.md §6.3; mockup 10). */
 export function HistoryPage() {
@@ -146,68 +153,91 @@ function HistoryRow({ entry, group }: { entry: HistoryEntry; group: HistoryGroup
       : t('history.pageNoTotal', { page: entry.lastPage + 1 });
 
   return (
-    <article
-      data-testid="history-entry"
-      className="flex items-center gap-4 rounded-xl border bg-card/40 p-2.5 pr-4 transition-colors hover:border-input"
-    >
-      <Link to="/manga/$mangaId" params={{ mangaId: String(entry.mangaId) }} className="shrink-0">
-        <CoverImage
-          mangaId={entry.mangaId}
-          coverKey={entry.coverKey}
-          alt=""
-          className="aspect-[2/3] w-12 rounded-md border"
-        />
-      </Link>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex min-w-0 items-center gap-2">
-          <Link
-            to="/manga/$mangaId"
-            params={{ mangaId: String(entry.mangaId) }}
-            className="truncate text-[15px] font-medium hover:underline"
-          >
-            {entry.title}
-          </Link>
-          {entry.sourceName && (
-            <span className="shrink-0 rounded border bg-muted px-1.5 py-px font-mono text-[10px] text-muted-foreground">
-              {entry.sourceName}
-            </span>
-          )}
-        </div>
-        <p className="truncate text-xs text-muted-foreground">
-          <span className="text-foreground/85">{entry.chapterName}</span> · {page}
-          <span className="px-2">·</span>
-          {when}
-        </p>
-        <div className="flex items-center gap-2">
-          <div className="h-1 w-56 overflow-hidden rounded-full bg-muted">
-            <div
-              className={cn('h-full rounded-full', readAgain ? 'bg-ctp-green' : 'bg-primary')}
-              style={{ width: `${percent}%` }}
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <article
+          data-testid="history-entry"
+          className="flex items-center gap-4 rounded-xl border bg-card/40 p-2.5 pr-4 transition-colors hover:border-input"
+        >
+          <Link to="/manga/$mangaId" params={{ mangaId: String(entry.mangaId) }} className="shrink-0">
+            <CoverImage
+              mangaId={entry.mangaId}
+              coverKey={entry.coverKey}
+              alt=""
+              className="aspect-[2/3] w-12 rounded-md border"
             />
+          </Link>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <Link
+                to="/manga/$mangaId"
+                params={{ mangaId: String(entry.mangaId) }}
+                className="truncate text-[15px] font-medium hover:underline"
+              >
+                {entry.title}
+              </Link>
+              {entry.sourceName && (
+                <span className="shrink-0 rounded border bg-muted px-1.5 py-px font-mono text-[10px] text-muted-foreground">
+                  {entry.sourceName}
+                </span>
+              )}
+            </div>
+            <p className="truncate text-xs text-muted-foreground">
+              <span className="text-foreground/85">{entry.chapterName}</span> · {page}
+              <span className="px-2">·</span>
+              {when}
+            </p>
+            <div className="flex items-center gap-2">
+              <div className="h-1 w-56 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn('h-full rounded-full', readAgain ? 'bg-ctp-green' : 'bg-primary')}
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <span className={cn('text-[11px] text-muted-foreground', readAgain && 'text-success-text')}>
+                {percent}%
+              </span>
+            </div>
           </div>
-          <span className={cn('text-[11px] text-muted-foreground', readAgain && 'text-success-text')}>{percent}%</span>
-        </div>
-      </div>
-      {readAgain ? (
-        <Button variant="secondary" onClick={() => resume.mutate()} disabled={resume.isPending}>
-          <RotateCcw />
-          {t('history.readAgain')}
-        </Button>
-      ) : (
-        <Button onClick={() => resume.mutate()} disabled={resume.isPending}>
-          <Play className="fill-current" />
-          {t('history.resume')}
-        </Button>
-      )}
-      <Button
-        variant="ghost"
-        size="icon"
-        title={t('history.remove')}
-        className="hover:text-danger-text"
-        onClick={() => remove.mutate()}
-      >
-        <Trash2 />
-      </Button>
-    </article>
+          {readAgain ? (
+            <Button variant="secondary" onClick={() => resume.mutate()} disabled={resume.isPending}>
+              <RotateCcw />
+              {t('history.readAgain')}
+            </Button>
+          ) : (
+            <Button onClick={() => resume.mutate()} disabled={resume.isPending}>
+              <Play className="fill-current" />
+              {t('history.resume')}
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            title={t('history.remove')}
+            className="hover:text-danger-text"
+            onClick={() => remove.mutate()}
+          >
+            <Trash2 />
+          </Button>
+        </article>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onSelect={() => resume.mutate()} disabled={resume.isPending}>
+          {readAgain ? <RotateCcw aria-hidden /> : <Play aria-hidden />}
+          {readAgain ? t('history.readAgain') : t('history.resume')}
+        </ContextMenuItem>
+        <ContextMenuItem
+          onSelect={() => void navigate({ to: '/manga/$mangaId', params: { mangaId: String(entry.mangaId) } })}
+        >
+          <ExternalLink aria-hidden />
+          {t('contextMenu.lists.openManga')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem destructive onSelect={() => remove.mutate()}>
+          <Trash2 aria-hidden />
+          {t('history.remove')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }

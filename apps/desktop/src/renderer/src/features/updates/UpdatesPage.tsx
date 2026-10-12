@@ -9,6 +9,7 @@ import {
   CircleAlert,
   CircleArrowDown,
   EllipsisVertical,
+  ExternalLink,
   EyeOff,
   Play,
   RefreshCw,
@@ -36,6 +37,13 @@ import { DownloadButton } from '../manga/DownloadButton';
 import { type UpdateRowEntry, flattenGroups } from './entries';
 import { AnimatePresence, m, slideUpBar } from '../../lib/motion';
 import { notifyError } from '../../lib/toast';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '../../components/ui/context-menu';
 
 /** New chapters of library manga, grouped by day (docs/BRAINSTORM.md §6.4; mockup 07). */
 export function UpdatesPage() {
@@ -425,6 +433,7 @@ function UpdateRow({
     mutationFn: (read: boolean) => ipc.invoke('chapters.markRead', { chapterIds: [entry.chapterId], read }),
   });
   const read = () => void navigate({ to: '/reader/$chapterId', params: { chapterId: String(entry.chapterId) } });
+  const enqueue = useEnqueueDownloads();
   const when =
     now - entry.fetchedAt < 86_400_000
       ? formatRelative(entry.fetchedAt, i18n.language, now)
@@ -436,65 +445,97 @@ function UpdateRow({
         }).format(entry.fetchedAt);
 
   return (
-    <article
-      data-testid="update-row"
-      className={cn(
-        'group flex items-center gap-3 border-x border-t bg-card/40 px-3 py-2 transition-colors hover:bg-accent/40',
-        first && 'rounded-t-xl',
-        last && 'rounded-b-xl border-b',
-        selected && 'bg-primary/10',
-      )}
-    >
-      <input
-        type="checkbox"
-        checked={selected}
-        onChange={() => undefined}
-        onClick={(event) => onToggle(entry.chapterId, event)}
-        aria-label={t('updates.select', { chapter: entry.chapterName, title: entry.mangaTitle })}
-        className="size-4 shrink-0 accent-(--primary)"
-      />
-      <span
-        className={cn('size-1.5 shrink-0 rounded-full', entry.read ? 'bg-transparent' : 'bg-primary')}
-        aria-label={entry.read ? undefined : t('updates.unread')}
-      />
-      <div className={cn('flex min-w-0 flex-1 items-center gap-3', entry.read && 'opacity-50')}>
-        <Link to="/manga/$mangaId" params={{ mangaId: String(entry.mangaId) }} className="shrink-0">
-          <CoverImage mangaId={entry.mangaId} coverKey={entry.coverKey} alt="" className="h-10 w-7 rounded-sm" />
-        </Link>
-        <div className="min-w-0">
-          <p className="truncate">
-            <Link
-              to="/manga/$mangaId"
-              params={{ mangaId: String(entry.mangaId) }}
-              className="font-semibold hover:underline"
-            >
-              {entry.mangaTitle}
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <article
+          data-testid="update-row"
+          className={cn(
+            'group flex items-center gap-3 border-x border-t bg-card/40 px-3 py-2 transition-colors hover:bg-accent/40',
+            first && 'rounded-t-xl',
+            last && 'rounded-b-xl border-b',
+            selected && 'bg-primary/10',
+          )}
+        >
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => undefined}
+            onClick={(event) => onToggle(entry.chapterId, event)}
+            aria-label={t('updates.select', { chapter: entry.chapterName, title: entry.mangaTitle })}
+            className="size-4 shrink-0 accent-(--primary)"
+          />
+          <span
+            className={cn('size-1.5 shrink-0 rounded-full', entry.read ? 'bg-transparent' : 'bg-primary')}
+            aria-label={entry.read ? undefined : t('updates.unread')}
+          />
+          <div className={cn('flex min-w-0 flex-1 items-center gap-3', entry.read && 'opacity-50')}>
+            <Link to="/manga/$mangaId" params={{ mangaId: String(entry.mangaId) }} className="shrink-0">
+              <CoverImage mangaId={entry.mangaId} coverKey={entry.coverKey} alt="" className="h-10 w-7 rounded-sm" />
             </Link>
-            <span className="px-1.5 text-muted-foreground">·</span>
-            <span className="text-primary-text">{entry.chapterName}</span>
-          </p>
-          <p className="truncate text-xs text-muted-foreground">
-            {[entry.scanlator ?? entry.sourceName, when].filter(Boolean).join(' · ')}
-          </p>
-        </div>
-      </div>
-      <DownloadButton chapterId={entry.chapterId} download={download} />
-      {entry.read ? (
-        <Button variant="ghost" size="sm" title={t('updates.markUnread')} onClick={() => markRead.mutate(false)}>
-          <Check />
-          {t('updates.read')}
-        </Button>
-      ) : (
-        <>
-          <Button variant="ghost" size="icon-sm" title={t('updates.markRead')} onClick={() => markRead.mutate(true)}>
-            <Check />
-          </Button>
-          <Button variant="ghost" size="icon-sm" title={t('updates.readNow')} onClick={read}>
-            <Play />
-          </Button>
-        </>
-      )}
-    </article>
+            <div className="min-w-0">
+              <p className="truncate">
+                <Link
+                  to="/manga/$mangaId"
+                  params={{ mangaId: String(entry.mangaId) }}
+                  className="font-semibold hover:underline"
+                >
+                  {entry.mangaTitle}
+                </Link>
+                <span className="px-1.5 text-muted-foreground">·</span>
+                <span className="text-primary-text">{entry.chapterName}</span>
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {[entry.scanlator ?? entry.sourceName, when].filter(Boolean).join(' · ')}
+              </p>
+            </div>
+          </div>
+          <DownloadButton chapterId={entry.chapterId} download={download} />
+          {entry.read ? (
+            <Button variant="ghost" size="sm" title={t('updates.markUnread')} onClick={() => markRead.mutate(false)}>
+              <Check />
+              {t('updates.read')}
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                title={t('updates.markRead')}
+                onClick={() => markRead.mutate(true)}
+              >
+                <Check />
+              </Button>
+              <Button variant="ghost" size="icon-sm" title={t('updates.readNow')} onClick={read}>
+                <Play />
+              </Button>
+            </>
+          )}
+        </article>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onSelect={read}>
+          <Play aria-hidden />
+          {t('updates.readNow')}
+        </ContextMenuItem>
+        <ContextMenuItem onSelect={() => markRead.mutate(!entry.read)}>
+          {entry.read ? <EyeOff aria-hidden /> : <Check aria-hidden />}
+          {entry.read ? t('updates.markUnread') : t('updates.markRead')}
+        </ContextMenuItem>
+        {download === undefined ? (
+          <ContextMenuItem onSelect={() => enqueue([entry.chapterId])}>
+            <CircleArrowDown aria-hidden />
+            {t('downloads.download')}
+          </ContextMenuItem>
+        ) : null}
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          onSelect={() => void navigate({ to: '/manga/$mangaId', params: { mangaId: String(entry.mangaId) } })}
+        >
+          <ExternalLink aria-hidden />
+          {t('contextMenu.lists.openManga')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
