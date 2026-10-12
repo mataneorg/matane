@@ -249,7 +249,7 @@ export function LibraryPage({ tab: requestedTab, onTab }: { tab: LibraryTab; onT
         ) : library.isError ? (
           <ErrorState error={library.error} onRetry={() => void library.refetch()} />
         ) : library.isPending ? (
-          <GridSkeleton coverSize={settings.coverSize} />
+          <GridSkeleton coverSize={settings.coverSize} display={settings.display} />
         ) : items.length === 0 ? (
           <EmptyState
             icon={SearchX}
@@ -636,15 +636,31 @@ function LibraryList({ items, scrollElement, selected, onItemClick, onToggle, on
   );
 }
 
-function GridSkeleton({ coverSize }: { coverSize: number }) {
+/** Placeholders in the shape of the chosen display: rows for the list, covers (with a caption) for the grids. */
+function GridSkeleton({ coverSize, display }: { coverSize: number; display: LibrarySettings['display'] }) {
+  if (display === 'list') {
+    return (
+      <div className="px-6 pt-2" aria-busy>
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={i} className="flex h-16 items-center gap-3 border-b px-2">
+            <Skeleton className="aspect-[2/3] h-12 rounded" />
+            <Skeleton className="h-3.5 w-1/3" />
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div
-      className="grid gap-4 p-6"
+      className={cn('grid p-6', display === 'comfortable' ? 'gap-4' : 'gap-2.5')}
       style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${coverSize}px, 1fr))` }}
       aria-busy
     >
       {Array.from({ length: 12 }, (_, i) => (
-        <Skeleton key={i} className="aspect-[2/3] rounded-lg" />
+        <div key={i} className="flex flex-col gap-2">
+          <Skeleton className="aspect-[2/3] rounded-lg" />
+          {display === 'comfortable' ? <Skeleton className="h-3.5 w-4/5" /> : null}
+        </div>
       ))}
     </div>
   );
