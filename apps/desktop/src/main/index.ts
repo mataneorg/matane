@@ -380,10 +380,10 @@ async function bootstrap(): Promise<void> {
     local: { sourceId: LOCAL_SOURCE_ID, cover: (url) => localStore.cover(url) },
     log: (message) => log.scope('images').warn(message),
     fetcher: {
-      fetchImage: (extensionId, url, headers) => {
+      fetchImage: (extensionId, url, headers, options) => {
         const manifest = extensions.get(extensionId)?.manifest;
         if (!manifest) return Promise.reject(new Error(`Extension ${extensionId} is not loaded`));
-        return network.fetchImage(manifest, url, headers);
+        return network.fetchImage(manifest, url, headers, options);
       },
     },
   });

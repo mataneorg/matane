@@ -118,7 +118,12 @@ describe('ImageService', () => {
     const [first, second] = await Promise.all([service.cover(mangaId), service.cover(mangaId)]);
     expect(first).toEqual(second);
     expect(fetchImage).toHaveBeenCalledTimes(1);
-    expect(fetchImage).toHaveBeenCalledWith('demo', 'https://example.com/a.jpg', { Referer: 'https://example.com/' });
+    expect(fetchImage).toHaveBeenCalledWith(
+      'demo',
+      'https://example.com/a.jpg',
+      { Referer: 'https://example.com/' },
+      { cover: true },
+    );
     await service.cover(mangaId);
     expect(fetchImage).toHaveBeenCalledTimes(1);
     expect(reports).toEqual([expect.objectContaining({ success: true, bytes: 30, cached: true })]);

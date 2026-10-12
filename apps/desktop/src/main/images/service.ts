@@ -16,7 +16,12 @@ import { type Box, type ImageInput, type Size, cropBox, cropImage, measure, spli
 
 export interface ImageFetcher {
   /** Fetches an image through the extension's session; returns the raw response. */
-  fetchImage(extensionId: string, url: string, headers: Record<string, string>): Promise<Response>;
+  fetchImage(
+    extensionId: string,
+    url: string,
+    headers: Record<string, string>,
+    options?: { cover?: boolean },
+  ): Promise<Response>;
 }
 
 const MAX_IMAGE_BYTES = 30 * 1024 * 1024;
@@ -316,7 +321,7 @@ export class ImageService {
   private async fetchAndStore(key: string, kind: ImageKind, sourceId: string, url: string): Promise<CachedImage> {
     const cached = await this.deps.cache.get(key);
     if (cached) return cached;
-    const { bytes, contentType } = await this.fetchBytes(sourceId, url);
+    const { bytes, contentType } = await this.fetchBytes(sourceId, url, false, true);
     return this.deps.cache.put(key, kind, bytes, contentType);
   }
 
@@ -324,7 +329,7 @@ export class ImageService {
    * One image through the extension's network, checked, and reported to the extension. Encrypted
    * images (`anyType`) may come with any content type; they are checked after restoring.
    */
-  private async fetchBytes(sourceId: string, url: string, anyType = false): Promise<ImageBytes> {
+  private async fetchBytes(sourceId: string, url: string, anyType = false, cover = false): Promise<ImageBytes> {
     if (this.deps.local && sourceId === this.deps.local.sourceId) return this.deps.local.cover(url);
     const source = this.deps.sources.source(sourceId);
     const headers = await this.deps.sources.imageHeaders(sourceId);
@@ -333,7 +338,12 @@ export class ImageService {
     let success = false;
     let cachedByCdn = false;
     try {
-      const response = await this.deps.fetcher.fetchImage(source.extensionId, url, headers);
+      const response = await this.deps.fetcher.fetchImage(
+        source.extensionId,
+        url,
+        headers,
+        cover ? { cover: true } : undefined,
+      );
       cachedByCdn = (response.headers.get('x-cache') ?? '').toUpperCase().startsWith('HIT');
       const contentType = response.headers.get('content-type');
       if (!response.ok) {

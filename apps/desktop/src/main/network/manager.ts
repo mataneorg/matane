@@ -12,12 +12,17 @@ import { browserUserAgent } from './user-agent';
 const DEFAULT_RATE = { requests: 10, perMs: 1000 };
 /** Images come from CDNs, not the rate-limited API; they get their own, looser bucket. */
 const IMAGE_RATE = { requests: 20, perMs: 1000 };
+/** A browse cover nobody is waiting for: a dead one shows its placeholder after ~21 s at worst. */
+const COVER_TIMEOUT_MS = 10_000;
+const COVER_RETRIES = 1;
 
 interface NetworkEntry {
   version: string;
   session: Session;
   fetcher: ExtensionFetcher;
   images: ExtensionFetcher;
+  /** Same bucket as `images`, with a shorter timeout and one retry. */
+  covers: ExtensionFetcher;
 }
 
 /**
@@ -45,11 +50,16 @@ export class NetworkManager implements ExtensionNetwork {
     return entry.fetcher.request(request);
   }
 
-  /** Image fetch through the extension's session, with its own rate bucket. */
-  async fetchImage(manifest: ExtensionManifest, url: string, headers: Record<string, string>): Promise<Response> {
+  /** Image fetch through the extension's session, with its own rate bucket; covers give up sooner than pages. */
+  async fetchImage(
+    manifest: ExtensionManifest,
+    url: string,
+    headers: Record<string, string>,
+    options?: { cover?: boolean },
+  ): Promise<Response> {
     const entry = this.entry(manifest);
     await this.proxyReady(manifest.id);
-    const { response } = await entry.images.fetchRaw({ url, headers });
+    const { response } = await (options?.cover ? entry.covers : entry.images).fetchRaw({ url, headers });
     return response;
   }
 
@@ -113,14 +123,23 @@ export class NetworkManager implements ExtensionNetwork {
       userAgent: this.userAgent,
       solveChallenge,
     });
+    const imageLimiter = new TokenBucket(IMAGE_RATE.requests, IMAGE_RATE.perMs);
     const images = new ExtensionFetcher({
       fetch: sessionFetch(ses),
-      limiter: new TokenBucket(IMAGE_RATE.requests, IMAGE_RATE.perMs),
+      limiter: imageLimiter,
       userAgent: this.userAgent,
       solveChallenge,
       timeoutMs: 30_000,
     });
-    const entry = { version: manifest.version, session: ses, fetcher, images };
+    const covers = new ExtensionFetcher({
+      fetch: sessionFetch(ses),
+      limiter: imageLimiter,
+      userAgent: this.userAgent,
+      solveChallenge,
+      timeoutMs: COVER_TIMEOUT_MS,
+      maxRetries: COVER_RETRIES,
+    });
+    const entry = { version: manifest.version, session: ses, fetcher, images, covers };
     this.entries.set(manifest.id, entry);
     return entry;
   }
