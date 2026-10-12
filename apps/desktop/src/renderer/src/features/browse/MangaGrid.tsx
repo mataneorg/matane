@@ -114,6 +114,7 @@ export function MangaGrid({
   items,
   hasNextPage,
   isFetchingNextPage,
+  failed = false,
   fetchNextPage,
   scrollRoot,
   loadingLabel,
@@ -123,6 +124,8 @@ export function MangaGrid({
   items: BrowseItem[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  /** The last request for the next page failed; the observer waits for the Retry button instead of looping. */
+  failed?: boolean;
   fetchNextPage: () => void;
   scrollRoot: React.RefObject<HTMLElement | null>;
   loadingLabel: string;
@@ -132,7 +135,7 @@ export function MangaGrid({
   const sentinel = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const node = sentinel.current;
-    if (!node || !hasNextPage) return;
+    if (!node || !hasNextPage || failed) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting) && !isFetchingNextPage) fetchNextPage();
@@ -141,7 +144,8 @@ export function MangaGrid({
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, scrollRoot]);
+    // `items.length` makes a new observer report a sentinel that is still in view after a page arrives.
+  }, [hasNextPage, isFetchingNextPage, failed, items.length, fetchNextPage, scrollRoot]);
 
   return (
     <>

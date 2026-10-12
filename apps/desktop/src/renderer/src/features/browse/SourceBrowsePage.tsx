@@ -187,6 +187,7 @@ export function SourceBrowsePage({
                 items={unique}
                 hasNextPage={listing.hasNextPage}
                 isFetchingNextPage={listing.isFetchingNextPage}
+                failed={listing.isFetchNextPageError}
                 fetchNextPage={() => void listing.fetchNextPage()}
                 scrollRoot={scrollRef}
                 loadingLabel={t('browse.loadingMore', { source: source?.name ?? '' })}
