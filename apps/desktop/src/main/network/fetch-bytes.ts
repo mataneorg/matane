@@ -36,7 +36,11 @@ export function createFetchBytes(fetchImpl: (url: string, init: RequestInit) => 
       await response.body?.cancel();
       throw new AppError('http', `${url}: HTTP ${response.status}`, response.status);
     }
-    const tooLarge = () => new AppError('repo', `${url} is larger than ${Math.round(maxBytes / 1024)} KB`);
+    const tooLarge = () =>
+      AppError.keyed('repo', `${url} is larger than ${Math.round(maxBytes / 1024)} KB`, 'repo.tooLarge', {
+        url,
+        kb: Math.round(maxBytes / 1024),
+      });
     if (Number(response.headers.get('content-length') ?? 0) > maxBytes) {
       await response.body?.cancel();
       throw tooLarge();

@@ -121,14 +121,22 @@ export class ExtensionInstaller {
     const from = this.deps.origin.get(extensionId);
     // Updates only come from the repository an extension was installed from (§5.8).
     if (current && from !== null && from !== repoId) {
-      throw new AppError('repo', `${entry.name} is installed from another repository; uninstall it first`);
+      throw AppError.keyed(
+        'repo',
+        `${entry.name} is installed from another repository; uninstall it first`,
+        'repo.otherRepository',
+        { name: entry.name },
+      );
     }
 
     const bytes = await this.deps.fetchBytes(this.deps.repos.fileUrl(repoId, entry.file), {
       maxBytes: Math.min(entry.size, REPO_LIMITS.archiveBytes),
       timeoutMs: 120_000,
     });
-    if (!bytes) throw new AppError('repo', `${entry.file} is missing from the repository`);
+    if (!bytes)
+      throw AppError.keyed('repo', `${entry.file} is missing from the repository`, 'repo.fileMissing', {
+        file: entry.file,
+      });
     const archive = await this.verify(entry, bytes);
 
     const token = randomUUID();
@@ -159,7 +167,7 @@ export class ExtensionInstaller {
   async install(token: string): Promise<ExtensionEntry> {
     this.dropExpired();
     const prepared = this.prepared.get(token);
-    if (!prepared) throw new AppError('repo', 'This install expired; start it again');
+    if (!prepared) throw AppError.keyed('repo', 'This install expired; start it again', 'repo.installExpired');
     this.prepared.delete(token);
     const { preview, archive } = prepared;
     return this.exclusive(preview.id, async () => {
@@ -241,7 +249,8 @@ export class ExtensionInstaller {
   }
 
   private async exclusive<T>(id: string, work: () => Promise<T>): Promise<T> {
-    if (this.busy.has(id)) throw new AppError('repo', `${id} is already being installed or removed`);
+    if (this.busy.has(id))
+      throw AppError.keyed('repo', `${id} is already being installed or removed`, 'repo.busy', { id });
     this.busy.add(id);
     try {
       return await work();

@@ -45,3 +45,4 @@ Short records of decisions that shape the codebase. The full design discussion (
 | [0039](0039-latte-text-contrast.md) | Text in accent and status colours keeps its contrast on Latte |
 | [0040](0040-browse-memory-and-prefetch.md) | Browse remembers its first page, fetches ahead, and drops rows nobody kept |
 | [0041](0041-updates-mark-seen.md) | Updates: entries are marked as seen on purpose, not by opening the page |
+| [0042](0042-main-process-i18n.md) | The main process speaks the user's language: its own catalogs, and errors that carry a key |

@@ -581,7 +581,23 @@
     "unknown": "Something went wrong",
     "verify": "Verify",
     "verifying": "Waiting for the check…",
-    "nsfw_hidden": "Adult sources are hidden. Turn them on in Settings → Browse & extensions."
+    "nsfw_hidden": "Adult sources are hidden. Turn them on in Settings → Browse & extensions.",
+    "main": {
+      "repo": {
+        "otherRepository": "{{name}} is installed from another repository; uninstall it first",
+        "fileMissing": "{{file}} is missing from the repository",
+        "installExpired": "This install expired; start it again",
+        "busy": "{{id}} is already being installed or removed",
+        "notUrl": "This is not a web address: {{input}}",
+        "httpsOnly": "Repositories must use HTTPS",
+        "noLogin": "Repository addresses cannot contain a login",
+        "alreadyAdded": "This repository is already added",
+        "noKeyToTrust": "This repository has no valid signature, so there is no key to trust",
+        "noIndex": "There is no {{file}} at {{url}}",
+        "notUtf8": "{{file}} is not UTF-8 text",
+        "tooLarge": "{{url}} is larger than {{kb}} KB"
+      }
+    }
   },
   "browse": {
     "inLibrary": "In library",

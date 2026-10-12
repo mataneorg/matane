@@ -579,7 +579,23 @@
     "unknown": "Terjadi kesalahan",
     "verify": "Verifikasi",
     "verifying": "Menunggu verifikasi…",
-    "nsfw_hidden": "Source dewasa disembunyikan. Aktifkan di Setting → Browse & extension."
+    "nsfw_hidden": "Source dewasa disembunyikan. Aktifkan di Setting → Browse & extension.",
+    "main": {
+      "repo": {
+        "otherRepository": "{{name}} dipasang dari repository lain; copot dulu",
+        "fileMissing": "{{file}} tidak ada di repository",
+        "installExpired": "Pemasangan ini sudah kedaluwarsa; mulai lagi",
+        "busy": "{{id}} sedang dipasang atau dicopot",
+        "notUrl": "Ini bukan alamat web: {{input}}",
+        "httpsOnly": "Repository harus memakai HTTPS",
+        "noLogin": "Alamat repository tidak boleh berisi login",
+        "alreadyAdded": "Repository ini sudah ditambahkan",
+        "noKeyToTrust": "Repository ini tidak punya tanda tangan yang sah, jadi tidak ada kunci untuk dipercaya",
+        "noIndex": "Tidak ada {{file}} di {{url}}",
+        "notUtf8": "{{file}} bukan teks UTF-8",
+        "tooLarge": "{{url}} lebih besar dari {{kb}} KB"
+      }
+    }
   },
   "browse": {
     "inLibrary": "Di library",

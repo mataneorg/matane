@@ -9,7 +9,10 @@ export function appError(error: unknown): AppErrorData {
   return decodeIpcError(error);
 }
 
-/** Short, translated headline for an error plus the raw detail for the curious. */
+/**
+ * Short, translated headline for an error plus the detail for the curious: the sentence in the user's language when main
+ * sent a key we know (`MAIN_ERROR_KEYS`), otherwise the raw English message.
+ */
 export function describeError(
   error: unknown,
   t: TFunction,
@@ -19,7 +22,8 @@ export function describeError(
     data.code === 'http' && data.status !== undefined
       ? t('errors.httpStatus', { status: data.status })
       : t(`errors.${data.code}`);
-  return { code: data.code, title, detail: data.message };
+  const detail = data.key ? t(`errors.main.${data.key}`, { ...data.params, defaultValue: data.message }) : data.message;
+  return { code: data.code, title, detail };
 }
 
 /** `describeError` for a component. */

@@ -23,13 +23,16 @@ export function normalizeRepoUrl(input: string): string {
   try {
     url = new URL(text);
   } catch {
-    throw new AppError('repo', `Not a URL: ${input}`);
+    throw AppError.keyed('repo', `Not a URL: ${input}`, 'repo.notUrl', { input });
   }
   if (url.protocol === 'http:' && !LOOPBACK.test(url.hostname)) {
-    throw new AppError('repo', 'Repositories must use HTTPS');
+    throw AppError.keyed('repo', 'Repositories must use HTTPS', 'repo.httpsOnly');
   }
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new AppError('repo', 'Repositories must use HTTPS');
-  if (url.username || url.password) throw new AppError('repo', 'Repository URLs cannot contain a login');
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw AppError.keyed('repo', 'Repositories must use HTTPS', 'repo.httpsOnly');
+  }
+  if (url.username || url.password)
+    throw AppError.keyed('repo', 'Repository URLs cannot contain a login', 'repo.noLogin');
   url.search = '';
   url.hash = '';
   url.pathname = url.pathname.replace(/\/index\.json$/, '/');
@@ -119,7 +122,8 @@ export class RepoService {
 
   async add(input: string, confirmUnverified = false): Promise<AddRepoResult> {
     const url = normalizeRepoUrl(input);
-    if (this.deps.repo.byUrl(url)) throw new AppError('repo', 'This repository is already added');
+    if (this.deps.repo.byUrl(url))
+      throw AppError.keyed('repo', 'This repository is already added', 'repo.alreadyAdded');
     const fetched = await this.fetchIndex(url);
     const trust = this.trustOf(fetched.bytes, fetched.signature, null, fetched.index);
     if (trust.trust === 'unverified' && !confirmUnverified) {
@@ -153,7 +157,11 @@ export class RepoService {
     const info = this.get(repoId);
     if (info.trust !== 'unverified') return info;
     if (info.problem !== 'unknown-key' || !info.signedBy) {
-      throw new AppError('repo', 'This repository has no valid signature, so there is no key to trust');
+      throw AppError.keyed(
+        'repo',
+        'This repository has no valid signature, so there is no key to trust',
+        'repo.noKeyToTrust',
+      );
     }
     this.deps.repo.update(repoId, { publicKey: info.signedBy });
     return this.get(repoId);
@@ -232,12 +240,13 @@ export class RepoService {
     const bytes = await this.deps.fetchBytes(new URL(REPO_INDEX_FILE, url).toString(), {
       maxBytes: REPO_LIMITS.indexBytes,
     });
-    if (!bytes) throw new AppError('repo', `No ${REPO_INDEX_FILE} at ${url}`);
+    if (!bytes)
+      throw AppError.keyed('repo', `No ${REPO_INDEX_FILE} at ${url}`, 'repo.noIndex', { url, file: REPO_INDEX_FILE });
     let text: string;
     try {
       text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
     } catch {
-      throw new AppError('repo', `${REPO_INDEX_FILE} is not UTF-8`);
+      throw AppError.keyed('repo', `${REPO_INDEX_FILE} is not UTF-8`, 'repo.notUtf8', { file: REPO_INDEX_FILE });
     }
     let index: RepoIndex;
     try {
