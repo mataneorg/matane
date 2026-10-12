@@ -2,7 +2,7 @@
 
 Download Matane from [GitHub Releases](https://github.com/mataneorg/matane/releases). Pre-releases (betas) are marked as such.
 
-<DownloadButton />
+<DownloadButton :guide="false" />
 
 | System                        | File                                       | Updates                                |
 | ----------------------------- | ------------------------------------------ | -------------------------------------- |
