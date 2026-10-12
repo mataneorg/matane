@@ -48,3 +48,4 @@ Short records of decisions that shape the codebase. The full design discussion (
 | [0042](0042-main-process-i18n.md) | The main process speaks the user's language: its own catalogs, and errors that carry a key |
 | [0043](0043-repository-format-min-app-and-icon-hash.md) | Repository index: the oldest app version and the hash of the icon |
 | [0044](0044-packaged-app-smoke-test.md) | A smoke test of the packaged app, run by the release workflow |
+| [0045](0045-registry-integrity-and-duplicate-folders.md) | The registry checks installed files against their digest and refuses duplicate developer folders |

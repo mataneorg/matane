@@ -7,6 +7,7 @@ import { REPO_LIMITS, type RepoEntry } from '@matane/extension-sdk/repo';
 import type { AvailableExtension, ExtensionEntry, InstallPreview, UpdateAllResult } from '@manga-reader/shared';
 import { AppError, toAppErrorData } from '@manga-reader/shared/errors';
 import { compareVersions } from '../app/updater';
+import { bundleDigest } from './registry';
 import type { FetchBytes } from '../network/fetch-bytes';
 import type { RepoService } from './repos';
 
@@ -35,6 +36,8 @@ export interface InstallerDeps {
     /** Re-reads bundles for this id, drops its runtime and network state. */
     reload(extensionId: string): Promise<unknown>;
   };
+  /** The digest of the installed files, checked at every load (`ExtensionRegistry`); null forgets it. */
+  digest: { set(extensionId: string, digest: string | null): void };
   /** Which repository an installed extension came from. */
   origin: { get(extensionId: string): number | null; set(extensionId: string, repoId: number | null): void };
   /** Removes the extension's DB record; its storage and preferences go with it. */
@@ -198,6 +201,8 @@ export class ExtensionInstaller {
     const { preview, archive } = prepared;
     return this.exclusive(preview.id, async () => {
       await this.write(preview.id, archive);
+      // Before the reload: the registry checks the files against it.
+      this.deps.digest.set(preview.id, bundleDigest(archive.files['manifest.json'], archive.files['index.js']));
       this.deps.log?.(`installed ${preview.id} ${preview.version} from ${preview.repoName}`);
       await this.deps.extensions.reload(preview.id);
       this.deps.origin.set(preview.id, preview.repoId);
@@ -239,6 +244,7 @@ export class ExtensionInstaller {
       // Drops the runtime and network state; a built-in with the same id takes over, if any.
       await this.deps.extensions.reload(extensionId);
       this.deps.forget(extensionId);
+      this.deps.digest.set(extensionId, null);
       await this.deps
         .clearSession(extensionId)
         .catch((error: unknown) =>

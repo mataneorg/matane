@@ -171,6 +171,16 @@ describe('ExtensionService', () => {
     expect(sources.list()).toEqual([expect.objectContaining({ id: 'demo/en', installed: true, lang: 'en' })]);
   });
 
+  it('refuses a second developer folder with an id another one already provides', async () => {
+    writeExtension(join(dir, 'dev-a'), CODE, '1.1.0-dev');
+    writeExtension(join(dir, 'dev-b'), CODE, '1.2.0-dev');
+    await extensions.addDevFolder(join(dir, 'dev-a'));
+    await expect(extensions.addDevFolder(join(dir, 'dev-b'))).rejects.toThrow(/already provides this extension id/);
+    // The folder that was refused is not kept: the first one still provides the extension.
+    expect(extensions.list()).toEqual([expect.objectContaining({ origin: 'dev', version: '1.1.0-dev' })]);
+    await extensions.removeDevFolder(join(dir, 'dev-a'));
+  });
+
   it('lets a dev folder override the built-in and reports broken folders', async () => {
     writeExtension(join(dir, 'dev'), CODE, '1.1.0-dev');
     const entry = await extensions.addDevFolder(join(dir, 'dev'));

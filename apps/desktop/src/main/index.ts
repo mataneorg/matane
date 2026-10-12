@@ -101,6 +101,8 @@ import { BackupService } from './backup/service';
 import { CoverColors } from './images/cover-color';
 
 const DEV_FOLDERS_KEY = 'extensions.devFolders';
+/** Settings key (not an app setting): the digest of an extension's files when it was installed. */
+const digestKey = (extensionId: string) => `extensions.digest.${extensionId}`;
 /** Settings key (not an app setting): the last version whose release notes were shown or skipped. */
 const WHATS_NEW_KEY = 'app.whatsNewSeen';
 const MB = 1024 * 1024;
@@ -249,6 +251,7 @@ async function bootstrap(): Promise<void> {
     installedDir: installedExtensionsDir,
     native: [localExtension.entry],
     devFolders: () => settings.getValue<string[]>(DEV_FOLDERS_KEY, []),
+    digest: { get: (id) => settings.getValue<string | null>(digestKey(id), null) },
     onDevChange: (extensionId) => {
       extLog.info(`Dev extension ${extensionId} changed on disk, reloading`);
       void extensions.reload(extensionId).catch((error: unknown) => extLog.error('Reload failed', error));
@@ -315,6 +318,7 @@ async function bootstrap(): Promise<void> {
     extensions,
     appVersion: () => app.getVersion(),
     origin: { get: (id) => reposRepo.installedFrom(id), set: (id, repoId) => reposRepo.setInstalledFrom(id, repoId) },
+    digest: { set: (id, digest) => settings.setValue(digestKey(id), digest) },
     forget: (id) => extensionsRepo.remove(id),
     clearSession: async (id) => {
       const ses = network.sessionFor(id);
@@ -330,6 +334,12 @@ async function bootstrap(): Promise<void> {
   });
   await installer.recover();
   const installed = await extensions.init();
+  // Extensions installed before digests were recorded are trusted as they are now; from here a change is noticed.
+  for (const entry of registry.list()) {
+    if (entry.origin === 'repo' && !entry.error && entry.digest && !settings.getValue(digestKey(entry.id), null)) {
+      settings.setValue(digestKey(entry.id), entry.digest);
+    }
+  }
   const urlMigration = new UrlMigration({
     sqlite: connection.sqlite,
     store: {

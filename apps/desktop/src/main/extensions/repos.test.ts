@@ -31,6 +31,8 @@ let fetched: string[];
 let repos: RepoService;
 let installer: ExtensionInstaller;
 let devFolders: string[];
+let digests: Map<string, string>;
+let registry: ExtensionRegistry;
 let appVersion: string;
 let extensions: ExtensionService;
 let extensionsRepo: ExtensionsRepository;
@@ -100,12 +102,14 @@ beforeEach(async () => {
   extensionsRepo = new ExtensionsRepository(connection.db, changes);
   const reposRepo = new ReposRepository(connection.db, changes);
   devFolders = [];
+  digests = new Map();
   appVersion = '1.0.0';
   mkdirSync(join(dir, 'builtin'));
-  const registry = new ExtensionRegistry({
+  registry = new ExtensionRegistry({
     builtinDir: join(dir, 'builtin'),
     installedDir: join(dir, 'installed'),
     devFolders: () => devFolders,
+    digest: { get: (id) => digests.get(id) ?? null },
   });
   extensions = new ExtensionService({
     registry,
@@ -131,6 +135,7 @@ beforeEach(async () => {
     fetchBytes,
     extensions,
     appVersion: () => appVersion,
+    digest: { set: (id, digest) => void (digest === null ? digests.delete(id) : digests.set(id, digest)) },
     origin: { get: (id) => reposRepo.installedFrom(id), set: (id, repoId) => reposRepo.setInstalledFrom(id, repoId) },
     forget: (id) => extensionsRepo.remove(id),
     clearSession: async (id) => {
@@ -346,6 +351,67 @@ describe('ExtensionInstaller', () => {
     expect(installer.available()[0]).toMatchObject({ minAppVersion: null, compatible: true });
     appVersion = '0.0.1';
     await expect(installer.prepare(repo.id, 'demo')).resolves.toMatchObject({ id: 'demo' });
+  });
+
+  it('refuses to run installed files that changed after the install, and runs them again once reinstalled', async () => {
+    const repo = await addTrusted();
+    await installer.install((await installer.prepare(repo.id, 'demo')).token);
+    expect(extensions.list().find((e) => e.id === 'demo')).toMatchObject({ origin: 'repo', error: null });
+    expect(digests.get('demo')).toMatch(/^[0-9a-f]{64}$/);
+
+    const file = join(dir, 'installed', 'demo', 'index.js');
+    writeFileSync(file, `${readFileSync(file, 'utf8')}\n// changed by someone`);
+    await extensions.reload('demo');
+    expect(extensions.list().find((e) => e.id === 'demo')).toMatchObject({
+      origin: 'repo',
+      error: expect.stringMatching(/changed after it was installed/),
+    });
+    await expect(extensions.call('demo', 'en', '__info')).rejects.toMatchObject({ code: 'extension' });
+
+    await installer.install((await installer.prepare(repo.id, 'demo')).token);
+    expect(extensions.list().find((e) => e.id === 'demo')).toMatchObject({ error: null });
+  });
+
+  it('trusts an installed extension that has no digest yet (installed before they were recorded)', async () => {
+    const repo = await addTrusted();
+    await installer.install((await installer.prepare(repo.id, 'demo')).token);
+    digests.clear();
+    const file = join(dir, 'installed', 'demo', 'index.js');
+    writeFileSync(file, `${readFileSync(file, 'utf8')}\n// edited`);
+    await extensions.reload('demo');
+    expect(extensions.list().find((e) => e.id === 'demo')).toMatchObject({ error: null });
+  });
+
+  it('forgets the digest when the extension is uninstalled', async () => {
+    const repo = await addTrusted();
+    await installer.install((await installer.prepare(repo.id, 'demo')).token);
+    await installer.uninstall('demo');
+    expect(digests.has('demo')).toBe(false);
+  });
+
+  it('keeps the first of two developer folders that give the same id', async () => {
+    const a = join(dir, 'dev-a');
+    const b = join(dir, 'dev-b');
+    for (const folder of [a, b]) {
+      mkdirSync(folder);
+      writeFileSync(
+        join(folder, 'manifest.json'),
+        JSON.stringify({
+          id: 'twin',
+          name: 'Twin',
+          version: '1.0.0',
+          apiVersion: 1,
+          sources: [{ key: 'en', lang: 'en', name: 'Twin' }],
+        }),
+      );
+      writeFileSync(join(folder, 'index.js'), 'globalThis.__extension = { createSource: () => ({}) };');
+    }
+    devFolders = [a, b];
+    await extensions.init();
+    const twins = extensions.list().filter((e) => e.id === 'twin');
+    expect(twins).toHaveLength(1);
+    expect(twins[0]!.path).toBe(a);
+    expect(registry.duplicateOf(b)).toBe(a);
   });
 
   it('refuses to install an id that a developer folder provides', async () => {

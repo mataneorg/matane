@@ -30,6 +30,7 @@ export function createLocalExtension(files: LocalFiles, version: string): Native
       code: '',
       error: null,
       iconPath: null,
+      digest: null,
     },
     async call(_sourceKey, method, args) {
       switch (method) {

@@ -146,6 +146,13 @@ export class ExtensionService {
     const folders = this.deps.devFolders.get();
     if (!folders.includes(folder)) this.deps.devFolders.set([...folders, folder]);
     await this.reload();
+    const other = this.deps.registry.duplicateOf(folder);
+    if (other) {
+      // Two folders would fight over one id; the first was there, so this one goes.
+      this.deps.devFolders.set(this.deps.devFolders.get().filter((f) => f !== folder));
+      await this.reload();
+      throw new AppError('extension', `Another developer folder already provides this extension id: ${other}`);
+    }
     const entry = this.list().find((e) => e.origin === 'dev' && e.path === folder);
     if (!entry) throw new AppError('extension', `No extension found in ${folder}`);
     return entry;
