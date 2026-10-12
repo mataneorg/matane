@@ -1,5 +1,6 @@
 import type { BrowseItem, BrowseSettings } from '@manga-reader/shared';
 import { useQuery } from '@tanstack/react-query';
+import type { TFunction } from 'i18next';
 import { Link } from '@tanstack/react-router';
 import { Bookmark, Loader2 } from 'lucide-react';
 import { type CSSProperties, useEffect, useRef } from 'react';
@@ -7,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { CoverImage } from '../../components/CoverImage';
 import { Skeleton } from '../../components/ui/skeleton';
 import { libraryIdsQuery } from '../../lib/library';
+import { MangaCardMenu } from './MangaCardMenu';
 
 type Display = BrowseSettings['display'];
 
@@ -26,6 +28,28 @@ export function MangaCard({ item, display = 'comfortable' }: { item: BrowseItem;
   const inLibrary = libraryIds ? libraryIds.has(item.mangaId) : item.inLibrary;
   const params = { mangaId: String(item.mangaId) };
 
+  const card = renderCard({ item, display, inLibrary, params, t });
+  return (
+    <MangaCardMenu item={item} inLibrary={inLibrary}>
+      {card}
+    </MangaCardMenu>
+  );
+}
+
+/** The card itself: a link, so that the right-click menu can attach to it. */
+function renderCard({
+  item,
+  display,
+  inLibrary,
+  params,
+  t,
+}: {
+  item: BrowseItem;
+  display: Display;
+  inLibrary: boolean;
+  params: { mangaId: string };
+  t: TFunction;
+}) {
   if (display === 'list') {
     return (
       <Link

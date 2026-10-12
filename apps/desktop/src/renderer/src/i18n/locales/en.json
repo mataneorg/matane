@@ -619,7 +619,8 @@
       "pin": "Pin to top",
       "unpin": "Unpin",
       "hiddenByContent_one": "{{count}} source hidden by your content settings.",
-      "hiddenByContent_other": "{{count}} sources hidden by your content settings."
+      "hiddenByContent_other": "{{count}} sources hidden by your content settings.",
+      "recent": "Last used"
     },
     "openUrl": {
       "label": "Open a manga from its web link",
@@ -1573,6 +1574,12 @@
       "moveLeft": "Move left",
       "moveRight": "Move right",
       "deleteCategory": "Delete category"
+    },
+    "browse": {
+      "open": "Open",
+      "addToCategory": "Add to category…",
+      "openSource": "Open source",
+      "openLatest": "Open latest updates"
     }
   }
 }

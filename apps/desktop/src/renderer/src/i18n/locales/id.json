@@ -614,7 +614,8 @@
       "lastUsed": "dipakai {{when}}",
       "pin": "Sematkan di atas",
       "unpin": "Lepas sematan",
-      "hiddenByContent_other": "{{count}} source disembunyikan oleh pengaturan kontenmu."
+      "hiddenByContent_other": "{{count}} source disembunyikan oleh pengaturan kontenmu.",
+      "recent": "Terakhir dipakai"
     },
     "openUrl": {
       "label": "Buka manga dari link web",
@@ -1544,6 +1545,12 @@
       "moveLeft": "Geser ke kiri",
       "moveRight": "Geser ke kanan",
       "deleteCategory": "Hapus kategori"
+    },
+    "browse": {
+      "open": "Buka",
+      "addToCategory": "Tambah ke kategori…",
+      "openSource": "Buka sumber",
+      "openLatest": "Buka pembaruan terbaru"
     }
   }
 }

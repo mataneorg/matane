@@ -1,12 +1,13 @@
 import type { ExtensionEntry, SourceEntry } from '@manga-reader/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ArrowRight, Globe, Link2, Loader2, Pin, PinOff } from 'lucide-react';
+import { ArrowRight, ExternalLink, Globe, Link2, Loader2, Newspaper, Pin, PinOff } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/EmptyState';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '../../components/ui/context-menu';
 import { Input } from '../../components/ui/input';
 import { useContentFilter } from '../../lib/content';
 import { useErrorText } from '../../lib/errors';
@@ -14,6 +15,7 @@ import { formatRelative, languageName } from '../../lib/format';
 import { ipc } from '../../lib/ipc';
 import { extensionsQuery, sourcesQuery } from '../../lib/sources';
 import { cn } from '../../lib/utils';
+import { recentSources } from './recent';
 import { SourceIcon } from './SourceIcon';
 import { extensionIconUrl } from '../../lib/extensions';
 
@@ -35,6 +37,7 @@ export function SourcesPage() {
   // Content settings (§6.6): other languages and adult sources are hidden.
   const installed = allInstalled.filter((s) => content.visible({ langs: [s.lang], nsfw: s.nsfw }));
   const hidden = allInstalled.length - installed.length;
+  const recent = recentSources(installed);
   const pinned = installed.filter((s) => s.pinned);
   const groups = groupByLanguage(
     installed.filter((s) => !s.pinned),
@@ -75,6 +78,9 @@ export function SourcesPage() {
           />
         ) : (
           <div className="mx-auto flex max-w-5xl flex-col gap-8 p-6">
+            {recent.length > 0 && (
+              <SourceGroup title={t('browse.sources.recent')} sources={recent} extensions={extensionById} />
+            )}
             {pinned.length > 0 && (
               <SourceGroup title={t('browse.sources.pinned')} sources={pinned} extensions={extensionById} />
             )}
@@ -122,51 +128,79 @@ function SourceRow({ source, extension }: { source: SourceEntry; extension?: Ext
   const togglePin = useMutation({
     mutationFn: () => ipc.invoke('sources.setPinned', { sourceId: source.id, pinned: !source.pinned }),
   });
+  const navigate = useNavigate();
   const params = { extensionId: source.extensionId, sourceKey: source.key };
 
   return (
-    <li className="group flex items-center gap-3 rounded-xl border bg-card/40 p-3 transition-colors hover:border-input hover:bg-card/70">
-      <Link
-        to="/browse/sources/$extensionId/$sourceKey"
-        params={params}
-        search={{ tab: 'popular' }}
-        className="flex min-w-0 flex-1 items-center gap-3 outline-offset-4"
-      >
-        <SourceIcon
-          id={source.extensionId}
-          name={source.name}
-          src={source.installed && source.hasIcon ? extensionIconUrl(source.extensionId) : null}
-        />
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="truncate font-semibold">{source.name}</span>
-            <Badge>{source.lang.toUpperCase()}</Badge>
-            {extension?.nsfw && <Badge variant="danger">18+</Badge>}
-            {extension?.origin === 'dev' && <Badge variant="info">{t('extensions.dev')}</Badge>}
-          </div>
-          <p className="truncate text-xs text-muted-foreground">
-            {extension ? `${extension.name} ${extension.version}` : source.extensionId}
-            {source.lastUsedAt !== null &&
-              ` · ${t('browse.sources.lastUsed', { when: formatRelative(source.lastUsedAt, i18n.language) })}`}
-          </p>
-        </div>
-      </Link>
-      <Button asChild variant="ghost" size="sm">
-        <Link to="/browse/sources/$extensionId/$sourceKey" params={params} search={{ tab: 'latest' }}>
-          {t('browse.tabs.latest')}
-        </Link>
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        title={source.pinned ? t('browse.sources.unpin') : t('browse.sources.pin')}
-        aria-pressed={source.pinned}
-        onClick={() => togglePin.mutate()}
-        className={cn(source.pinned && 'text-primary-text')}
-      >
-        {source.pinned ? <PinOff /> : <Pin />}
-      </Button>
-    </li>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <li className="group relative flex items-center gap-3 rounded-xl border bg-card/40 p-3 transition-colors hover:border-input hover:bg-card/70">
+          {/* The link covers the whole card (the ::after); the buttons sit above it. */}
+          <Link
+            to="/browse/sources/$extensionId/$sourceKey"
+            params={params}
+            search={{ tab: 'popular' }}
+            className="flex min-w-0 flex-1 items-center gap-3 outline-offset-4 after:absolute after:inset-0 after:rounded-xl"
+          >
+            <SourceIcon
+              id={source.extensionId}
+              name={source.name}
+              src={source.installed && source.hasIcon ? extensionIconUrl(source.extensionId) : null}
+            />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="truncate font-semibold">{source.name}</span>
+                <Badge>{source.lang.toUpperCase()}</Badge>
+                {extension?.nsfw && <Badge variant="danger">18+</Badge>}
+                {extension?.origin === 'dev' && <Badge variant="info">{t('extensions.dev')}</Badge>}
+              </div>
+              <p className="truncate text-xs text-muted-foreground">
+                {extension ? `${extension.name} ${extension.version}` : source.extensionId}
+                {source.lastUsedAt !== null &&
+                  ` · ${t('browse.sources.lastUsed', { when: formatRelative(source.lastUsedAt, i18n.language) })}`}
+              </p>
+            </div>
+          </Link>
+          <Button asChild variant="ghost" size="sm" className="relative">
+            <Link to="/browse/sources/$extensionId/$sourceKey" params={params} search={{ tab: 'latest' }}>
+              {t('browse.tabs.latest')}
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            title={source.pinned ? t('browse.sources.unpin') : t('browse.sources.pin')}
+            aria-pressed={source.pinned}
+            onClick={() => togglePin.mutate()}
+            className={cn('relative', source.pinned && 'text-primary-text')}
+          >
+            {source.pinned ? <PinOff /> : <Pin />}
+          </Button>
+        </li>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem
+          onSelect={() =>
+            void navigate({ to: '/browse/sources/$extensionId/$sourceKey', params, search: { tab: 'popular' } })
+          }
+        >
+          <ExternalLink aria-hidden />
+          {t('contextMenu.browse.openSource')}
+        </ContextMenuItem>
+        <ContextMenuItem
+          onSelect={() =>
+            void navigate({ to: '/browse/sources/$extensionId/$sourceKey', params, search: { tab: 'latest' } })
+          }
+        >
+          <Newspaper aria-hidden />
+          {t('contextMenu.browse.openLatest')}
+        </ContextMenuItem>
+        <ContextMenuItem onSelect={() => togglePin.mutate()}>
+          {source.pinned ? <PinOff aria-hidden /> : <Pin aria-hidden />}
+          {source.pinned ? t('browse.sources.unpin') : t('browse.sources.pin')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
