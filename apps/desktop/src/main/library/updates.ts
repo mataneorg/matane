@@ -10,6 +10,7 @@ import type {
 import { toAppErrorData } from '@manga-reader/shared/errors';
 import { createLimiter } from '@manga-reader/shared/limit';
 import type { ChapterRow } from '../db/repositories/chapters';
+import { mainT } from '../i18n';
 import type { UpdateTarget, UpdatesRepository } from '../db/repositories/updates';
 
 /** Manga checked at once (docs/BRAINSTORM.md §6.4); each source's rate limit still applies. */
@@ -50,19 +51,16 @@ export function autoDownloads(
   return !included || categoryIds.some((id) => categories.get(id)?.autoDownload === 'include');
 }
 
-/** "5 new chapters from 3 manga" and the first titles, in the app language (English or Indonesian). */
+/** "5 new chapters from 3 manga" and the first titles, in the app language. */
 export function notificationText(
   language: string,
   newChapters: number,
   titles: readonly string[],
 ): { title: string; body: string } {
-  const id = language.startsWith('id');
-  const title = id
-    ? `${newChapters} chapter baru dari ${titles.length} manga`
-    : `${newChapters} new chapter${newChapters === 1 ? '' : 's'} from ${titles.length} manga`;
+  const title = mainT(language, 'notify.newChapters.title', { count: newChapters, manga: titles.length });
   const shown = titles.slice(0, 3).join(', ');
   const more = titles.length - 3;
-  const body = more > 0 ? `${shown} ${id ? `dan ${more} lainnya` : `and ${more} more`}` : shown;
+  const body = more > 0 ? mainT(language, 'notify.newChapters.more', { shown, count: more }) : shown;
   return { title, body };
 }
 

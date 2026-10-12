@@ -1,4 +1,5 @@
 import type { DownloadStats, UpdateProgress } from '@manga-reader/shared';
+import { mainT, type MainKey } from '../i18n';
 import { Menu, type MenuItemConstructorOptions, Tray, nativeImage } from 'electron';
 
 export interface TrayStatus {
@@ -7,43 +8,16 @@ export interface TrayStatus {
   online: boolean;
 }
 
-const STRINGS = {
-  en: {
-    open: 'Open Matane',
-    check: 'Check for updates now',
-    pause: 'Pause downloads',
-    resume: 'Resume downloads',
-    quit: 'Quit',
-    idle: 'Nothing running',
-    offline: 'Offline',
-    checking: (done: number, total: number) => `Checking for updates ${done}/${total}`,
-    downloading: (n: number, queued: number) => `Downloading ${n} · ${queued} in queue`,
-    paused: (n: number) => `${n} download${n === 1 ? '' : 's'} paused`,
-  },
-  id: {
-    open: 'Buka Matane',
-    check: 'Cek update sekarang',
-    pause: 'Jeda download',
-    resume: 'Lanjutkan download',
-    quit: 'Keluar',
-    idle: 'Tidak ada yang berjalan',
-    offline: 'Offline',
-    checking: (done: number, total: number) => `Mengecek update ${done}/${total}`,
-    downloading: (n: number, queued: number) => `Mengunduh ${n} · ${queued} di antrean`,
-    paused: (n: number) => `${n} download dijeda`,
-  },
-};
-
 /** The short status lines at the top of the tray menu (and its tooltip). */
 export function trayStatusLines(language: string, status: TrayStatus): string[] {
-  const s = language.startsWith('id') ? STRINGS.id : STRINGS.en;
   const lines: string[] = [];
-  if (!status.online) lines.push(s.offline);
-  if (status.update) lines.push(s.checking(status.update.done, status.update.total));
+  if (!status.online) lines.push(mainT(language, 'tray.offline'));
+  if (status.update)
+    lines.push(mainT(language, 'tray.checking', { done: status.update.done, total: status.update.total }));
   const { downloading, queued, paused } = status.downloads;
-  if (downloading > 0 || queued > 0) lines.push(s.downloading(downloading, queued));
-  else if (paused > 0) lines.push(s.paused(paused));
-  return lines.length > 0 ? lines : [s.idle];
+  if (downloading > 0 || queued > 0) lines.push(mainT(language, 'tray.downloading', { count: downloading, queued }));
+  else if (paused > 0) lines.push(mainT(language, 'tray.paused', { count: paused }));
+  return lines.length > 0 ? lines : [mainT(language, 'tray.idle')];
 }
 
 export interface AppTrayDeps {
@@ -88,7 +62,7 @@ export class AppTray {
   refresh(): void {
     if (!this.tray) return;
     const language = this.deps.language();
-    const s = language.startsWith('id') ? STRINGS.id : STRINGS.en;
+    const t = (key: MainKey) => mainT(language, key);
     const status = this.deps.status();
     const lines = trayStatusLines(language, status);
     const { downloading, queued, paused } = status.downloads;
@@ -96,17 +70,17 @@ export class AppTray {
     const template: MenuItemConstructorOptions[] = [
       ...lines.map((label) => ({ label, enabled: false })),
       { type: 'separator' },
-      { label: s.open, click: () => this.deps.open() },
+      { label: t('tray.open'), click: () => this.deps.open() },
       {
-        label: s.check,
+        label: t('tray.check'),
         enabled: status.online && status.update === null,
         click: () => this.deps.checkUpdates(),
       },
       running
-        ? { label: s.pause, click: () => this.deps.pauseDownloads() }
-        : { label: s.resume, enabled: paused > 0, click: () => this.deps.resumeDownloads() },
+        ? { label: t('tray.pause'), click: () => this.deps.pauseDownloads() }
+        : { label: t('tray.resume'), enabled: paused > 0, click: () => this.deps.resumeDownloads() },
       { type: 'separator' },
-      { label: s.quit, click: () => this.deps.quit() },
+      { label: t('tray.quit'), click: () => this.deps.quit() },
     ];
     this.tray.setContextMenu(Menu.buildFromTemplate(template));
     this.tray.setToolTip(`Matane\n${lines.join('\n')}`);

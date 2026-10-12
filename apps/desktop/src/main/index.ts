@@ -18,6 +18,7 @@ import { createMainWindow } from './app/window';
 import icon from '../../resources/icon.png?asset';
 import { DbChanges } from './db/changes';
 import { BrowseCache } from './browse/cache';
+import { mainT } from './i18n';
 import { openDatabase } from './db/client';
 import { purgeBrowseRows } from './db/housekeeping';
 import { runMigrations } from './db/migrate';
@@ -648,10 +649,10 @@ async function bootstrap(): Promise<void> {
           const current = settings.getAppSettings();
           return { ...current.general.discord, incognito: current.incognito };
         },
-        texts: () =>
-          (settings.getAppSettings().language ?? app.getLocale()).startsWith('id')
-            ? { reading: 'Membaca', readingManga: 'Sedang membaca manga' }
-            : { reading: 'Reading', readingManga: 'Reading manga' },
+        texts: () => {
+          const language = settings.getAppSettings().language ?? app.getLocale();
+          return { reading: mainT(language, 'discord.reading'), readingManga: mainT(language, 'discord.readingManga') };
+        },
         log: (message) => log.scope('discord').info(message),
       })
     : null;

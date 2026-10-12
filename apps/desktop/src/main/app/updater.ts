@@ -1,5 +1,6 @@
 import { PACKAGE_MANAGED, type PackageKind, type UpdaterSettings, type UpdaterStatus } from '@manga-reader/shared';
 import { toAppErrorData } from '@manga-reader/shared/errors';
+import { mainT } from '../i18n';
 
 export const RELEASES_URL = 'https://github.com/mataneorg/matane/releases';
 const RELEASES_API = 'https://api.github.com/repos/mataneorg/matane/releases?per_page=20';
@@ -142,21 +143,21 @@ export class AppUpdater {
   }
 
   private text(kind: 'ready' | 'available', version: string): { title: string; body: string } {
-    const id = this.deps.language().startsWith('id');
+    const language = this.deps.language();
     if (kind === 'ready') {
-      return id
-        ? { title: `Matane ${version} siap dipasang`, body: 'Mulai ulang Matane untuk memperbarui.' }
-        : { title: `Matane ${version} is ready`, body: 'Restart Matane to update.' };
+      return {
+        title: mainT(language, 'updater.ready.title', { version }),
+        body: mainT(language, 'updater.ready.body'),
+      };
     }
     // Flatpak, AUR and deb/rpm installs update through their package manager.
-    if (PACKAGE_MANAGED.includes(this.deps.packaging)) {
-      return id
-        ? { title: `Matane ${version} tersedia`, body: 'Perbarui lewat package manager kamu.' }
-        : { title: `Matane ${version} is available`, body: 'Update it through your package manager.' };
-    }
-    return id
-      ? { title: `Matane ${version} tersedia`, body: 'Lihat Setting → Tentang.' }
-      : { title: `Matane ${version} is available`, body: 'See Settings → About.' };
+    return {
+      title: mainT(language, 'updater.available.title', { version }),
+      body: mainT(
+        language,
+        PACKAGE_MANAGED.includes(this.deps.packaging) ? 'updater.available.packageManager' : 'updater.available.about',
+      ),
+    };
   }
 
   /** Tells once per version. */
