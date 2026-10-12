@@ -1,7 +1,7 @@
 import type { FilterState } from '@manga-reader/shared';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { RefreshCw, Search, SearchX, SlidersHorizontal } from 'lucide-react';
+import { Loader2, RefreshCw, Search, SearchX, SlidersHorizontal } from 'lucide-react';
 import { type FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CoverViewControls } from '../../components/CoverViewControls';
@@ -12,6 +12,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import {
   type BrowseKind,
+  browseCachedQuery,
   browseQuery,
   queryKeys,
   sourceFiltersQuery,
@@ -66,14 +67,17 @@ export function SourceBrowsePage({
     ...browseQuery(sourceId, tab, q, filters),
     enabled: tab !== 'latest' || info.isSuccess,
   });
+  // What the first page was last time, until the real one arrives (also when it fails or the machine is offline).
+  const remembered = useQuery({ ...browseCachedQuery(sourceId, tab), enabled: tab !== 'search' });
+  const showingRemembered = listing.data === undefined && (remembered.data?.items.length ?? 0) > 0;
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
   const attachScroll = useCallback((node: HTMLDivElement | null) => {
     scrollRef.current = node;
     setScrollElement(node);
   }, []);
-  useScrollRestoration(scrollElement, listing.data !== undefined);
-  const items = listing.data?.pages.flatMap((page) => page.items) ?? [];
+  useScrollRestoration(scrollElement, listing.data !== undefined || showingRemembered);
+  const items = listing.data?.pages.flatMap((page) => page.items) ?? remembered.data?.items ?? [];
   // Pages can repeat titles when the source list shifts between requests; show each once.
   const unique = items.filter((item, index) => items.findIndex((other) => other.mangaId === item.mangaId) === index);
 
@@ -166,7 +170,7 @@ export function SourceBrowsePage({
         </header>
 
         <div className="p-6">
-          {listing.isPending ? (
+          {listing.isPending && !showingRemembered ? (
             <div className="grid" style={gridStyle(display, coverSize)}>
               {Array.from({ length: 18 }, (_, i) => (
                 <MangaCardSkeleton key={i} display={display} />
@@ -187,6 +191,18 @@ export function SourceBrowsePage({
             />
           ) : (
             <>
+              {showingRemembered && (
+                <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground" role="status">
+                  {listing.isError ? (
+                    <ErrorState compact error={listing.error} onRetry={reload} sourceId={sourceId} />
+                  ) : (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin text-primary-text" />
+                      {t('browse.refreshing')}
+                    </>
+                  )}
+                </div>
+              )}
               <MangaGrid
                 items={unique}
                 hasNextPage={listing.hasNextPage}

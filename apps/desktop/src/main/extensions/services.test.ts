@@ -3,10 +3,11 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { MessageChannel, type MessagePort } from 'node:worker_threads';
 import type { HttpRequest, HttpResponse } from '@matane/extension-sdk';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExtensionHost } from '../../extension-host/host';
 import type { HostMethods, MainMethods } from '../../extension-host/protocol';
 import { type RpcMessage, RpcPeer, type RpcTransport } from '../../extension-host/rpc';
+import { BrowseCache } from '../browse/cache';
 import { DbChanges } from '../db/changes';
 import { type DatabaseConnection, openDatabase } from '../db/client';
 import { runMigrations } from '../db/migrate';
@@ -239,6 +240,29 @@ describe('SourceService', () => {
     const again = await sources.browse({ sourceId: 'demo/en', kind: 'popular', page: 1 });
     expect(again.items.map((i) => i.mangaId)).toEqual(result.items.map((i) => i.mangaId));
     expect(extensionsRepo.getStorage('demo', 'visits')).toBe(2);
+  });
+
+  it('remembers the first page of Popular and Latest, and shows it from the rows', async () => {
+    const remembering = new SourceService({
+      extensions,
+      extensionsRepo,
+      manga: new MangaRepository(connection.db, new DbChanges(() => undefined)),
+      chapters: chaptersRepo,
+      browseCache: new BrowseCache(join(dir, 'cache', 'browse')),
+    });
+    expect(await remembering.cachedBrowse({ sourceId: 'demo/en', kind: 'popular', page: 1 })).toBeNull();
+    const live = await remembering.browse({ sourceId: 'demo/en', kind: 'popular', page: 1 });
+    // The listing is written in the background.
+    await vi.waitFor(async () => {
+      expect(await remembering.cachedBrowse({ sourceId: 'demo/en', kind: 'popular', page: 1 })).not.toBeNull();
+    });
+    const remembered = await remembering.cachedBrowse({ sourceId: 'demo/en', kind: 'popular', page: 1 });
+    expect(remembered?.items.map((item) => item.mangaId)).toEqual(live.items.map((item) => item.mangaId));
+    expect(remembered?.hasNextPage).toBe(true);
+    // Latest was not browsed, later pages and searches are never remembered.
+    expect(await remembering.cachedBrowse({ sourceId: 'demo/en', kind: 'latest', page: 1 })).toBeNull();
+    expect(await remembering.cachedBrowse({ sourceId: 'demo/en', kind: 'popular', page: 2 })).toBeNull();
+    expect(await remembering.cachedBrowse({ sourceId: 'demo/en', kind: 'search', page: 1 })).toBeNull();
   });
 
   it('refreshes details and syncs chapters', async () => {

@@ -46,6 +46,7 @@ export const INVOKE_CHANNELS = [
   'sources.info',
   'sources.filters',
   'sources.browse',
+  'sources.browseCached',
   'sources.resolveUrl',
   'sources.solveChallenge',
   'sources.setPinned',

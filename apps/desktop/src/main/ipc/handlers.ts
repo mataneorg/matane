@@ -238,6 +238,7 @@ export function createIpcHandlers({
     'sources.info': ({ sourceId }) => sources.info(sourceId),
     'sources.filters': ({ sourceId }) => sources.filters(sourceId),
     'sources.browse': ({ requestId, ...input }) => requests.run(requestId, (signal) => sources.browse(input, signal)),
+    'sources.browseCached': (input) => sources.cachedBrowse(input),
     'sources.setPinned': ({ sourceId, pinned }) => sources.setPinned(sourceId, pinned),
     'sources.resolveUrl': ({ url }) => sources.resolveUrl(url),
     'sources.solveChallenge': async ({ sourceId }) => {

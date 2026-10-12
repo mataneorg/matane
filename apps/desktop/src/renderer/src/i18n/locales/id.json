@@ -622,7 +622,8 @@
       "placeholder": "Tempel link manga, mis. https://example.com/title/…",
       "open": "Buka",
       "noMatch": "Tidak ada source terpasang yang mengenali link ini."
-    }
+    },
+    "refreshing": "Memperbarui daftar…"
   },
   "extensions": {
     "dev": "Dev",

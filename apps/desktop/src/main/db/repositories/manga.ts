@@ -145,6 +145,7 @@ export class MangaRepository {
             thumbnailUrl,
             coverKey: thumbnailUrl,
             inLibrary: false,
+            detailsFetched: false,
           });
           continue;
         }
@@ -164,10 +165,30 @@ export class MangaRepository {
           thumbnailUrl: cover,
           coverKey: existing.customCoverPath ?? cover,
           inLibrary: existing.inLibrary,
+          detailsFetched: existing.lastUpdateCheckAt !== null,
         });
       }
     });
     return result;
+  }
+
+  /** Listing items for rows that exist, in the order of `ids`; rows that were purged since are skipped. */
+  browseItems(ids: readonly number[]): BrowseItem[] {
+    const items: BrowseItem[] = [];
+    for (const id of ids) {
+      const row = this.get(id);
+      if (!row) continue;
+      items.push({
+        mangaId: row.id,
+        url: row.url,
+        title: row.title,
+        thumbnailUrl: row.thumbnailUrl,
+        coverKey: coverKeyOf(row),
+        inLibrary: row.inLibrary,
+        detailsFetched: row.lastUpdateCheckAt !== null,
+      });
+    }
+    return items;
   }
 
   /** Get-or-create for a single summary (e.g. from resolveUrl). */

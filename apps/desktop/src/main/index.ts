@@ -17,6 +17,7 @@ import { detectTraySupport } from './app/tray-support';
 import { createMainWindow } from './app/window';
 import icon from '../../resources/icon.png?asset';
 import { DbChanges } from './db/changes';
+import { BrowseCache } from './browse/cache';
 import { openDatabase } from './db/client';
 import { purgeBrowseRows } from './db/housekeeping';
 import { runMigrations } from './db/migrate';
@@ -277,6 +278,8 @@ async function bootstrap(): Promise<void> {
     // Declared further down; only used once requests arrive.
     downloads: { pages: async (chapterId) => (await localStore.pages(chapterId)) ?? downloadStore.pages(chapterId) },
     showNsfw: () => settings.getAppSettings().browse.showNsfw,
+    browseCache: new BrowseCache(join(userData, 'cache', 'browse')),
+    log: (message) => log.scope('browse').warn(message),
   });
   // Extension repositories and installs (docs/BRAINSTORM.md §5.8). `online` is declared further down.
   const fetchBytes = createFetchBytes((url, init) => net.fetch(url, init));

@@ -163,6 +163,8 @@ export const browseItemSchema = z.object({
   /** Changes whenever the shown cover changes (custom cover or new source cover); null = none. */
   coverKey: z.string().nullable(),
   inLibrary: z.boolean(),
+  /** The details and chapter list were fetched at least once, so opening it needs no request (ADR 0040). */
+  detailsFetched: z.boolean(),
 });
 export type BrowseItem = z.infer<typeof browseItemSchema>;
 

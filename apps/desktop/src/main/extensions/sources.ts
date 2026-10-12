@@ -1,6 +1,7 @@
 import type { Chapter, FilterState, ImageFetchResult, MangaSummary, Page } from '@matane/extension-sdk';
 import type { BrowseResult, MangaInfo, SourceCapabilities, SourceEntry } from '@manga-reader/shared';
 import { AppError } from '@manga-reader/shared/errors';
+import type { BrowseCache } from '../browse/cache';
 import type { ChaptersRepository } from '../db/repositories/chapters';
 import type { ExtensionsRepository, SourceRow } from '../db/repositories/extensions';
 import type { MangaRepository } from '../db/repositories/manga';
@@ -22,7 +23,16 @@ export interface SourceServiceDeps {
   downloads?: Pick<DownloadStore, 'pages'>;
   /** Adult sources can be browsed (Settings → Browse & extensions). */
   showNsfw?: () => boolean;
+  /** Remembers the first page of Popular and Latest between runs (ADR 0040). */
+  browseCache?: BrowseCache;
+  /** Logs a failure that is not worth failing a request for. */
+  log?: (message: string) => void;
   now?: () => number;
+}
+
+/** The listing worth remembering: page 1 of Popular or Latest. Searches and later pages are not. */
+function listingKey(input: { sourceId: string; kind: BrowseKind; page: number }): string | null {
+  return input.kind === 'search' || input.page !== 1 ? null : `${input.sourceId}|${input.kind}`;
 }
 
 /** Source-level operations: talk to the sandbox, validate the answer, sync it into SQLite. */
@@ -120,7 +130,32 @@ export class SourceService {
     );
     const items = this.deps.manga.upsertSummaries(source.id, page.items, this.now());
     this.deps.extensionsRepo.touchSource(source.id, this.now());
+    const key = listingKey(input);
+    if (key && this.deps.browseCache) {
+      this.deps.browseCache
+        .put(
+          key,
+          items.map((item) => item.mangaId),
+          page.hasNextPage,
+        )
+        .catch((error: unknown) => this.deps.log?.(`could not remember the listing ${key}: ${String(error)}`));
+    }
     return { items, hasNextPage: page.hasNextPage };
+  }
+
+  /**
+   * The first page of Popular or Latest as it was last seen, rebuilt from the rows (so titles, covers and
+   * `inLibrary` are current), or null when nothing is remembered. The renderer shows it while the real request runs.
+   */
+  async cachedBrowse(input: { sourceId: string; kind: BrowseKind; page: number }): Promise<BrowseResult | null> {
+    const source = this.source(input.sourceId);
+    this.assertVisible(source.extensionId);
+    const key = listingKey(input);
+    if (!key || !this.deps.browseCache) return null;
+    const cached = await this.deps.browseCache.get(key);
+    if (!cached) return null;
+    const items = this.deps.manga.browseItems(cached.ids);
+    return items.length > 0 ? { items, hasNextPage: cached.hasNextPage } : null;
   }
 
   /** Asks each installed source that supports it to recognise a pasted web URL. */

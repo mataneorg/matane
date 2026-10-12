@@ -185,6 +185,15 @@ export const invokeContract = {
     }),
     browseResultSchema,
   ),
+  /** The first page of Popular or Latest as it was last seen, for the time the real request takes; null = none. */
+  'sources.browseCached': invoke(
+    z.object({
+      sourceId: sourceIdSchema,
+      kind: z.enum(['popular', 'latest', 'search']),
+      page: z.number().int().positive(),
+    }),
+    browseResultSchema.nullable(),
+  ),
   /** Tries every installed source that implements resolveUrl. */
   'sources.resolveUrl': invoke(
     z.object({ url: z.url() }),

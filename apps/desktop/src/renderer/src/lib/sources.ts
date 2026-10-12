@@ -85,6 +85,15 @@ export const preferencesQuery = (extensionId: string) =>
     ...localQueryDefaults,
   });
 
+/** The first page of Popular or Latest as it was last seen: shown while the real request runs (ADR 0040). */
+export const browseCachedQuery = (sourceId: string, kind: BrowseKind) =>
+  queryOptions({
+    queryKey: ['browse-cached', sourceId, kind] as const,
+    queryFn: () => ipc.invoke('sources.browseCached', { sourceId, kind, page: 1 }),
+    staleTime: Infinity,
+    retry: false,
+  });
+
 export const browseQuery = (sourceId: string, kind: BrowseKind, query: string, filters: FilterState) =>
   infiniteQueryOptions({
     queryKey: queryKeys.browse(sourceId, kind, query, filters),

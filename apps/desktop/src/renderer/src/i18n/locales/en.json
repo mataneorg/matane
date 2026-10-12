@@ -627,7 +627,8 @@
       "placeholder": "Paste a manga link, e.g. https://example.com/title/…",
       "open": "Open",
       "noMatch": "No installed source recognises this link."
-    }
+    },
+    "refreshing": "Updating the list…"
   },
   "extensions": {
     "dev": "Dev",
