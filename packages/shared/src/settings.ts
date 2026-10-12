@@ -10,6 +10,7 @@ import {
   RESOLVED_MODES,
   TAP_ZONES,
 } from './reader';
+import { isAbsolutePath } from './backup';
 import { ACCENTS, LANGUAGES, THEME_MODES } from './theme';
 
 /** Reading mode and direction a manga type gets while the global ones are "auto" (§6.1). */
@@ -473,7 +474,7 @@ export const appSettingsSchema = z.object({
   backup: z
     .object({
       auto: z.enum(['off', 'daily', 'weekly']).catch('daily'),
-      folder: z.string().nullable().catch(null),
+      folder: z.string().refine(isAbsolutePath).nullable().catch(null),
     })
     .catch({ auto: 'daily', folder: null }),
   /** Trackers (ADR 0038): the services that may also move chapters read here; on unless switched off. */

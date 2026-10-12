@@ -7,6 +7,11 @@ import { z } from 'zod';
 /** Bump on every change of the structure; readers keep accepting every older version. */
 export const BACKUP_FORMAT_VERSION = 1;
 
+/** An absolute path on POSIX (`/home/…`) or Windows (`C:\…`, `C:/…`, `\\server\share`); a relative one is not trusted. */
+export function isAbsolutePath(path: string): boolean {
+  return path.startsWith('/') || /^[A-Za-z]:[\\/]/.test(path) || path.startsWith('\\\\');
+}
+
 const time = z.number().int().nonnegative();
 const nullableTime = time.nullable().catch(null);
 

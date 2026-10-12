@@ -1,6 +1,7 @@
 import { mkdir, readdir, rm, stat } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import type { AppSettings, BackupFile, BackupPreview, BackupProgress, RestoreResult } from '@manga-reader/shared';
+import { isAbsolutePath } from '@manga-reader/shared/backup';
 import type Database from 'better-sqlite3';
 import { collectBackup, writeBackup } from './export';
 import {
@@ -62,6 +63,7 @@ export interface BackupServiceDeps {
 export class BackupService {
   private busy: Promise<unknown> | null = null;
   private timer: ReturnType<typeof setInterval> | undefined;
+  private first: ReturnType<typeof setTimeout> | undefined;
 
   constructor(private readonly deps: BackupServiceDeps) {}
 
@@ -70,7 +72,9 @@ export class BackupService {
   }
 
   folder(): string {
-    return this.deps.settings().folder ?? this.deps.defaultFolder;
+    const { folder } = this.deps.settings();
+    // A relative folder (hand-edited settings, a backup from another system) would depend on the working directory.
+    return folder !== null && isAbsolutePath(folder) ? folder : this.deps.defaultFolder;
   }
 
   /** A file name for a backup written now. */
@@ -259,7 +263,8 @@ export class BackupService {
     const { auto } = this.deps.settings();
     if (auto === 'off') return false;
     const last = this.deps.store.get<number | null>(LAST_AUTO_KEY, null);
-    return last === null || this.now() - last >= (auto === 'daily' ? DAY_MS : 7 * DAY_MS);
+    // A last backup in the future (the clock was set back) would otherwise pause backups until that time.
+    return last === null || last > this.now() || this.now() - last >= (auto === 'daily' ? DAY_MS : 7 * DAY_MS);
   }
 
   /** Writes an automatic backup when due, then keeps the newest `KEEP_AUTO` of them. */
@@ -287,13 +292,18 @@ export class BackupService {
   start(firstDelayMs = 60_000, everyMs = 60 * 60_000): void {
     const run = () =>
       void this.runAutoIfDue().catch((error: unknown) => this.deps.log?.(`automatic backup failed: ${String(error)}`));
-    setTimeout(run, firstDelayMs).unref?.();
+    if (this.timer) return;
+    this.first = setTimeout(run, firstDelayMs);
+    this.first.unref?.();
     this.timer = setInterval(run, everyMs);
     this.timer.unref?.();
   }
 
   stop(): void {
+    clearTimeout(this.first);
     clearInterval(this.timer);
+    this.first = undefined;
+    this.timer = undefined;
   }
 
   private exclusive<T>(run: () => Promise<T>): Promise<T> {

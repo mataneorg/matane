@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DEFAULT_SETTINGS } from '@manga-reader/shared';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import yazl from 'yazl';
 import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
@@ -381,6 +381,47 @@ describe('backup and restore', () => {
     expect(names[0]).toBe('matane-backup-2026-10-03-0900.zip');
     expect(names.at(-1)).toBe('matane-backup-2026-10-09-0900.zip');
     expect(readFileSync(files[0]!.path).subarray(0, 2).toString()).toBe('PK');
+  });
+
+  it('treats a last backup in the future as due, so a clock set back does not pause backups', async () => {
+    const connection = await database('a');
+    const now = new Date(2026, 9, 1, 9, 0).getTime();
+    const { backups, kv } = service(connection, { now: () => now });
+    kv.set(LAST_AUTO_KEY, now + 30 * DAY);
+    expect(backups.isDue()).toBe(true);
+    kv.set(LAST_AUTO_KEY, now - 60_000);
+    expect(backups.isDue()).toBe(false);
+  });
+
+  it('uses the default folder when the chosen one is not an absolute path', async () => {
+    const connection = await database('a');
+    const relative = service(connection, { folder: 'backups/here' });
+    expect(relative.backups.folder()).toBe(join(dir, 'auto'));
+    const absolute = service(connection, { folder: join(dir, 'chosen') });
+    expect(absolute.backups.folder()).toBe(join(dir, 'chosen'));
+  });
+
+  it('starts its schedule once and stops it, first check included', async () => {
+    vi.useFakeTimers();
+    try {
+      const connection = await database('a');
+      seed(connection);
+      const { backups } = service(connection);
+      const run = vi.spyOn(backups, 'runAutoIfDue').mockResolvedValue(null);
+      backups.start(1000, 5000);
+      backups.start(1000, 5000); // a second call changes nothing
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(run).toHaveBeenCalledTimes(1);
+      backups.stop();
+      await vi.advanceTimersByTimeAsync(20_000);
+      expect(run).toHaveBeenCalledTimes(1);
+      backups.start(1000, 5000); // it can start again after a stop
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(run).toHaveBeenCalledTimes(2);
+      backups.stop();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('applies preferences kept for an extension once it is installed', async () => {
