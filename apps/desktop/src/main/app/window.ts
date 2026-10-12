@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { BrowserWindow, type Rectangle, screen, shell } from 'electron';
+import { attachTextContextMenu } from './context-menu';
 import type { SettingsRepository } from '../db/repositories/settings';
 import { broadcast } from '../ipc/register';
 import icon from '../../../resources/icon.png?asset';
@@ -88,6 +89,7 @@ export function createMainWindow(settings: SettingsRepository, options: MainWind
     return { action: 'deny' };
   });
   window.webContents.on('will-navigate', (event) => event.preventDefault());
+  attachTextContextMenu(window);
 
   const devUrl = process.env['ELECTRON_RENDERER_URL'];
   if (devUrl) void window.loadURL(devUrl);
