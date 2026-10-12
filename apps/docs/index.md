@@ -13,9 +13,6 @@ hero:
       text: Get started
       link: /guide/
     - theme: alt
-      text: Download
-      link: https://github.com/mataneorg/matane/releases
-    - theme: alt
       text: Write an extension
       link: /extensions/
 
