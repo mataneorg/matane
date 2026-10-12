@@ -381,6 +381,20 @@ export const networkSettingsSchema = z
   });
 export type NetworkSettings = z.infer<typeof networkSettingsSchema>;
 
+/** Why a connection test failed, in words the renderer translates (`settings.network.test.reasons.*`). */
+export const NETWORK_FAILURES = [
+  'proxy',
+  'proxy_auth',
+  'dns',
+  'refused',
+  'timeout',
+  'offline',
+  'tls',
+  'reset',
+  'unknown',
+] as const;
+export type NetworkFailure = (typeof NETWORK_FAILURES)[number];
+
 /** App updates (docs/BRAINSTORM.md §10): download by itself, only tell, or off; stable or beta releases. */
 export const updaterSettingsSchema = z.object({
   mode: z.enum(['auto', 'notify', 'off']).catch('auto'),

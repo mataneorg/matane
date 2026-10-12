@@ -51,7 +51,7 @@ import {
   syncResultSchema,
 } from '../models';
 import type { DbChangeTag } from '../models';
-import { appSettingsSchema, mangaReaderSettingsSchema, migrationOptionsSchema } from '../settings';
+import { NETWORK_FAILURES, appSettingsSchema, mangaReaderSettingsSchema, migrationOptionsSchema } from '../settings';
 import { backupFileSchema, backupPreviewSchema, backupProgressSchema, restoreResultSchema } from '../backup';
 import type { EventChannel, InvokeChannel } from './channels';
 
@@ -364,6 +364,8 @@ export const invokeContract = {
       status: z.number().nullable(),
       ms: z.number(),
       error: z.string().nullable(),
+      /** A readable cause when the request failed or the proxy asked for a login; null when it worked. */
+      reason: z.enum(NETWORK_FAILURES).nullable(),
     }),
   ),
 

@@ -502,7 +502,17 @@
         "run": "Tes koneksi",
         "ok": "Tersambung dalam {{ms}} ms (HTTP {{status}})",
         "http": "Situs menjawab HTTP {{status}}",
-        "failed": "Tidak tersambung: {{error}}"
+        "failed": "Tidak tersambung: {{error}}",
+        "reasons": {
+          "proxy": "Proxy tidak menerima koneksi",
+          "proxy_auth": "Proxy meminta nama pengguna dan kata sandi",
+          "dns": "Alamat tidak dapat dicari (DNS)",
+          "refused": "Server menolak koneksi",
+          "timeout": "Koneksi kehabisan waktu",
+          "offline": "Tidak ada koneksi internet",
+          "tls": "Koneksi aman tidak dapat dibuat",
+          "reset": "Koneksi ditutup oleh pihak lain"
+        }
       }
     },
     "tracking": {

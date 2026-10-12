@@ -503,7 +503,17 @@
         "run": "Test connection",
         "ok": "Connected in {{ms}} ms (HTTP {{status}})",
         "http": "The site answered HTTP {{status}}",
-        "failed": "No connection: {{error}}"
+        "failed": "No connection: {{error}}",
+        "reasons": {
+          "proxy": "The proxy did not accept the connection",
+          "proxy_auth": "The proxy needs a username and password",
+          "dns": "The address could not be looked up (DNS)",
+          "refused": "The server refused the connection",
+          "timeout": "The connection timed out",
+          "offline": "There is no internet connection",
+          "tls": "The secure connection could not be set up",
+          "reset": "The connection was closed by the other side"
+        }
       }
     },
     "tracking": {

@@ -308,9 +308,11 @@ function TestSection() {
             )}
             {result.ok
               ? t('settings.network.test.ok', { ms: result.ms, status: result.status })
-              : result.status !== null
-                ? t('settings.network.test.http', { status: result.status })
-                : t('settings.network.test.failed', { error: result.error })}
+              : result.reason !== null && result.reason !== 'unknown'
+                ? t(`settings.network.test.reasons.${result.reason}`)
+                : result.status !== null
+                  ? t('settings.network.test.http', { status: result.status })
+                  : t('settings.network.test.failed', { error: result.error })}
           </p>
         )}
       </div>

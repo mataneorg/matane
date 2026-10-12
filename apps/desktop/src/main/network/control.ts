@@ -1,5 +1,6 @@
 import { type Session, app, safeStorage } from 'electron';
-import type { NetworkSettings } from '@manga-reader/shared';
+import type { NetworkFailure, NetworkSettings } from '@manga-reader/shared';
+import { classifyNetworkError, classifyStatus } from './connection-test';
 import { sessionFetch, setProxyCredentials } from './electron-fetch';
 import type { NetworkManager } from './manager';
 import { hostResolverOptions, proxyConfig } from './settings';
@@ -77,7 +78,14 @@ export class NetworkControl {
   }
 
   /** Loads a small page through the app's session (DoH and proxy apply), timing it. */
-  async test(): Promise<{ url: string; ok: boolean; status: number | null; ms: number; error: string | null }> {
+  async test(): Promise<{
+    url: string;
+    ok: boolean;
+    status: number | null;
+    ms: number;
+    error: string | null;
+    reason: NetworkFailure | null;
+  }> {
     const url = this.testUrl;
     const started = Date.now();
     try {
@@ -86,10 +94,18 @@ export class NetworkControl {
         signal: AbortSignal.timeout(TEST_TIMEOUT_MS),
       });
       await response.body?.cancel();
-      return { url, ok: response.ok, status: response.status, ms: Date.now() - started, error: null };
+      const reason = response.ok ? null : classifyStatus(response.status);
+      return { url, ok: response.ok, status: response.status, ms: Date.now() - started, error: null, reason };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      return { url, ok: false, status: null, ms: Date.now() - started, error: message };
+      return {
+        url,
+        ok: false,
+        status: null,
+        ms: Date.now() - started,
+        error: message,
+        reason: classifyNetworkError(error),
+      };
     }
   }
 
