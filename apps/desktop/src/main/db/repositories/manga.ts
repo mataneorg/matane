@@ -17,6 +17,9 @@ import { manga, mangaCategories } from '../schema';
 
 export type MangaRow = typeof manga.$inferSelect;
 
+/** How often a row seen again in a listing gets its `updatedAt` renewed. */
+const SEEN_REFRESH_MS = 24 * 60 * 60 * 1000;
+
 function parseGenres(json: string): string[] {
   try {
     const value: unknown = JSON.parse(json);
@@ -150,6 +153,9 @@ export class MangaRepository {
         if (title !== existing.title || cover !== existing.thumbnailUrl) {
           tx.update(manga).set({ title, thumbnailUrl: cover, updatedAt: now }).where(eq(manga.id, existing.id)).run();
           this.changes.mark(`manga:${existing.id}`);
+        } else if (now - existing.updatedAt >= SEEN_REFRESH_MS) {
+          // A manga that keeps showing up in listings is not stale (see `purgeBrowseRows`); once a day is enough.
+          tx.update(manga).set({ updatedAt: now }).where(eq(manga.id, existing.id)).run();
         }
         result.push({
           mangaId: existing.id,
@@ -223,7 +229,7 @@ export class MangaRepository {
 
   /** Checked for new chapters without taking the details (metadata updates are off). */
   touchChecked(id: number, now = Date.now()): void {
-    this.db.update(manga).set({ lastUpdateCheckAt: now }).where(eq(manga.id, id)).run();
+    this.db.update(manga).set({ lastUpdateCheckAt: now, updatedAt: now }).where(eq(manga.id, id)).run();
   }
 
   updateDetails(id: number, details: MangaDetails, now = Date.now()): MangaRow {

@@ -1,4 +1,5 @@
 import { mkdirSync } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import os from 'node:os';
 import { dirname, join } from 'node:path';
 import { BrowserWindow, Notification, app, crashReporter, net, safeStorage, session, shell } from 'electron';
@@ -17,6 +18,7 @@ import { createMainWindow } from './app/window';
 import icon from '../../resources/icon.png?asset';
 import { DbChanges } from './db/changes';
 import { openDatabase } from './db/client';
+import { purgeBrowseRows } from './db/housekeeping';
 import { runMigrations } from './db/migrate';
 import { ChaptersRepository } from './db/repositories/chapters';
 import { ExtensionsRepository } from './db/repositories/extensions';
@@ -164,6 +166,16 @@ async function bootstrap(): Promise<void> {
     backupDir: join(userData, 'backups', 'db'),
   });
   if (migration.applied > 0) log.info('Applied database migrations', migration);
+  // Rows that a listing created and nobody kept (ADR 0040); their permanent covers go with them.
+  try {
+    const purged = purgeBrowseRows(connection.sqlite, Date.now());
+    if (purged.deleted > 0) {
+      log.info(`Dropped ${purged.deleted} browse rows nobody kept`);
+      for (const path of purged.coverPaths) void rm(path, { force: true }).catch(() => undefined);
+    }
+  } catch (error) {
+    log.warn('Could not drop old browse rows', error);
+  }
 
   const changes = new DbChanges((tags) => {
     broadcast('db.changed', { tags });
