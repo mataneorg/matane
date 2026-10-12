@@ -289,11 +289,12 @@
       "dataFolder": "Folder data",
       "logs": "Log",
       "open": "Buka",
-      "statistics": "Statistik",
       "clearStats": "Hapus statistik",
       "clearStatsHint": "Melupakan waktu baca dan sesi. Progres, chapter yang dibaca, dan history tetap ada.",
       "clearStatsTitle": "Hapus statistik?",
-      "clearStatsDescription": "Waktu baca, streak, dan halaman statistik mulai dari awal. Tidak bisa dibatalkan."
+      "clearStatsDescription": "Waktu baca, streak, dan halaman statistik mulai dari awal. Tidak bisa dibatalkan.",
+      "clearData": "Hapus data",
+      "clearHistoryHint": "Mengosongkan halaman Riwayat. Progres baca dan chapter yang sudah dibaca tetap ada."
     },
     "updater": {
       "title": "Update aplikasi",

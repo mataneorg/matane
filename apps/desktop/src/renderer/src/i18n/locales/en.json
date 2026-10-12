@@ -289,11 +289,12 @@
       "dataFolder": "Data folder",
       "logs": "Logs",
       "open": "Open",
-      "statistics": "Statistics",
       "clearStats": "Clear statistics",
       "clearStatsHint": "Forgets reading time and sessions. Progress, read chapters and history stay.",
       "clearStatsTitle": "Clear the statistics?",
-      "clearStatsDescription": "Reading time, streaks and the statistics page start over. This cannot be undone."
+      "clearStatsDescription": "Reading time, streaks and the statistics page start over. This cannot be undone.",
+      "clearData": "Clear data",
+      "clearHistoryHint": "Empties the History page. Reading progress and read chapters stay."
     },
     "updater": {
       "title": "App updates",

@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/button';
 import { formatBytes } from '../../lib/format';
 import { ipc, settingsQuery, useUpdateSettings } from '../../lib/ipc';
 import { BackupSettings } from './BackupSettings';
+import { ClearDataSection } from './ClearDataSection';
 import { Row } from './controls';
 
 const storageQueryKey = ['storage', 'info'] as const;
@@ -25,11 +26,6 @@ export function DataSettings() {
   const clear = useMutation({
     mutationFn: (kind: 'page' | 'browse_cover') => ipc.invoke('storage.clearCache', { kind }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: storageQueryKey }),
-  });
-  const [confirmStats, setConfirmStats] = useState(false);
-  const clearStats = useMutation({
-    mutationFn: () => ipc.invoke('stats.clear'),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['stats'] }),
   });
   const openPath = useMutation({ mutationFn: (which: 'data' | 'logs') => ipc.invoke('app.openPath', { which }) });
   const sizeId = useId();
@@ -151,28 +147,8 @@ export function DataSettings() {
 
       <BackupSettings />
 
-      <section className="rounded-xl border bg-card/40 p-5">
-        <h2 className="mb-4 text-sm font-semibold">{t('settings.data.statistics')}</h2>
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="font-medium">{t('settings.data.clearStats')}</p>
-            <p className="text-xs text-muted-foreground">{t('settings.data.clearStatsHint')}</p>
-          </div>
-          <Button variant="destructive" size="sm" onClick={() => setConfirmStats(true)}>
-            <Trash2 />
-            {t('settings.data.clearStats')}
-          </Button>
-        </div>
-      </section>
+      <ClearDataSection />
 
-      <ConfirmDialog
-        open={confirmStats}
-        onOpenChange={setConfirmStats}
-        title={t('settings.data.clearStatsTitle')}
-        description={t('settings.data.clearStatsDescription')}
-        confirmLabel={t('settings.data.clearStats')}
-        onConfirm={() => clearStats.mutate()}
-      />
       <ConfirmDialog
         open={confirm !== null}
         onOpenChange={(open) => !open && setConfirm(null)}
