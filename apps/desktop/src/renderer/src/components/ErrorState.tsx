@@ -16,7 +16,10 @@ export function ErrorState({
   sourceId,
   compact,
   className,
+  title: titleOverride,
 }: {
+  /** A headline of the caller's own instead of the one for the error's code. */
+  title?: string;
   error: unknown;
   onRetry?: () => void;
   sourceId?: string;
@@ -45,7 +48,7 @@ export function ErrorState({
         </div>
       )}
       <div>
-        <h2 className="font-semibold">{title}</h2>
+        <h2 className="font-semibold">{titleOverride ?? title}</h2>
         <p className="mt-1 max-w-md text-xs break-words text-muted-foreground select-text">{detail}</p>
       </div>
       <div className="flex gap-2">

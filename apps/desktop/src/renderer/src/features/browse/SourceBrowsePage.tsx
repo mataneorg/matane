@@ -1,8 +1,9 @@
 import type { FilterState } from '@manga-reader/shared';
+import type { Filter } from '@matane/extension-sdk';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Loader2, RefreshCw, Search, SearchX, SlidersHorizontal } from 'lucide-react';
-import { type FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CoverViewControls } from '../../components/CoverViewControls';
 import { EmptyState } from '../../components/EmptyState';
@@ -22,12 +23,16 @@ import {
 import { useScrollRestoration } from '../../lib/scroll';
 import { cn } from '../../lib/utils';
 import { usePageCrumbs } from '../../stores/crumbs';
-import { FilterPanel, countActiveFilters } from './FilterPanel';
+import { AppliedFilters } from './AppliedFilters';
+import { FilterPanel } from './FilterPanel';
+import { countActive, normalize, requestFilters } from './filterState';
+import { useNarrow } from './useNarrow';
 import { MangaCardSkeleton, MangaGrid, gridStyle } from './MangaGrid';
 import { useBrowseView } from './settings';
 import { SourceIcon } from './SourceIcon';
 import { extensionIconUrl } from '../../lib/extensions';
 import { TabUnderline } from '../../components/ui/tab-underline';
+import { AnimatePresence } from '../../lib/motion';
 
 export interface BrowseSearch {
   tab: BrowseKind;
@@ -59,13 +64,35 @@ export function SourceBrowsePage({
   const capabilities = info.data?.capabilities ?? [];
   const hasFilters = capabilities.includes('getFilters');
   const filterDefs = useQuery({ ...sourceFiltersQuery(sourceId), enabled: hasFilters });
+  const filterList = useMemo(() => (filterDefs.data ?? []) as Filter[], [filterDefs.data]);
   const [panelOpen, setPanelOpen] = useState(false);
+  // The panel holds what is edited and not yet applied; the address (`filters`) is what the listing shows.
+  const [filterDraft, setFilterDraft] = useState<FilterState>(filters);
+  // The address changed (a chip taken off, Back): the panel shows it, not what was edited before.
+  const [seenFilters, setSeenFilters] = useState(filters);
+  if (seenFilters !== filters) {
+    setSeenFilters(filters);
+    setFilterDraft(filters);
+  }
+  const toggle = useRef<HTMLButtonElement>(null);
+  // Below this width the panel floats over the list instead of taking a column from it.
+  const [root, setRoot] = useState<HTMLDivElement | null>(null);
+  const drawer = useNarrow(root, 1040);
+  const closePanel = () => {
+    setPanelOpen(false);
+    toggle.current?.focus();
+  };
+  // A search carries the defaults the extension declared, so it waits for the declarations (or for their failure).
+  const sent = useMemo(
+    () => (tab === 'search' && hasFilters ? requestFilters(filterList, filters) : filters),
+    [tab, hasFilters, filterList, filters],
+  );
   const [{ display, coverSize }, updateView] = useBrowseView();
   usePageCrumbs(source ? `${source.name} (${source.lang.toUpperCase()})` : undefined);
 
   const listing = useInfiniteQuery({
-    ...browseQuery(sourceId, tab, q, filters),
-    enabled: tab !== 'latest' || info.isSuccess,
+    ...browseQuery(sourceId, tab, q, sent),
+    enabled: (tab !== 'latest' || info.isSuccess) && (tab !== 'search' || !hasFilters || !filterDefs.isPending),
   });
   // What the first page was last time, until the real one arrives (also when it fails or the machine is offline).
   const remembered = useQuery({ ...browseCachedQuery(sourceId, tab), enabled: tab !== 'search' });
@@ -96,11 +123,11 @@ export function SourceBrowsePage({
     ...(capabilities.includes('getLatest') ? [{ kind: 'latest' as const, label: t('browse.tabs.latest') }] : []),
     { kind: 'search', label: t('browse.tabs.search') },
   ];
-  const activeFilters = countActiveFilters(filters);
-  const reload = () => void queryClient.resetQueries({ queryKey: queryKeys.browse(sourceId, tab, q, filters) });
+  const activeFilters = countActive(filterList, filters);
+  const reload = () => void queryClient.resetQueries({ queryKey: queryKeys.browse(sourceId, tab, q, sent) });
 
   return (
-    <div className="flex h-full">
+    <div ref={setRoot} className="flex h-full">
       <div ref={attachScroll} className="min-w-0 flex-1 overflow-y-auto">
         <header className="sticky top-0 z-10 border-b bg-background/95 px-6 pt-4 backdrop-blur">
           <div className="flex items-center gap-3">
@@ -149,11 +176,12 @@ export function SourceBrowsePage({
               />
               {hasFilters && (
                 <Button
+                  ref={toggle}
                   variant={panelOpen || activeFilters > 0 ? 'default' : 'secondary'}
                   className={cn(
                     !panelOpen && activeFilters > 0 && 'bg-primary/15 text-primary-text hover:bg-primary/25',
                   )}
-                  onClick={() => setPanelOpen((open) => !open)}
+                  onClick={() => (panelOpen ? closePanel() : setPanelOpen(true))}
                   aria-expanded={panelOpen}
                 >
                   <SlidersHorizontal />
@@ -169,7 +197,18 @@ export function SourceBrowsePage({
           </div>
         </header>
 
-        <div className="p-6">
+        <div className="flex flex-col gap-5 p-6">
+          {hasFilters && tab === 'search' ? (
+            <AppliedFilters
+              filters={filterList}
+              value={filters}
+              onRemove={(id) => {
+                const { [id]: _removed, ...rest } = filters;
+                onSearchChange({ ...search, filters: Object.keys(rest).length > 0 ? rest : undefined });
+              }}
+              onClear={() => onSearchChange({ ...search, filters: undefined })}
+            />
+          ) : null}
           {listing.isPending && !showingRemembered ? (
             <div className="grid" style={gridStyle(display, coverSize)}>
               {Array.from({ length: 18 }, (_, i) => (
@@ -227,15 +266,36 @@ export function SourceBrowsePage({
         </div>
       </div>
 
-      {panelOpen && hasFilters && (
-        <FilterPanel
-          key={JSON.stringify(filters)}
-          filters={filterDefs.data ?? []}
-          value={filters}
-          onClose={() => setPanelOpen(false)}
-          onApply={(next) => onSearchChange({ tab: 'search', q: search.q, filters: next })}
-        />
-      )}
+      <AnimatePresence>
+        {panelOpen && hasFilters ? (
+          <FilterPanel
+            filters={filterList}
+            status={filterDefs.isPending ? 'pending' : filterDefs.isError ? 'error' : 'ready'}
+            error={filterDefs.error}
+            onRetry={() => void filterDefs.refetch()}
+            value={filterDraft}
+            applied={filters}
+            overlay={drawer}
+            busy={listing.isFetching && !listing.isFetchingNextPage}
+            onChange={setFilterDraft}
+            onApply={() => {
+              const applied = normalize(filterList, filterDraft);
+              onSearchChange({
+                tab: 'search',
+                q: search.q,
+                filters: Object.keys(applied).length > 0 ? applied : undefined,
+              });
+              // A drawer hides the list it filters: show the result.
+              if (drawer) closePanel();
+            }}
+            onReset={() => {
+              setFilterDraft({});
+              onSearchChange({ tab: 'search', q: search.q, filters: undefined });
+            }}
+            onClose={closePanel}
+          />
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
