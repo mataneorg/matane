@@ -1,4 +1,4 @@
-import type { LibraryItem, LibrarySettings, LibraryTab } from '@manga-reader/shared';
+import type { Category, LibraryItem, LibrarySettings, LibraryTab } from '@manga-reader/shared';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -18,7 +18,7 @@ import {
   SearchX,
   X,
 } from 'lucide-react';
-import { type MouseEvent, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { type ComponentProps, type MouseEvent, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { CoverImage } from '../../components/CoverImage';
@@ -33,6 +33,16 @@ import { sourcesQuery } from '../../lib/sources';
 import { cn } from '../../lib/utils';
 import { isTyping } from '../reader/keymap';
 import { CategoryDialog } from './CategoryDialog';
+import { CategoryTabMenu, LibraryItemMenu } from './LibraryMenus';
+import {
+  type CardMenuAction,
+  type TabMenuAction,
+  menuTargetIds,
+  movedCategoryIds,
+  sharedCategoryIds,
+  toggledAutoDownload,
+} from './menu';
+import { RenameCategoryDialog } from './RenameCategoryDialog';
 import { LibraryToolbar } from './LibraryToolbar';
 import { EMPTY_SELECTION, type Selection, select, visibleSelection } from './selection';
 import { filterCount, filtersOf, useLibrarySettings } from './settings';
@@ -101,6 +111,59 @@ export function LibraryPage({ tab: requestedTab, onTab }: { tab: LibraryTab; onT
   };
   const onToggle = (id: number) => setSelection((current) => select(current, order, id, 'toggle'));
 
+  // Right-click menus: the cards act on the selection when the card is in it, the tabs on their category.
+  const navigate = useNavigate();
+  const [menuCategories, setMenuCategories] = useState<number[] | null>(null);
+  const [menuRemove, setMenuRemove] = useState<number[] | null>(null);
+  const [renaming, setRenaming] = useState<Category | null>(null);
+  const [deleting, setDeleting] = useState<Category | null>(null);
+  const menuMarkRead = useMutation({
+    mutationFn: (input: { ids: number[]; read: boolean }) =>
+      ipc.invoke('library.markRead', { mangaIds: input.ids, read: input.read }),
+    onError: (error) => notifyError(error, t),
+  });
+  const menuSetCategories = useMutation({
+    mutationFn: (input: { ids: number[]; categoryIds: number[] }) =>
+      ipc.invoke('library.setCategories', { mangaIds: input.ids, categoryIds: input.categoryIds }),
+    onSuccess: () => setMenuCategories(null),
+    onError: (error) => notifyError(error, t),
+  });
+  const menuRemoveItems = useMutation({
+    mutationFn: (ids: number[]) => ipc.invoke('library.remove', { mangaIds: ids }),
+    onSuccess: () => clearSelection(),
+    onError: (error) => notifyError(error, t),
+  });
+  const tabMutation = useMutation({
+    mutationFn: (run: () => Promise<void>) => run(),
+    onError: (error) => notifyError(error, t),
+  });
+  const onCardMenu = (action: CardMenuAction, mangaId: number) => {
+    const ids = menuTargetIds(selection.ids, mangaId);
+    if (action === 'markRead') menuMarkRead.mutate({ ids, read: true });
+    else if (action === 'markUnread') menuMarkRead.mutate({ ids, read: false });
+    else if (action === 'categories') setMenuCategories(ids);
+    else if (action === 'remove') setMenuRemove(ids);
+    else if (action === 'select') onToggle(mangaId);
+    else void navigate({ to: '/library/migrate', search: { ids } });
+  };
+  const onTabMenu = (action: TabMenuAction, category: Category) => {
+    if (action === 'rename') setRenaming(category);
+    else if (action === 'delete') setDeleting(category);
+    else if (action === 'autoDownload') {
+      tabMutation.mutate(() =>
+        ipc.invoke('categories.setAutoDownload', {
+          id: category.id,
+          value: toggledAutoDownload(category.autoDownload),
+        }),
+      );
+    } else {
+      const order = categories.map((c) => c.id);
+      tabMutation.mutate(() =>
+        ipc.invoke('categories.reorder', { ids: movedCategoryIds(order, category.id, action === 'moveLeft' ? -1 : 1) }),
+      );
+    }
+  };
+
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
   useScrollRestoration(scrollElement, library.data !== undefined);
   const empty = counts?.all === 0;
@@ -135,15 +198,22 @@ export function LibraryPage({ tab: requestedTab, onTab }: { tab: LibraryTab; onT
           <TabButton active={tab === 'all'} count={counts?.all} onClick={() => onTab('all')}>
             {t('library.all')}
           </TabButton>
-          {categories.map((category) => (
-            <TabButton
+          {categories.map((category, index) => (
+            <CategoryTabMenu
               key={category.id}
-              active={tab === category.id}
-              count={counts?.byCategory[String(category.id)] ?? 0}
-              onClick={() => onTab(category.id)}
+              category={category}
+              first={index === 0}
+              last={index === categories.length - 1}
+              onAction={(action) => onTabMenu(action, category)}
             >
-              {category.name}
-            </TabButton>
+              <TabButton
+                active={tab === category.id}
+                count={counts?.byCategory[String(category.id)] ?? 0}
+                onClick={() => onTab(category.id)}
+              >
+                {category.name}
+              </TabButton>
+            </CategoryTabMenu>
           ))}
           <TabButton active={tab === 'default'} count={counts?.default} onClick={() => onTab('default')}>
             {t('library.default')}
@@ -214,6 +284,7 @@ export function LibraryPage({ tab: requestedTab, onTab }: { tab: LibraryTab; onT
             selected={selection.ids}
             onItemClick={onItemClick}
             onToggle={onToggle}
+            onMenuAction={onCardMenu}
           />
         ) : (
           <LibraryGrid
@@ -223,6 +294,7 @@ export function LibraryPage({ tab: requestedTab, onTab }: { tab: LibraryTab; onT
             selected={selection.ids}
             onItemClick={onItemClick}
             onToggle={onToggle}
+            onMenuAction={onCardMenu}
           />
         )}
       </div>
@@ -238,30 +310,58 @@ export function LibraryPage({ tab: requestedTab, onTab }: { tab: LibraryTab; onT
           />
         )}
       </AnimatePresence>
+
+      <CategoryDialog
+        open={menuCategories !== null}
+        onOpenChange={(open) => !open && setMenuCategories(null)}
+        title={t('library.categories.setTitle', { count: menuCategories?.length ?? 0 })}
+        initial={sharedCategoryIds(items.filter((item) => menuCategories?.includes(item.mangaId)))}
+        confirmLabel={t('common.save')}
+        onConfirm={(categoryIds) => menuCategories && menuSetCategories.mutate({ ids: menuCategories, categoryIds })}
+      />
+      <ConfirmDialog
+        open={menuRemove !== null}
+        onOpenChange={(open) => !open && setMenuRemove(null)}
+        title={t('library.remove.title', { count: menuRemove?.length ?? 0 })}
+        description={t('library.remove.description')}
+        confirmLabel={t('library.remove.confirm')}
+        onConfirm={() => menuRemove && menuRemoveItems.mutate(menuRemove)}
+      />
+      <RenameCategoryDialog category={renaming} onClose={() => setRenaming(null)} />
+      <ConfirmDialog
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={t('settings.library.deleteTitle', { name: deleting?.name ?? '' })}
+        description={t('settings.library.deleteDescription')}
+        confirmLabel={t('settings.library.delete')}
+        onConfirm={() => deleting && tabMutation.mutate(() => ipc.invoke('categories.delete', { id: deleting.id }))}
+      />
     </div>
   );
 }
 
+/** `...rest` lets the right-click menu (`ContextMenuTrigger asChild`) attach to the button. */
 function TabButton({
   active,
   count,
-  onClick,
   children,
+  className,
+  ...rest
 }: {
   active: boolean;
   count?: number;
-  onClick: () => void;
   children: React.ReactNode;
-}) {
+} & Omit<ComponentProps<'button'>, 'children'>) {
   return (
     <button
+      {...rest}
       type="button"
       role="tab"
       aria-selected={active}
-      onClick={onClick}
       className={cn(
         'relative flex h-9 shrink-0 items-center gap-2 border-b-2 border-transparent px-2 text-muted-foreground transition-colors hover:text-foreground',
         active && 'font-semibold text-foreground',
+        className,
       )}
     >
       {active && <TabUnderline layoutId="library-tab-underline" />}
@@ -300,6 +400,7 @@ interface ViewProps {
   selected: ReadonlySet<number>;
   onItemClick: (event: MouseEvent, id: number) => void;
   onToggle: (id: number) => void;
+  onMenuAction: (action: CardMenuAction, mangaId: number) => void;
 }
 
 /** Virtualized by rows, so 1,000+ covers stay smooth. */
@@ -352,72 +453,80 @@ function LibraryCard({
   selected,
   onItemClick,
   onToggle,
+  onMenuAction,
 }: Omit<ViewProps, 'items' | 'scrollElement'> & { item: LibraryItem; display: LibrarySettings['display'] }) {
   const { t } = useTranslation();
   const isSelected = selected.has(item.mangaId);
   const progress = item.chapterCount > 0 && item.readCount > 0 ? item.readCount / item.chapterCount : 0;
   return (
-    <div className="group relative min-w-0">
-      <Link
-        to="/manga/$mangaId"
-        params={{ mangaId: String(item.mangaId) }}
-        onClick={(event) => onItemClick(event, item.mangaId)}
-        className="flex min-w-0 flex-col gap-2 rounded-lg outline-offset-4"
-        title={item.title}
-        aria-selected={isSelected}
-        data-testid="library-item"
-      >
-        <div
-          className={cn(
-            'relative overflow-hidden rounded-lg border transition-colors group-hover:border-primary',
-            isSelected && 'border-primary ring-2 ring-primary',
-          )}
+    <LibraryItemMenu
+      item={item}
+      selected={isSelected}
+      targetCount={isSelected ? selected.size : 1}
+      onAction={(action) => onMenuAction(action, item.mangaId)}
+    >
+      <div className="group relative min-w-0">
+        <Link
+          to="/manga/$mangaId"
+          params={{ mangaId: String(item.mangaId) }}
+          onClick={(event) => onItemClick(event, item.mangaId)}
+          className="flex min-w-0 flex-col gap-2 rounded-lg outline-offset-4"
+          title={item.title}
+          aria-selected={isSelected}
+          data-testid="library-item"
         >
-          <CoverImage mangaId={item.mangaId} coverKey={item.coverKey} alt={item.title} className="aspect-[2/3]" />
-          {(item.unreadCount > 0 || item.downloadedCount > 0) && (
-            <span className="absolute top-1.5 left-1.5 flex overflow-hidden rounded-full text-[11px] font-semibold">
-              {item.unreadCount > 0 && (
-                <span
-                  className="flex h-5 min-w-5 items-center justify-center bg-primary px-1.5 text-primary-foreground"
-                  title={t('library.unread', { count: item.unreadCount })}
-                >
-                  {item.unreadCount}
-                </span>
-              )}
-              {item.downloadedCount > 0 && (
-                <span
-                  className="flex h-5 min-w-5 items-center justify-center bg-ctp-teal px-1.5 text-ctp-crust"
-                  title={t('library.downloaded', { count: item.downloadedCount })}
-                >
-                  {item.downloadedCount}
-                </span>
-              )}
-            </span>
-          )}
-          {display === 'compact' && (
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ctp-crust/95 via-ctp-crust/70 to-transparent px-2 pt-6 pb-2">
-              <p className="line-clamp-2 text-xs leading-snug font-semibold text-ctp-text">{item.title}</p>
-            </div>
-          )}
-          {progress > 0 && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-ctp-crust/60">
-              <div className="h-full bg-primary" style={{ width: `${progress * 100}%` }} />
-            </div>
-          )}
-        </div>
-        {display === 'comfortable' && (
-          <div className="min-w-0">
-            <p className="truncate text-[13px] leading-snug font-semibold group-hover:text-primary-text">
-              {item.title}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              <ItemMeta item={item} />
-            </p>
+          <div
+            className={cn(
+              'relative overflow-hidden rounded-lg border transition-colors group-hover:border-primary',
+              isSelected && 'border-primary ring-2 ring-primary',
+            )}
+          >
+            <CoverImage mangaId={item.mangaId} coverKey={item.coverKey} alt={item.title} className="aspect-[2/3]" />
+            {(item.unreadCount > 0 || item.downloadedCount > 0) && (
+              <span className="absolute top-1.5 left-1.5 flex overflow-hidden rounded-full text-[11px] font-semibold">
+                {item.unreadCount > 0 && (
+                  <span
+                    className="flex h-5 min-w-5 items-center justify-center bg-primary px-1.5 text-primary-foreground"
+                    title={t('library.unread', { count: item.unreadCount })}
+                  >
+                    {item.unreadCount}
+                  </span>
+                )}
+                {item.downloadedCount > 0 && (
+                  <span
+                    className="flex h-5 min-w-5 items-center justify-center bg-ctp-teal px-1.5 text-ctp-crust"
+                    title={t('library.downloaded', { count: item.downloadedCount })}
+                  >
+                    {item.downloadedCount}
+                  </span>
+                )}
+              </span>
+            )}
+            {display === 'compact' && (
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ctp-crust/95 via-ctp-crust/70 to-transparent px-2 pt-6 pb-2">
+                <p className="line-clamp-2 text-xs leading-snug font-semibold text-ctp-text">{item.title}</p>
+              </div>
+            )}
+            {progress > 0 && (
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-ctp-crust/60">
+                <div className="h-full bg-primary" style={{ width: `${progress * 100}%` }} />
+              </div>
+            )}
           </div>
-        )}
-      </Link>
-      <SelectToggle selected={isSelected} onToggle={() => onToggle(item.mangaId)} />
-    </div>
+          {display === 'comfortable' && (
+            <div className="min-w-0">
+              <p className="truncate text-[13px] leading-snug font-semibold group-hover:text-primary-text">
+                {item.title}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                <ItemMeta item={item} />
+              </p>
+            </div>
+          )}
+        </Link>
+        <SelectToggle selected={isSelected} onToggle={() => onToggle(item.mangaId)} />
+      </div>
+    </LibraryItemMenu>
   );
 }
 
@@ -445,7 +554,7 @@ function SelectToggle({ selected, onToggle }: { selected: boolean; onToggle: () 
   );
 }
 
-function LibraryList({ items, scrollElement, selected, onItemClick, onToggle }: ViewProps) {
+function LibraryList({ items, scrollElement, selected, onItemClick, onToggle, onMenuAction }: ViewProps) {
   const { t, i18n } = useTranslation();
   const virtualizer = useVirtualizer({
     count: items.length,
@@ -461,58 +570,66 @@ function LibraryList({ items, scrollElement, selected, onItemClick, onToggle }: 
         const item = items[row.index]!;
         const isSelected = selected.has(item.mangaId);
         return (
-          <div key={row.key} className="group absolute inset-x-0 px-6" style={{ top: row.start, height: LIST_ROW }}>
-            <button
-              type="button"
-              aria-label={isSelected ? t('library.selection.deselect') : t('library.selection.select')}
-              onClick={() => onToggle(item.mangaId)}
-              className={cn(
-                'absolute top-1/2 left-8 z-10 -translate-y-1/2 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-                isSelected && 'text-primary-text opacity-100',
-              )}
-            >
-              {isSelected ? <CircleCheck className="size-4" /> : <Circle className="size-4" />}
-            </button>
-            <Link
-              to="/manga/$mangaId"
-              params={{ mangaId: String(item.mangaId) }}
-              onClick={(event) => onItemClick(event, item.mangaId)}
-              aria-selected={isSelected}
-              data-testid="library-item"
-              className={cn(
-                'flex h-full items-center gap-3 border-b px-2 transition-colors hover:bg-accent/60',
-                isSelected && 'bg-primary/10 hover:bg-primary/15',
-              )}
-            >
-              <span className="w-4 shrink-0" />
-              <CoverImage
-                mangaId={item.mangaId}
-                coverKey={item.coverKey}
-                alt={item.title}
-                className="aspect-[2/3] h-12 shrink-0 rounded"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold group-hover:text-primary-text">{item.title}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  <ItemMeta item={item} />
-                </p>
-              </div>
-              <span className="hidden w-32 shrink-0 text-xs text-muted-foreground md:block">
-                {item.lastReadAt !== null &&
-                  new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(item.lastReadAt)}
-              </span>
-              <span className="w-24 shrink-0 text-right text-xs text-muted-foreground">
-                {t('library.readOf', { read: item.readCount, total: item.chapterCount })}
-              </span>
-              <span className="w-10 shrink-0 text-right">
-                {item.unreadCount > 0 && (
-                  <span className="rounded-full bg-primary px-1.5 py-0.5 text-[11px] font-semibold text-primary-foreground">
-                    {item.unreadCount}
-                  </span>
+          <LibraryItemMenu
+            key={row.key}
+            item={item}
+            selected={isSelected}
+            targetCount={isSelected ? selected.size : 1}
+            onAction={(action) => onMenuAction(action, item.mangaId)}
+          >
+            <div className="group absolute inset-x-0 px-6" style={{ top: row.start, height: LIST_ROW }}>
+              <button
+                type="button"
+                aria-label={isSelected ? t('library.selection.deselect') : t('library.selection.select')}
+                onClick={() => onToggle(item.mangaId)}
+                className={cn(
+                  'absolute top-1/2 left-8 z-10 -translate-y-1/2 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+                  isSelected && 'text-primary-text opacity-100',
                 )}
-              </span>
-            </Link>
-          </div>
+              >
+                {isSelected ? <CircleCheck className="size-4" /> : <Circle className="size-4" />}
+              </button>
+              <Link
+                to="/manga/$mangaId"
+                params={{ mangaId: String(item.mangaId) }}
+                onClick={(event) => onItemClick(event, item.mangaId)}
+                aria-selected={isSelected}
+                data-testid="library-item"
+                className={cn(
+                  'flex h-full items-center gap-3 border-b px-2 transition-colors hover:bg-accent/60',
+                  isSelected && 'bg-primary/10 hover:bg-primary/15',
+                )}
+              >
+                <span className="w-4 shrink-0" />
+                <CoverImage
+                  mangaId={item.mangaId}
+                  coverKey={item.coverKey}
+                  alt={item.title}
+                  className="aspect-[2/3] h-12 shrink-0 rounded"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold group-hover:text-primary-text">{item.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    <ItemMeta item={item} />
+                  </p>
+                </div>
+                <span className="hidden w-32 shrink-0 text-xs text-muted-foreground md:block">
+                  {item.lastReadAt !== null &&
+                    new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(item.lastReadAt)}
+                </span>
+                <span className="w-24 shrink-0 text-right text-xs text-muted-foreground">
+                  {t('library.readOf', { read: item.readCount, total: item.chapterCount })}
+                </span>
+                <span className="w-10 shrink-0 text-right">
+                  {item.unreadCount > 0 && (
+                    <span className="rounded-full bg-primary px-1.5 py-0.5 text-[11px] font-semibold text-primary-foreground">
+                      {item.unreadCount}
+                    </span>
+                  )}
+                </span>
+              </Link>
+            </div>
+          </LibraryItemMenu>
         );
       })}
     </div>

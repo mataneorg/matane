@@ -1535,5 +1535,15 @@
   },
   "toast": {
     "copied": "Disalin ke clipboard"
+  },
+  "contextMenu": {
+    "library": {
+      "rename": "Ubah nama",
+      "renameTitle": "Ubah nama kategori",
+      "autoDownload": "Unduh chapter baru",
+      "moveLeft": "Geser ke kiri",
+      "moveRight": "Geser ke kanan",
+      "deleteCategory": "Hapus kategori"
+    }
   }
 }

@@ -1564,5 +1564,15 @@
   },
   "toast": {
     "copied": "Copied to the clipboard"
+  },
+  "contextMenu": {
+    "library": {
+      "rename": "Rename",
+      "renameTitle": "Rename category",
+      "autoDownload": "Download new chapters",
+      "moveLeft": "Move left",
+      "moveRight": "Move right",
+      "deleteCategory": "Delete category"
+    }
   }
 }
