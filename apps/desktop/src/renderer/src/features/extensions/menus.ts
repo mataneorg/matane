@@ -13,9 +13,9 @@ export function installedMenuRows(extension: {
   };
 }
 
-/** Which rows the menu of an extension a repository offers shows. One installed from another repository only updates there. */
-export function availableMenuRows(item: { update: boolean; elsewhere: boolean }) {
-  return { action: !item.elsewhere, update: item.update };
+/** Which rows the menu of an extension a repository offers shows. One installed from another repository only updates there, and one that needs a newer app cannot be installed yet. */
+export function availableMenuRows(item: { update: boolean; elsewhere: boolean; compatible: boolean }) {
+  return { action: !item.elsewhere && item.compatible, update: item.update };
 }
 
 /** Which rows the menu of a repository shows: the key can be trusted only when the repository signed with an unknown one. */

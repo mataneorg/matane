@@ -28,8 +28,15 @@ describe('installedMenuRows', () => {
 
 describe('availableMenuRows', () => {
   it('has no install for an extension installed from another repository', () => {
-    expect(availableMenuRows({ update: false, elsewhere: true }).action).toBe(false);
-    expect(availableMenuRows({ update: true, elsewhere: false })).toEqual({ action: true, update: true });
+    expect(availableMenuRows({ update: false, elsewhere: true, compatible: true }).action).toBe(false);
+    expect(availableMenuRows({ update: true, elsewhere: false, compatible: true })).toEqual({
+      action: true,
+      update: true,
+    });
+  });
+
+  it('has no install for an extension that needs a newer app', () => {
+    expect(availableMenuRows({ update: false, elsewhere: false, compatible: false }).action).toBe(false);
   });
 });
 

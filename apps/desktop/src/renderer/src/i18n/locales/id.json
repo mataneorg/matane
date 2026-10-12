@@ -594,7 +594,8 @@
         "noIndex": "Tidak ada {{file}} di {{url}}",
         "notUtf8": "{{file}} bukan teks UTF-8",
         "tooLarge": "{{url}} lebih besar dari {{kb}} KB",
-        "shadowedByFolder": "{{name}} dimuat dari folder pengembang; hapus foldernya dulu"
+        "shadowedByFolder": "{{name}} dimuat dari folder pengembang; hapus foldernya dulu",
+        "needsNewerApp": "{{name}} butuh Matane {{version}} atau yang lebih baru"
       }
     }
   },
@@ -781,7 +782,9 @@
     },
     "getExtensions": "Cari extension",
     "shadows": "Menggantikan salinan terpasang",
-    "shadowsHint": "Folder pengembang dengan id yang sama dipakai, bukan salinan terpasang atau bawaan."
+    "shadowsHint": "Folder pengembang dengan id yang sama dipakai, bukan salinan terpasang atau bawaan.",
+    "needsApp": "Butuh Matane {{version}}",
+    "needsAppHint": "Perbarui Matane dulu (Setelan → Tentang), lalu pasang extension ini."
   },
   "manga": {
     "author": "Penulis: {{name}}",

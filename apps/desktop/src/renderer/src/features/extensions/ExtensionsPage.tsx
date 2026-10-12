@@ -524,7 +524,7 @@ function AvailableRow({
   const { t } = useTranslation();
   // Installed from another repository: updates only come from there (§5.8).
   const elsewhere = installed?.origin === 'repo' && !item.installedHere;
-  const rows = availableMenuRows({ update: item.update, elsewhere });
+  const rows = availableMenuRows({ update: item.update, elsewhere, compatible: item.compatible });
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -561,6 +561,14 @@ function AvailableRow({
             </div>
             {elsewhere ? (
               <span className="ml-auto text-xs text-muted-foreground">{t('extensions.installedElsewhere')}</span>
+            ) : !item.compatible ? (
+              <span
+                className="ml-auto flex items-center gap-1.5 text-xs text-warning-text"
+                title={t('extensions.needsAppHint')}
+              >
+                <AlertTriangle className="size-3.5" />
+                {t('extensions.needsApp', { version: item.minAppVersion })}
+              </span>
             ) : (
               <Button
                 size="sm"

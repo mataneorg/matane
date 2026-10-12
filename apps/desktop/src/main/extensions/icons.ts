@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { checkIconHash } from '@matane/extension-runtime/repo';
 import { REPO_LIMITS } from '@matane/extension-sdk/repo';
 import { AppError } from '@manga-reader/shared/errors';
 import type { ServedImage } from '../images/service';
@@ -20,7 +21,8 @@ export interface ExtensionIconsDeps {
 
 /**
  * Extension icons for `manga://extension-icon/<id>` (installed) and `manga://repo-icon/<repoId>/<id>`
- * (offered by a repository; fetched once a day and kept in memory). Only PNGs are served.
+ * (offered by a repository; fetched once a day and kept in memory). Only PNGs are served, and when the index lists the
+ * icon's size and sha256 the file must match them.
  */
 export class ExtensionIcons {
   private readonly cache = new Map<string, { data: Buffer; at: number }>();
@@ -44,6 +46,12 @@ export class ExtensionIcons {
       maxBytes: REPO_LIMITS.iconBytes,
     });
     if (!data) throw new AppError('not_found', `${entry.icon} is missing`);
+    // The signed index lists the icon's hash (repositories built since 0.4): an icon that differs is not shown.
+    try {
+      checkIconHash(entry, data);
+    } catch (error) {
+      throw new AppError('not_found', error instanceof Error ? error.message : String(error));
+    }
     this.cache.set(key, { data, at: now });
     return this.serve(data);
   }

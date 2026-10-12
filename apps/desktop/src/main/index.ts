@@ -312,6 +312,7 @@ async function bootstrap(): Promise<void> {
     repos,
     fetchBytes,
     extensions,
+    appVersion: () => app.getVersion(),
     origin: { get: (id) => reposRepo.installedFrom(id), set: (id, repoId) => reposRepo.setInstalledFrom(id, repoId) },
     forget: (id) => extensionsRepo.remove(id),
     clearSession: async (id) => {

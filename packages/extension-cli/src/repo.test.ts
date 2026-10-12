@@ -115,6 +115,44 @@ describe('mr-ext repo', () => {
     ]);
   });
 
+  it('lists the hash of an icon and the oldest app version, and verify checks the icon', async () => {
+    const key = generateRepoKey();
+    const out = path.join(await scratch(), 'repo');
+    const { index } = await buildRepo({
+      extensions: await extensions(),
+      outDir: out,
+      name: 'Test',
+      privateKeyPem: key.privateKeyPem,
+      minAppVersion: '1.2.0',
+    });
+    expect(index.extensions[0]).toMatchObject({
+      id: 'alpha',
+      iconSize: ICON.byteLength,
+      iconSha256: sha256Hex(ICON),
+      minAppVersion: '1.2.0',
+    });
+    // No icon, no icon hash; the version goes on every entry.
+    expect(index.extensions[1]).toMatchObject({ id: 'beta', icon: null, minAppVersion: '1.2.0' });
+    expect(index.extensions[1]).not.toHaveProperty('iconSha256');
+    expect((await verifyRepo({ source: out, publicKey: key.publicKey })).problems).toEqual([]);
+
+    await writeFile(path.join(out, 'extensions/icons/alpha.png'), Buffer.concat([ICON, Buffer.from('!')]));
+    expect((await verifyRepo({ source: out, publicKey: key.publicKey })).problems).toEqual([
+      expect.stringMatching(/^extensions\/icons\/alpha\.png: sha256 mismatch/),
+    ]);
+  });
+
+  it('refuses an app version that is not semver', async () => {
+    await expect(
+      buildRepo({
+        extensions: await extensions(),
+        outDir: path.join(await scratch(), 'repo'),
+        name: 'Test',
+        minAppVersion: 'latest',
+      }),
+    ).rejects.toThrow(/not a semantic version/);
+  });
+
   it('reports a wrong key, an unsigned repo and missing files', async () => {
     const key = generateRepoKey();
     const out = path.join(await scratch(), 'repo');

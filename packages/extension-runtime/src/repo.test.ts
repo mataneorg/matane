@@ -4,6 +4,7 @@ import yazl from 'yazl';
 import {
   RepoError,
   checkArchiveHash,
+  checkIconHash,
   entryFields,
   generateRepoKey,
   parsePublicKey,
@@ -168,5 +169,44 @@ describe('archives', () => {
 
   it('rejects something that is not a zip', async () => {
     await expect(readExtensionArchive(Buffer.from('hello'))).rejects.toThrow(/not a zip/);
+  });
+});
+
+describe('icons and the oldest app version in an index', () => {
+  const icon = Buffer.from('icon bytes');
+  const base = {
+    id: 'demo',
+    name: 'Demo',
+    version: '1.2.0',
+    apiVersion: 1,
+    nsfw: false,
+    langs: ['en'],
+    file: archivePath('demo', '1.2.0'),
+    size: 10,
+    sha256: 'a'.repeat(64),
+    icon: iconPath('demo'),
+  } satisfies RepoEntry;
+  const index = (entry: Record<string, unknown>) =>
+    Buffer.from(JSON.stringify({ formatVersion: 1, name: 'Test', extensions: [entry] }));
+
+  it('checks an icon against the size and sha256 the index lists', () => {
+    const listed = { ...base, iconSize: icon.byteLength, iconSha256: sha256Hex(icon) };
+    expect(() => checkIconHash(listed, icon)).not.toThrow();
+    expect(() => checkIconHash(listed, Buffer.from('another icon'))).toThrow(/sha256 mismatch/);
+    expect(() => checkIconHash(listed, Buffer.concat([icon, Buffer.from('!')]))).toThrow(RepoError);
+  });
+
+  it('accepts any icon from an index that lists no hash (older repositories)', () => {
+    expect(() => checkIconHash(base, Buffer.from('anything'))).not.toThrow();
+  });
+
+  it('parses the hash and the oldest app version, and keeps them together or not at all', () => {
+    const entry = { ...base, iconSize: icon.byteLength, iconSha256: sha256Hex(icon), minAppVersion: '1.1.0' };
+    expect(parseRepoIndex(index(entry)).extensions[0]).toMatchObject({ minAppVersion: '1.1.0' });
+    expect(() => parseRepoIndex(index({ ...base, iconSize: 3 }))).toThrow(/go together/);
+    expect(() => parseRepoIndex(index({ ...base, icon: null, iconSize: 3, iconSha256: 'b'.repeat(64) }))).toThrow(
+      /only an extension with an icon/,
+    );
+    expect(() => parseRepoIndex(index({ ...base, minAppVersion: 'new' }))).toThrow(RepoError);
   });
 });

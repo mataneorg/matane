@@ -21,6 +21,8 @@ mr-ext repo verify public --public-key ed25519:…   # or a URL: https://you.git
 - `repo build` takes extension folders with sources (`src/index.ts`, built and minified) or already built ones (`manifest.json` + `index.js`). It rewrites the output folder completely, and refuses a non-empty folder that is not a repository.
 - Builds are reproducible: the same extensions give byte-identical archives and index, so a rebuild only changes what really changed.
 - `repo verify` checks what the app checks: the signature, the index, and each archive's size, sha256, contents and manifest (it must match the index). Any problem exits with code 1.
+- **`--min-app-version <semver>`** puts `minAppVersion` on every entry: the oldest Matane that can run the extensions (for example one that needs a newer extension API or host feature). An older app lists such an extension but shows "Needs Matane 1.2.0" instead of an Install button, and "Update all" leaves it alone. An app from before this field ignores it, so only set it when the extension also fails cleanly on an older host. Prereleases of Matane sort below the release (1.2.0-beta.3 is older than 1.2.0).
+- Each entry with an icon also lists `iconSize` and `iconSha256`. The app checks the icon it fetches against them (it is part of the signed index), and `repo verify` does the same. A repository built with an older `mr-ext` has no icon hash and still works.
 - The app trusts a repository through a key the user chose to trust; the `publicKey` in `index.json` is only informative. `--unsigned` builds a repository the app will call unverified.
 
 ## Contributing and publishing: the usual workflow

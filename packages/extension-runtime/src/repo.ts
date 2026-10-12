@@ -119,6 +119,18 @@ export function checkArchiveHash(entry: RepoEntry, bytes: Uint8Array): void {
   }
 }
 
+/** Throws unless an icon is the one the index lists (an index without icon hashes accepts any icon). */
+export function checkIconHash(entry: RepoEntry, bytes: Uint8Array): void {
+  if (entry.iconSize === undefined || entry.iconSha256 === undefined) return;
+  const actual = sha256Hex(bytes);
+  if (bytes.byteLength !== entry.iconSize || actual !== entry.iconSha256) {
+    throw new RepoError(
+      'hash-mismatch',
+      `${entry.icon}: sha256 mismatch (index lists ${entry.iconSha256}, ${entry.iconSize} bytes; got ${actual}, ${bytes.byteLength} bytes)`,
+    );
+  }
+}
+
 export interface ExtensionArchive {
   manifest: ExtensionManifest;
   files: Partial<Record<ArchiveFile, Buffer>> & { 'manifest.json': Buffer; 'index.js': Buffer };

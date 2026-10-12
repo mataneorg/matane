@@ -175,22 +175,29 @@ repo
   .option('--name <name>', 'repository name shown in the app', 'Extensions')
   .option('--key <file>', `private key (PEM); default: $${KEY_ENV}`)
   .option('--unsigned', 'write no signature (the app will call the repository unverified)')
-  .action(async (extensions: string[], opts: { out: string; name: string; key?: string; unsigned?: boolean }) => {
-    const privateKeyPem = await loadPrivateKey(opts.key);
-    if (!privateKeyPem && !opts.unsigned) {
-      throw new Error(`No signing key: pass --key <file>, set $${KEY_ENV}, or --unsigned`);
-    }
-    const { index, signed } = await buildRepo({
-      extensions,
-      outDir: opts.out,
-      name: opts.name,
-      privateKeyPem: opts.unsigned ? undefined : privateKeyPem,
-    });
-    for (const entry of index.extensions) console.log(`  ${entry.id} ${entry.version}  ${entry.sha256}`);
-    console.log(
-      `Wrote ${index.extensions.length} extension(s) to ${opts.out}, ${signed ? `signed by ${index.publicKey}` : 'unsigned'}`,
-    );
-  });
+  .option('--min-app-version <semver>', 'the oldest Matane version that can run these extensions')
+  .action(
+    async (
+      extensions: string[],
+      opts: { out: string; name: string; key?: string; unsigned?: boolean; minAppVersion?: string },
+    ) => {
+      const privateKeyPem = await loadPrivateKey(opts.key);
+      if (!privateKeyPem && !opts.unsigned) {
+        throw new Error(`No signing key: pass --key <file>, set $${KEY_ENV}, or --unsigned`);
+      }
+      const { index, signed } = await buildRepo({
+        extensions,
+        outDir: opts.out,
+        name: opts.name,
+        privateKeyPem: opts.unsigned ? undefined : privateKeyPem,
+        minAppVersion: opts.minAppVersion,
+      });
+      for (const entry of index.extensions) console.log(`  ${entry.id} ${entry.version}  ${entry.sha256}`);
+      console.log(
+        `Wrote ${index.extensions.length} extension(s) to ${opts.out}, ${signed ? `signed by ${index.publicKey}` : 'unsigned'}`,
+      );
+    },
+  );
 
 repo
   .command('verify')

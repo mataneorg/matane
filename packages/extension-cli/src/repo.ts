@@ -1,6 +1,6 @@
 import { access, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { ExtensionManifest } from '@matane/extension-sdk/manifest';
+import { type ExtensionManifest, manifestSchema } from '@matane/extension-sdk/manifest';
 import {
   REPO_FORMAT_VERSION,
   REPO_INDEX_FILE,
@@ -14,6 +14,7 @@ import {
 import {
   RepoError,
   checkArchiveHash,
+  checkIconHash,
   entryFields,
   generateRepoKey,
   parseRepoIndex,
@@ -93,6 +94,8 @@ export interface BuildRepoOptions {
   name: string;
   /** PKCS#8 PEM; without it the repo is written unsigned (and apps will call it unverified). */
   privateKeyPem?: string;
+  /** The oldest app version that can run these extensions (semver); an older app lists but does not install them. */
+  minAppVersion?: string;
 }
 
 export interface BuildRepoResult {
@@ -105,6 +108,9 @@ export interface BuildRepoResult {
  * per extension, icons, `index.json` sorted by id, and `index.json.sig` when a key is given.
  */
 export async function buildRepo(options: BuildRepoOptions): Promise<BuildRepoResult> {
+  if (options.minAppVersion !== undefined && !manifestSchema.shape.version.safeParse(options.minAppVersion).success) {
+    throw new Error(`--min-app-version "${options.minAppVersion}" is not a semantic version (like 1.2.0)`);
+  }
   const outDir = path.resolve(options.outDir);
   const existing = await readdir(outDir).catch((): string[] => []);
   if (existing.length > 0 && !existing.includes(REPO_INDEX_FILE)) {
@@ -145,6 +151,8 @@ export async function buildRepo(options: BuildRepoOptions): Promise<BuildRepoRes
       size: zip.byteLength,
       sha256: sha256Hex(zip),
       icon: icon ? iconPath(manifest.id) : null,
+      ...(icon ? { iconSize: icon.byteLength, iconSha256: sha256Hex(icon) } : {}),
+      ...(options.minAppVersion ? { minAppVersion: options.minAppVersion } : {}),
     });
   }
 
@@ -247,7 +255,17 @@ export async function verifyRepo(options: VerifyRepoOptions): Promise<VerifyRepo
     } catch (error) {
       problems.push((error as Error).message);
     }
-    if (entry.icon && !(await read(entry.icon))) problems.push(`${entry.icon} is missing`);
+    if (entry.icon) {
+      const icon = await read(entry.icon);
+      if (!icon) problems.push(`${entry.icon} is missing`);
+      else {
+        try {
+          checkIconHash(entry, icon);
+        } catch (error) {
+          problems.push((error as Error).message);
+        }
+      }
+    }
   }
   return result;
 }

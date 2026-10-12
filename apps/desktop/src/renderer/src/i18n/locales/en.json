@@ -596,7 +596,8 @@
         "noIndex": "There is no {{file}} at {{url}}",
         "notUtf8": "{{file}} is not UTF-8 text",
         "tooLarge": "{{url}} is larger than {{kb}} KB",
-        "shadowedByFolder": "{{name}} is loaded from a developer folder; remove the folder first"
+        "shadowedByFolder": "{{name}} is loaded from a developer folder; remove the folder first",
+        "needsNewerApp": "{{name}} needs Matane {{version}} or newer"
       }
     }
   },
@@ -789,7 +790,9 @@
     },
     "getExtensions": "Get extensions",
     "shadows": "Replaces the installed copy",
-    "shadowsHint": "A developer folder with the same id is used instead of the installed or built-in copy."
+    "shadowsHint": "A developer folder with the same id is used instead of the installed or built-in copy.",
+    "needsApp": "Needs Matane {{version}}",
+    "needsAppHint": "Update Matane first (Settings → About), then install this extension."
   },
   "manga": {
     "author": "Author: {{name}}",

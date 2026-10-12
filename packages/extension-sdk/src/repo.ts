@@ -45,6 +45,17 @@ export const repoEntrySchema = z
     sha256: z.string().regex(/^[0-9a-f]{64}$/, 'lowercase hex sha256'),
     /** Relative to the repo root; always `iconPath(id)` when present. */
     icon: z.string().nullable(),
+    /** Size and sha256 of the icon, so the app can check the file it fetches (set whenever `icon` is). */
+    iconSize: z.number().int().positive().max(REPO_LIMITS.iconBytes).optional(),
+    iconSha256: z
+      .string()
+      .regex(/^[0-9a-f]{64}$/, 'lowercase hex sha256')
+      .optional(),
+    /**
+     * The oldest app version that can run this extension. An app older than that lists it but does not install it;
+     * an app that predates the field ignores it (the signed index is not strict).
+     */
+    minAppVersion: version.optional(),
   })
   .superRefine((entry, ctx) => {
     // Fixed paths: nothing in an index can point outside the repo or at another extension's files.
@@ -53,6 +64,12 @@ export const repoEntrySchema = z
     }
     if (entry.icon !== null && entry.icon !== iconPath(entry.id)) {
       ctx.addIssue({ code: 'custom', path: ['icon'], message: `must be ${iconPath(entry.id)} or null` });
+    }
+    if ((entry.iconSize === undefined) !== (entry.iconSha256 === undefined)) {
+      ctx.addIssue({ code: 'custom', path: ['iconSha256'], message: 'iconSize and iconSha256 go together' });
+    }
+    if (entry.icon === null && entry.iconSize !== undefined) {
+      ctx.addIssue({ code: 'custom', path: ['iconSize'], message: 'only an extension with an icon has an icon hash' });
     }
   });
 export type RepoEntry = z.infer<typeof repoEntrySchema>;

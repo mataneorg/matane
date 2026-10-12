@@ -31,6 +31,7 @@ let fetched: string[];
 let repos: RepoService;
 let installer: ExtensionInstaller;
 let devFolders: string[];
+let appVersion: string;
 let extensions: ExtensionService;
 let extensionsRepo: ExtensionsRepository;
 let clearedSessions: string[];
@@ -53,13 +54,24 @@ function writeExtension(folder: string, version: string, extra: object = {}) {
 }
 
 /** Publishes a repository with "demo" at `version` into a served folder. */
-async function publish(url: string, version: string, key: { privateKeyPem: string } | null): Promise<string> {
+async function publish(
+  url: string,
+  version: string,
+  key: { privateKeyPem: string } | null,
+  options: { minAppVersion?: string } = {},
+): Promise<string> {
   const source = join(dir, `src-${version}-${Math.random()}`);
   writeExtension(source, version);
   writeFileSync(join(source, 'icon.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]));
   const out = served.get(url) ?? join(dir, `repo-${served.size}`);
   served.set(url, out);
-  await buildRepo({ extensions: [source], outDir: out, name: `Repo ${url}`, privateKeyPem: key?.privateKeyPem });
+  await buildRepo({
+    extensions: [source],
+    outDir: out,
+    name: `Repo ${url}`,
+    privateKeyPem: key?.privateKeyPem,
+    ...options,
+  });
   return out;
 }
 
@@ -88,6 +100,7 @@ beforeEach(async () => {
   extensionsRepo = new ExtensionsRepository(connection.db, changes);
   const reposRepo = new ReposRepository(connection.db, changes);
   devFolders = [];
+  appVersion = '1.0.0';
   mkdirSync(join(dir, 'builtin'));
   const registry = new ExtensionRegistry({
     builtinDir: join(dir, 'builtin'),
@@ -117,6 +130,7 @@ beforeEach(async () => {
     repos,
     fetchBytes,
     extensions,
+    appVersion: () => appVersion,
     origin: { get: (id) => reposRepo.installedFrom(id), set: (id, repoId) => reposRepo.setInstalledFrom(id, repoId) },
     forget: (id) => extensionsRepo.remove(id),
     clearSession: async (id) => {
@@ -306,6 +320,32 @@ describe('ExtensionInstaller', () => {
       update: false,
     });
     await expect(installer.prepare(other.repo.id, 'demo')).rejects.toThrow(/another repository/);
+  });
+
+  it('lists an extension that needs a newer app but does not install it until the app is new enough', async () => {
+    await publish(REPO_URL, '1.0.0', publisher, { minAppVersion: '1.2.0' });
+    const added = await repos.add(REPO_URL, true);
+    if (added.status !== 'added') throw new Error('not added');
+    expect(installer.available()).toEqual([
+      expect.objectContaining({ id: 'demo', minAppVersion: '1.2.0', compatible: false }),
+    ]);
+    await expect(installer.prepare(added.repo.id, 'demo')).rejects.toMatchObject({
+      key: 'repo.needsNewerApp',
+      params: { name: 'Demo', version: '1.2.0' },
+    });
+    // A beta of the same release is still older than it.
+    appVersion = '1.2.0-beta.3';
+    await expect(installer.prepare(added.repo.id, 'demo')).rejects.toMatchObject({ key: 'repo.needsNewerApp' });
+    appVersion = '1.2.0';
+    expect(installer.available()[0]).toMatchObject({ compatible: true });
+    await expect(installer.prepare(added.repo.id, 'demo')).resolves.toMatchObject({ id: 'demo' });
+  });
+
+  it('installs without a limit from a repository that lists no oldest app version', async () => {
+    const repo = await addTrusted();
+    expect(installer.available()[0]).toMatchObject({ minAppVersion: null, compatible: true });
+    appVersion = '0.0.1';
+    await expect(installer.prepare(repo.id, 'demo')).resolves.toMatchObject({ id: 'demo' });
   });
 
   it('refuses to install an id that a developer folder provides', async () => {

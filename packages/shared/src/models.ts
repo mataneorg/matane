@@ -94,6 +94,10 @@ export const availableExtensionSchema = z.object({
   installedHere: z.boolean(),
   /** Installed from this repository and this version is newer. */
   update: z.boolean(),
+  /** The oldest app version that can run it, when the repository says. */
+  minAppVersion: z.string().nullable(),
+  /** This app is new enough to install it (false = the user has to update the app first). */
+  compatible: z.boolean(),
 });
 export type AvailableExtension = z.infer<typeof availableExtensionSchema>;
 

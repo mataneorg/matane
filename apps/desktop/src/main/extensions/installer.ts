@@ -41,8 +41,15 @@ export interface InstallerDeps {
   forget(extensionId: string): void;
   /** Clears the extension's session (cookies, cache, storage). */
   clearSession(extensionId: string): Promise<void>;
+  /** The version of this app, for the `minAppVersion` an index can list. */
+  appVersion: () => string;
   now?: () => number;
   log?: (message: string) => void;
+}
+
+/** An entry without `minAppVersion` runs on any app; prereleases of the app sort below the release (semver). */
+export function satisfiesMinAppVersion(minAppVersion: string | undefined, appVersion: string): boolean {
+  return minAppVersion === undefined || compareVersions(appVersion, minAppVersion) >= 0;
 }
 
 /**
@@ -104,6 +111,8 @@ export class ExtensionInstaller {
           installedVersion: current?.version ?? null,
           installedHere,
           update: installedHere && compareVersions(entry.version, current.version) > 0,
+          minAppVersion: entry.minAppVersion ?? null,
+          compatible: satisfiesMinAppVersion(entry.minAppVersion, this.deps.appVersion()),
         });
       }
     }
@@ -116,6 +125,13 @@ export class ExtensionInstaller {
     const repo = this.deps.repos.list().find((r) => r.id === repoId);
     const entry = this.deps.repos.index(repoId)?.extensions.find((e) => e.id === extensionId);
     if (!repo || !entry) throw new AppError('not_found', `${extensionId} is not in this repository`);
+
+    if (!satisfiesMinAppVersion(entry.minAppVersion, this.deps.appVersion())) {
+      throw AppError.keyed('repo', `${entry.name} needs Matane ${entry.minAppVersion} or newer`, 'repo.needsNewerApp', {
+        name: entry.name,
+        version: entry.minAppVersion ?? '',
+      });
+    }
 
     // A developer folder with this id would win over the copy being installed: say so before downloading.
     if (this.deps.extensions.list().some((e) => e.id === extensionId && e.origin === 'dev')) {
@@ -194,7 +210,8 @@ export class ExtensionInstaller {
   /** Installs every available update. */
   async updateAll(): Promise<UpdateAllResult> {
     const result: UpdateAllResult = { updated: [], failed: [] };
-    for (const item of this.available().filter((a) => a.update)) {
+    // An update this app is too old for is left for later, not reported as a failure of "update all".
+    for (const item of this.available().filter((a) => a.update && a.compatible)) {
       try {
         const preview = await this.prepare(item.repoId, item.id);
         await this.install(preview.token);
