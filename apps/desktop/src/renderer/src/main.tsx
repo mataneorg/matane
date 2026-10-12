@@ -7,6 +7,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initI18n, resolveLanguage } from './i18n';
 import { ipc, osLocaleQuery, settingsQuery } from './lib/ipc';
+import { MotionProvider } from './lib/MotionProvider';
 import { queryClient, router } from './router';
 import { applyTheme } from './theme/apply-theme';
 
@@ -24,7 +25,9 @@ async function start(): Promise<void> {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <MotionProvider>
+          <RouterProvider router={router} />
+        </MotionProvider>
       </QueryClientProvider>
     </StrictMode>,
   );

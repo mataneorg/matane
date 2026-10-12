@@ -8,14 +8,30 @@ import { downloadStatsQuery } from '../../lib/downloads';
 import { updateStatusQuery } from '../../lib/updates';
 import { availableExtensionsQuery } from '../../lib/extensions';
 import { libraryCountsQuery } from '../../lib/library';
+import { AnimatePresence, LayoutGroup, collapse, m, transition } from '../../lib/motion';
 import logoMark from '../../assets/logo-mark.png';
 import { cn } from '../../lib/utils';
 import { NAV_ITEMS, type NavLeaf } from './nav';
 
+/**
+ * A sidebar row. The highlight itself is <ActiveIndicator>, which slides from the previously active row; `isolate`
+ * keeps it (behind the content, above the row) inside the link.
+ */
 const itemClass =
-  'flex h-9 items-center gap-3 rounded-lg border-l-2 border-transparent px-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground';
-const activeClass =
-  'border-primary bg-primary/15 font-semibold text-primary-text hover:bg-primary/15 hover:text-primary-text';
+  'relative isolate flex h-9 items-center gap-3 rounded-lg border-l-2 border-transparent px-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground';
+const activeClass = 'font-semibold text-primary-text hover:bg-transparent hover:text-primary-text';
+
+/** The one highlight behind the active row. It reaches over the row's transparent left border, so the accent bar lines up. */
+function ActiveIndicator() {
+  return (
+    <m.span
+      layoutId="nav-active"
+      transition={transition.layout}
+      aria-hidden
+      className="absolute inset-y-0 right-0 -left-0.5 -z-10 rounded-lg border-l-2 border-primary bg-primary/15"
+    />
+  );
+}
 
 function SidebarLink({
   item,
@@ -37,26 +53,26 @@ function SidebarLink({
     <Link
       to={item.to}
       title={collapsed ? t(`nav.${item.labelKey}`) : undefined}
-      className={cn(
-        'relative',
-        itemClass,
-        nested && !collapsed && 'h-8 pl-4 text-[13px]',
-        collapsed && 'justify-center px-0',
-      )}
+      className={cn(itemClass, nested && !collapsed && 'h-8 pl-4 text-[13px]', collapsed && 'justify-center px-0')}
       activeProps={{ className: activeClass }}
     >
-      <Icon className="size-4 shrink-0" />
-      {!collapsed && <span className="flex-1 truncate">{t(`nav.${item.labelKey}`)}</span>}
-      {!collapsed && badge !== undefined && badge > 0 && (
-        <span className="rounded-md bg-primary/20 px-1.5 text-[11px] font-semibold text-primary-text">{badge}</span>
-      )}
-      {dot && (
-        <span
-          role="status"
-          aria-label={dot}
-          title={dot}
-          className={cn('size-1.5 shrink-0 rounded-full bg-primary', collapsed && 'absolute top-1.5 right-2.5')}
-        />
+      {({ isActive }) => (
+        <>
+          {isActive && <ActiveIndicator />}
+          <Icon className="size-4 shrink-0" />
+          {!collapsed && <span className="flex-1 truncate">{t(`nav.${item.labelKey}`)}</span>}
+          {!collapsed && badge !== undefined && badge > 0 && (
+            <span className="rounded-md bg-primary/20 px-1.5 text-[11px] font-semibold text-primary-text">{badge}</span>
+          )}
+          {dot && (
+            <span
+              role="status"
+              aria-label={dot}
+              title={dot}
+              className={cn('size-1.5 shrink-0 rounded-full bg-primary', collapsed && 'absolute top-1.5 right-2.5')}
+            />
+          )}
+        </>
       )}
     </Link>
   );
@@ -68,6 +84,7 @@ export function Sidebar() {
   const updateSettings = useUpdateSettings();
   const collapsed = settings?.sidebarCollapsed ?? false;
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const settingsActive = pathname.startsWith('/settings');
   const [browseOpen, setBrowseOpen] = useState(true);
   const { data: counts } = useQuery(libraryCountsQuery);
   const { data: downloadStats } = useQuery(downloadStatsQuery);
@@ -88,80 +105,93 @@ export function Sidebar() {
   };
 
   return (
-    <aside
-      className={cn(
-        'flex shrink-0 flex-col border-r bg-sidebar px-3 py-3 transition-[width] duration-150',
-        collapsed ? 'w-16' : 'w-56',
-      )}
-    >
-      <div className={cn('mb-3 flex items-center gap-2.5 border-b pb-3', collapsed ? 'justify-center' : 'px-1')}>
-        <img src={logoMark} alt="" className="size-8 shrink-0" />
-        {!collapsed && (
-          <span className="flex items-baseline gap-1.5">
-            <span className="text-base font-semibold tracking-tight">{t('app.name')}</span>
-            <span lang="ja" className="text-xs text-muted-foreground">
-              {t('app.nameNative')}
-            </span>
-          </span>
+    <LayoutGroup>
+      <aside
+        className={cn(
+          'flex shrink-0 flex-col border-r bg-sidebar px-3 py-3 transition-[width] duration-150',
+          collapsed ? 'w-16' : 'w-56',
         )}
-      </div>
+      >
+        <div className={cn('mb-3 flex items-center gap-2.5 border-b pb-3', collapsed ? 'justify-center' : 'px-1')}>
+          <img src={logoMark} alt="" className="size-8 shrink-0" />
+          {!collapsed && (
+            <span className="flex items-baseline gap-1.5">
+              <span className="text-base font-semibold tracking-tight">{t('app.name')}</span>
+              <span lang="ja" className="text-xs text-muted-foreground">
+                {t('app.nameNative')}
+              </span>
+            </span>
+          )}
+        </div>
 
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
-          if ('to' in item)
-            return <SidebarLink key={item.to} item={item} collapsed={collapsed} badge={badges[item.to]} />;
-          const Icon = item.icon;
-          const groupActive = item.children.some((child) => pathname.startsWith(child.to));
-          if (collapsed) {
-            return item.children.map((child) => (
-              <SidebarLink key={child.to} item={child} collapsed dot={dots[child.to]} />
-            ));
-          }
-          return (
-            <div key={item.labelKey} className="flex flex-col gap-0.5">
-              <button
-                type="button"
-                onClick={() => setBrowseOpen((open) => !open)}
-                aria-expanded={browseOpen}
-                className={cn(itemClass, groupActive && 'text-foreground')}
-              >
-                <Icon className="size-4 shrink-0" />
-                <span className="flex-1 text-left">{t(`nav.${item.labelKey}`)}</span>
-                <ChevronDown className={cn('size-4 transition-transform', !browseOpen && '-rotate-90')} />
-              </button>
-              {browseOpen && (
-                <div className="ml-5 flex flex-col gap-0.5 border-l pl-2">
-                  {item.children.map((child) => (
-                    <SidebarLink key={child.to} item={child} collapsed={false} nested dot={dots[child.to]} />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
+          {NAV_ITEMS.map((item) => {
+            if ('to' in item)
+              return <SidebarLink key={item.to} item={item} collapsed={collapsed} badge={badges[item.to]} />;
+            const Icon = item.icon;
+            const groupActive = item.children.some((child) => pathname.startsWith(child.to));
+            if (collapsed) {
+              return item.children.map((child) => (
+                <SidebarLink key={child.to} item={child} collapsed dot={dots[child.to]} />
+              ));
+            }
+            return (
+              <div key={item.labelKey} className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => setBrowseOpen((open) => !open)}
+                  aria-expanded={browseOpen}
+                  className={cn(itemClass, groupActive && 'text-foreground')}
+                >
+                  <Icon className="size-4 shrink-0" />
+                  <span className="flex-1 text-left">{t(`nav.${item.labelKey}`)}</span>
+                  <ChevronDown className={cn('size-4 transition-transform', !browseOpen && '-rotate-90')} />
+                </button>
+                <AnimatePresence initial={false}>
+                  {browseOpen && (
+                    <m.div
+                      variants={collapse}
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      className="ml-5 overflow-hidden"
+                    >
+                      <div className="flex flex-col gap-0.5 border-l pl-2">
+                        {item.children.map((child) => (
+                          <SidebarLink key={child.to} item={child} collapsed={false} nested dot={dots[child.to]} />
+                        ))}
+                      </div>
+                    </m.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </nav>
 
-      <div className="mt-2 flex flex-col gap-0.5 border-t pt-2">
-        <Link
-          to="/settings/$section"
-          params={{ section: 'general' }}
-          title={collapsed ? t('nav.settings') : undefined}
-          // Highlight for every settings section, not just the linked one.
-          className={cn(itemClass, collapsed && 'justify-center px-0', pathname.startsWith('/settings') && activeClass)}
-        >
-          <Settings className="size-4 shrink-0" />
-          {!collapsed && <span>{t('nav.settings')}</span>}
-        </Link>
-        <button
-          type="button"
-          onClick={() => updateSettings.mutate({ sidebarCollapsed: !collapsed })}
-          title={t(collapsed ? 'nav.expand' : 'nav.collapse')}
-          className={cn(itemClass, collapsed && 'justify-center px-0')}
-        >
-          {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
-          {!collapsed && <span>{t('nav.collapse')}</span>}
-        </button>
-      </div>
-    </aside>
+        <div className="mt-2 flex flex-col gap-0.5 border-t pt-2">
+          <Link
+            to="/settings/$section"
+            params={{ section: 'general' }}
+            title={collapsed ? t('nav.settings') : undefined}
+            // Highlight for every settings section, not just the linked one.
+            className={cn(itemClass, collapsed && 'justify-center px-0', settingsActive && activeClass)}
+          >
+            {settingsActive && <ActiveIndicator />}
+            <Settings className="size-4 shrink-0" />
+            {!collapsed && <span>{t('nav.settings')}</span>}
+          </Link>
+          <button
+            type="button"
+            onClick={() => updateSettings.mutate({ sidebarCollapsed: !collapsed })}
+            title={t(collapsed ? 'nav.expand' : 'nav.collapse')}
+            className={cn(itemClass, collapsed && 'justify-center px-0')}
+          >
+            {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+            {!collapsed && <span>{t('nav.collapse')}</span>}
+          </button>
+        </div>
+      </aside>
+    </LayoutGroup>
   );
 }
