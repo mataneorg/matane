@@ -474,7 +474,7 @@ export function WebtoonView({
       </div>
       {loadingNext && (
         <p className="flex items-center justify-center gap-2 py-6 text-ctp-subtext0">
-          <Loader2 className="size-4 animate-spin text-primary" />
+          <Loader2 className="size-4 animate-spin text-primary-text" />
           {t('reader.loadingNext')}
         </p>
       )}

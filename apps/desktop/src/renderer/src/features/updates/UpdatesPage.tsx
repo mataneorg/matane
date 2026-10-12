@@ -147,7 +147,7 @@ function UpdatesHeader({
         <div className="ml-auto flex items-center gap-2">
           <Button
             variant="secondary"
-            className="border-primary/50 text-primary"
+            className="border-primary/50 text-primary-text"
             disabled={running || check.isPending}
             onClick={() => check.mutate()}
           >
@@ -222,7 +222,7 @@ function UpdatesHeader({
         <button
           type="button"
           onClick={() => setErrorsOpen(true)}
-          className="flex items-center gap-2 self-start text-xs text-destructive hover:underline"
+          className="flex items-center gap-2 self-start text-xs text-danger-text hover:underline"
         >
           <CircleAlert className="size-3.5" />
           {t('updates.lastErrors', { count: errors.length })}
@@ -245,7 +245,7 @@ function UpdatesHeader({
                   >
                     {error.title}
                   </Link>
-                  <p className="text-xs text-destructive">{error.message}</p>
+                  <p className="text-xs text-danger-text">{error.message}</p>
                 </li>
               ))}
             </ul>
@@ -275,7 +275,7 @@ function CheckBanner() {
       aria-label={t('updates.checking')}
       className="flex items-center gap-4 rounded-xl border bg-card/40 px-4 py-3.5"
     >
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border text-primary">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border text-primary-text">
         <RefreshCw className="size-4 animate-spin" />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -465,7 +465,7 @@ function UpdateRow({
               {entry.mangaTitle}
             </Link>
             <span className="px-1.5 text-muted-foreground">·</span>
-            <span className="text-primary">{entry.chapterName}</span>
+            <span className="text-primary-text">{entry.chapterName}</span>
           </p>
           <p className="truncate text-xs text-muted-foreground">
             {[entry.scanlator ?? entry.sourceName, when].filter(Boolean).join(' · ')}
@@ -514,7 +514,7 @@ function SelectionBar({
         aria-label={t('library.selection.toolbar')}
         className="pointer-events-auto flex items-center gap-1 rounded-xl border bg-popover/95 p-1.5 shadow-2xl backdrop-blur"
       >
-        <span className="flex items-center gap-2 px-3 font-medium text-primary">
+        <span className="flex items-center gap-2 px-3 font-medium text-primary-text">
           <span className="size-2 rounded-full bg-primary" />
           {t('library.selection.count', { count: chapterIds.length })}
         </span>

@@ -40,10 +40,10 @@ export function MangaCard({ item, display = 'comfortable' }: { item: BrowseItem;
           alt={item.title}
           className="aspect-[2/3] h-12 shrink-0 rounded"
         />
-        <span className="min-w-0 flex-1 truncate font-semibold group-hover:text-primary">{item.title}</span>
+        <span className="min-w-0 flex-1 truncate font-semibold group-hover:text-primary-text">{item.title}</span>
         {inLibrary && (
           <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-            <Bookmark className="size-3.5 fill-current text-primary" />
+            <Bookmark className="size-3.5 fill-current text-primary-text" />
             {t('browse.inLibrary')}
           </span>
         )}
@@ -67,7 +67,7 @@ export function MangaCard({ item, display = 'comfortable' }: { item: BrowseItem;
         />
         {inLibrary && (
           <span className="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-ctp-crust/85 px-1.5 py-1 text-[11px] font-medium text-foreground backdrop-blur-sm">
-            <Bookmark className="size-3 fill-current text-primary" />
+            <Bookmark className="size-3 fill-current text-primary-text" />
             {t('browse.inLibrary')}
           </span>
         )}
@@ -78,7 +78,9 @@ export function MangaCard({ item, display = 'comfortable' }: { item: BrowseItem;
         )}
       </div>
       {display === 'comfortable' && (
-        <span className="line-clamp-2 text-[13px] leading-snug font-medium group-hover:text-primary">{item.title}</span>
+        <span className="line-clamp-2 text-[13px] leading-snug font-medium group-hover:text-primary-text">
+          {item.title}
+        </span>
       )}
     </Link>
   );
@@ -159,7 +161,7 @@ export function MangaGrid({
       <div ref={sentinel} className="h-px" />
       {isFetchingNextPage && (
         <p className="flex items-center justify-center gap-2 py-6 text-muted-foreground">
-          <Loader2 className="size-4 animate-spin text-primary" />
+          <Loader2 className="size-4 animate-spin text-primary-text" />
           {loadingLabel}
         </p>
       )}

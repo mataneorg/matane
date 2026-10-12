@@ -255,7 +255,7 @@ function MangaHeader({
                 <button
                   type="button"
                   onClick={() => setExpanded((value) => !value)}
-                  className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary-text hover:underline"
                 >
                   {expanded ? t('manga.showLess') : t('manga.showMore')}
                   {expanded ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}

@@ -53,7 +53,7 @@ function FilterPopover({
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <Button variant="secondary" size="sm" className={cn(active > 0 && 'border-primary text-primary')}>
+        <Button variant="secondary" size="sm" className={cn(active > 0 && 'border-primary text-primary-text')}>
           <SlidersHorizontal />
           {t('library.filter.label')}
           {active > 0 && <span className="size-1.5 rounded-full bg-primary" aria-label={String(active)} />}
@@ -207,7 +207,7 @@ function SortMenu({
               <DropdownMenu.RadioItem key={sort} value={sort} className={menuItem}>
                 <span className="flex size-4 items-center justify-center">
                   <DropdownMenu.ItemIndicator>
-                    <Check className="size-4 text-primary" />
+                    <Check className="size-4 text-primary-text" />
                   </DropdownMenu.ItemIndicator>
                 </span>
                 {t(`library.sort.${sort}`)}

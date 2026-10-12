@@ -146,7 +146,7 @@ export function ChapterList({
       <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 border-b bg-background/95 px-6 py-2.5 backdrop-blur">
         <h2 className="mr-3 flex items-center gap-2 font-semibold">
           {t('manga.chapters')}
-          <span className="rounded-md bg-primary/15 px-1.5 text-xs text-primary">{chapters.length}</span>
+          <span className="rounded-md bg-primary/15 px-1.5 text-xs text-primary-text">{chapters.length}</span>
         </h2>
         <Chip active={view.unreadOnly} onClick={() => toggle('unreadOnly')}>
           {t('manga.filters.unread')}
@@ -186,7 +186,7 @@ export function ChapterList({
               <Users />
               {t('manga.scanlators.button')}
               {prefs.hidden.length > 0 && (
-                <span className="rounded bg-primary/15 px-1 text-[10px] text-primary">
+                <span className="rounded bg-primary/15 px-1 text-[10px] text-primary-text">
                   {t('manga.scanlators.hiddenCount', { count: prefs.hidden.length })}
                 </span>
               )}
@@ -280,7 +280,7 @@ function ChapterRow({
         onClick={onToggle}
         className={cn(
           'flex h-full w-7 shrink-0 items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-          selected && 'text-primary opacity-100',
+          selected && 'text-primary-text opacity-100',
         )}
       >
         {selected ? <CircleCheck className="size-4" /> : <Circle className="size-4" />}
@@ -308,7 +308,7 @@ function ChapterRow({
         {chapter.scanlator && <span className="truncate text-xs text-muted-foreground">· {chapter.scanlator}</span>}
         <span className="ml-auto flex shrink-0 items-center gap-3 text-xs text-muted-foreground">
           {chapter.lastPage > 0 && !chapter.read && chapter.totalPages !== null && (
-            <span className="text-primary">
+            <span className="text-primary-text">
               {t('manga.pageProgress', { page: chapter.lastPage + 1, total: chapter.totalPages })}
             </span>
           )}
@@ -353,7 +353,7 @@ function SortMenu({ view, onChange }: { view: ChapterView; onChange: (patch: Par
                   <DropdownMenu.RadioItem
                     key={sort}
                     value={sort}
-                    className="flex h-8 cursor-default items-center gap-2 rounded-md px-2 text-sm outline-none data-[highlighted]:bg-accent data-[state=checked]:text-primary"
+                    className="flex h-8 cursor-default items-center gap-2 rounded-md px-2 text-sm outline-none data-[highlighted]:bg-accent data-[state=checked]:text-primary-text"
                   >
                     <ItemIcon className="size-4" />
                     {t(`manga.sort.${sort}`)}
@@ -395,7 +395,7 @@ function BookmarkToggle({ chapter }: { chapter: ChapterInfo }) {
       className={cn(
         'ml-1',
         chapter.bookmarked
-          ? 'text-ctp-peach hover:text-ctp-peach'
+          ? 'text-warning-text hover:text-warning-text'
           : 'opacity-0 group-hover:opacity-60 hover:opacity-100 focus-visible:opacity-100',
       )}
     >
@@ -461,7 +461,7 @@ function ChapterMenu({
             {chapter.bookmarked ? t('manga.menu.unbookmark') : t('manga.menu.bookmark')}
           </DropdownMenu.Item>
           {local ? null : download ? (
-            <DropdownMenu.Item className={`${item} text-destructive`} onSelect={() => deleteDownload.mutate()}>
+            <DropdownMenu.Item className={`${item} text-danger-text`} onSelect={() => deleteDownload.mutate()}>
               <Trash2 className="size-4" />
               {download.status === 'done' ? t('downloads.delete') : t('downloads.cancel')}
             </DropdownMenu.Item>
@@ -521,7 +521,7 @@ function ChapterSelectionBar({
         aria-label={t('library.selection.toolbar')}
         className="pointer-events-auto flex items-center gap-1 rounded-xl border bg-popover/95 p-1.5 shadow-2xl backdrop-blur"
       >
-        <span className="flex items-center gap-2 px-3 font-medium text-primary">
+        <span className="flex items-center gap-2 px-3 font-medium text-primary-text">
           <span className="size-2 rounded-full bg-primary" />
           {t('library.selection.count', { count: chapters.length })}
         </span>
@@ -552,7 +552,7 @@ function ChapterSelectionBar({
           <Button
             variant="ghost"
             size="sm"
-            className="text-destructive"
+            className="text-danger-text"
             onClick={() => deleteDownloads.mutate(downloadedIds)}
           >
             <Trash2 />
@@ -582,7 +582,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       onClick={onClick}
       className={cn(
         'inline-flex h-8 items-center gap-1.5 rounded-lg border border-input px-3 text-xs transition-colors hover:border-foreground/40',
-        active && 'border-primary bg-primary/15 text-primary',
+        active && 'border-primary bg-primary/15 text-primary-text',
       )}
     >
       {children}

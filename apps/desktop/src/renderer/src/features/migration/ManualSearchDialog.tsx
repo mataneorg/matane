@@ -127,7 +127,9 @@ function ManualSearch({
                         alt={item.title}
                         className="aspect-[2/3] rounded-lg border transition-colors group-hover:border-primary"
                       />
-                      <span className="line-clamp-2 text-xs font-medium group-hover:text-primary">{item.title}</span>
+                      <span className="line-clamp-2 text-xs font-medium group-hover:text-primary-text">
+                        {item.title}
+                      </span>
                     </button>
                   ))
               : Array.from({ length: 6 }, (_, i) => <MangaCardSkeleton key={i} />)}

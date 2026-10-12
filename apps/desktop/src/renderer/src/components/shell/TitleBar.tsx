@@ -77,7 +77,10 @@ export function TitleBar() {
         <ActivityIndicator />
         <IncognitoToggle className="mr-1" />
         {!online && (
-          <span className="no-drag flex items-center gap-1.5 px-2 text-xs text-ctp-peach" title={t('titlebar.offline')}>
+          <span
+            className="no-drag flex items-center gap-1.5 px-2 text-xs text-warning-text"
+            title={t('titlebar.offline')}
+          >
             <WifiOff className="size-3.5" />
             {t('titlebar.offline')}
           </span>

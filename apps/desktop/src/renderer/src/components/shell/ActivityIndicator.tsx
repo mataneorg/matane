@@ -25,7 +25,7 @@ export function ActivityIndicator() {
       type="button"
       data-testid="activity"
       onClick={() => void navigate({ to })}
-      className="no-drag flex h-7 items-center gap-1.5 rounded-md px-2 text-xs text-primary hover:bg-accent"
+      className="no-drag flex h-7 items-center gap-1.5 rounded-md px-2 text-xs text-primary-text hover:bg-accent"
     >
       <Icon className={progress ? 'size-3.5 animate-spin' : 'size-3.5 animate-pulse'} />
       {label}

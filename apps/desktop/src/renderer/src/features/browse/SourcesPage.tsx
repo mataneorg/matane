@@ -55,7 +55,7 @@ export function SourcesPage() {
         {hidden > 0 && (
           <p className="mx-auto max-w-5xl px-6 pt-4 text-xs text-muted-foreground" data-testid="hidden-by-content">
             {t('browse.sources.hiddenByContent', { count: hidden })}{' '}
-            <Link to="/settings/$section" params={{ section: 'browse' }} className="text-primary hover:underline">
+            <Link to="/settings/$section" params={{ section: 'browse' }} className="text-primary-text hover:underline">
               {t('extensions.changeContent')}
             </Link>
           </p>
@@ -162,7 +162,7 @@ function SourceRow({ source, extension }: { source: SourceEntry; extension?: Ext
         title={source.pinned ? t('browse.sources.unpin') : t('browse.sources.pin')}
         aria-pressed={source.pinned}
         onClick={() => togglePin.mutate()}
-        className={cn(source.pinned && 'text-primary')}
+        className={cn(source.pinned && 'text-primary-text')}
       >
         {source.pinned ? <PinOff /> : <Pin />}
       </Button>
@@ -210,7 +210,7 @@ function OpenFromUrl() {
         </Button>
       </div>
       {resolve.isSuccess && resolve.data === null && (
-        <p className="text-xs text-ctp-peach">{t('browse.openUrl.noMatch')}</p>
+        <p className="text-xs text-warning-text">{t('browse.openUrl.noMatch')}</p>
       )}
       {resolve.isError && <ResolveError error={resolve.error} />}
     </form>
@@ -219,5 +219,5 @@ function OpenFromUrl() {
 
 function ResolveError({ error }: { error: unknown }) {
   const { title } = useErrorText(error);
-  return <p className="text-xs text-ctp-red">{title}</p>;
+  return <p className="text-xs text-danger-text">{title}</p>;
 }

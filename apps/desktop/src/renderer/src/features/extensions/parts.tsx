@@ -21,14 +21,14 @@ export function TrustLine({ trust, repoName }: { trust: RepoTrust; repoName: str
   const { t } = useTranslation();
   if (trust === 'trusted') {
     return (
-      <span className="flex max-w-[60%] min-w-0 shrink-0 items-center gap-1 text-ctp-blue">
+      <span className="flex max-w-[60%] min-w-0 shrink-0 items-center gap-1 text-info-text">
         <Shield className="size-3.5 shrink-0" />
         <span className="truncate">{t('extensions.trust.trustedLine', { repo: repoName })}</span>
       </span>
     );
   }
   return (
-    <span className="flex max-w-[60%] min-w-0 shrink-0 items-center gap-1 text-ctp-yellow">
+    <span className="flex max-w-[60%] min-w-0 shrink-0 items-center gap-1 text-warning-text">
       <ShieldAlert className="size-3.5 shrink-0" />
       <span className="truncate">{t('extensions.trust.unverifiedLine', { repo: repoName })}</span>
     </span>

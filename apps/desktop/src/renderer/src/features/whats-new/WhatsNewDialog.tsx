@@ -55,7 +55,7 @@ export function WhatsNewDialog() {
           className="fixed top-1/2 left-1/2 z-50 flex max-h-[80vh] w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border bg-popover shadow-2xl"
         >
           <header className="flex items-start gap-3 border-b p-5">
-            <Sparkles className="mt-0.5 size-5 text-primary" />
+            <Sparkles className="mt-0.5 size-5 text-primary-text" />
             <div className="flex-1">
               <Dialog.Title className="text-lg font-semibold">{t('whatsNew.title')}</Dialog.Title>
               {notes && (
@@ -111,7 +111,7 @@ function Notes({ blocks }: { blocks: Block[] }) {
           );
         }
         return (
-          <ul key={i} className="flex list-disc flex-col gap-1.5 pl-5 marker:text-primary">
+          <ul key={i} className="flex list-disc flex-col gap-1.5 pl-5 marker:text-primary-text">
             {group.map((item, j) => (
               <li key={j}>
                 <Text text={item.text} />
@@ -136,7 +136,7 @@ function Text({ text }: { text: string }) {
           <strong key={i}>{part.text}</strong>
         ) : part.kind === 'link' ? (
           // Opens in the browser (the window's open handler).
-          <a key={i} href={part.href} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+          <a key={i} href={part.href} target="_blank" rel="noreferrer" className="text-primary-text hover:underline">
             {part.text}
           </a>
         ) : (

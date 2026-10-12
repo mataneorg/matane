@@ -44,7 +44,7 @@ export function HistoryPage() {
               <SearchField value={query} onChange={setQuery} placeholder={t('history.search')} className="w-64" />
               <Button
                 variant="ghost"
-                className="h-8 border border-destructive/50 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+                className="h-8 border border-destructive/50 text-xs text-danger-text hover:bg-destructive/10 hover:text-danger-text"
                 onClick={() => setConfirmClear(true)}
               >
                 <Trash2 />
@@ -105,12 +105,12 @@ function IncognitoBanner() {
     <div
       className={cn(
         'flex items-center gap-3 rounded-xl border px-4 py-3 text-sm',
-        on ? 'border-ctp-peach/40 bg-ctp-peach/10 text-ctp-peach' : 'bg-card/40 text-muted-foreground',
+        on ? 'border-ctp-peach/40 bg-ctp-peach/10 text-warning-text' : 'bg-card/40 text-muted-foreground',
       )}
     >
       <EyeOff className="size-4.5 shrink-0" />
       <span className="flex-1">{on ? t('incognito.bannerOn') : t('incognito.bannerOff')}</span>
-      <Button variant="ghost" size="sm" className="text-primary" onClick={() => setOn(!on)}>
+      <Button variant="ghost" size="sm" className="text-primary-text" onClick={() => setOn(!on)}>
         {on ? t('incognito.turnOff') : t('incognito.turnOn')}
       </Button>
     </div>
@@ -185,7 +185,7 @@ function HistoryRow({ entry, group }: { entry: HistoryEntry; group: HistoryGroup
               style={{ width: `${percent}%` }}
             />
           </div>
-          <span className={cn('text-[11px] text-muted-foreground', readAgain && 'text-ctp-green')}>{percent}%</span>
+          <span className={cn('text-[11px] text-muted-foreground', readAgain && 'text-success-text')}>{percent}%</span>
         </div>
       </div>
       {readAgain ? (
@@ -203,7 +203,7 @@ function HistoryRow({ entry, group }: { entry: HistoryEntry; group: HistoryGroup
         variant="ghost"
         size="icon"
         title={t('history.remove')}
-        className="hover:text-destructive"
+        className="hover:text-danger-text"
         onClick={() => remove.mutate()}
       >
         <Trash2 />

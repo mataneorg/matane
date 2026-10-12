@@ -115,19 +115,19 @@ export function InstallDialog({ request, onClose }: { request: InstallRequest | 
               <InstallError error={error} />
             ) : !preview || autoUpdating ? (
               <p className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
-                <Loader2 className="size-4 animate-spin text-primary" />
+                <Loader2 className="size-4 animate-spin text-primary-text" />
                 {autoUpdating ? t('extensions.install.updating') : t('extensions.install.verifying')}
               </p>
             ) : (
               <>
                 {preview.trust === 'unverified' && (
-                  <p className="flex items-start gap-2.5 rounded-lg border border-ctp-yellow/40 bg-ctp-yellow/10 px-3 py-2.5 text-ctp-yellow">
+                  <p className="flex items-start gap-2.5 rounded-lg border border-ctp-yellow/40 bg-ctp-yellow/10 px-3 py-2.5 text-warning-text">
                     <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                     {t('extensions.install.unverifiedWarning')}
                   </p>
                 )}
                 {preview.nsfw && (
-                  <p className="flex items-center gap-2.5 rounded-lg border border-ctp-red/40 bg-ctp-red/10 px-3 py-2.5 text-ctp-red">
+                  <p className="flex items-center gap-2.5 rounded-lg border border-ctp-red/40 bg-ctp-red/10 px-3 py-2.5 text-danger-text">
                     <Badge variant="danger">18+</Badge>
                     {t('extensions.install.nsfw')}
                   </p>
@@ -140,7 +140,7 @@ export function InstallDialog({ request, onClose }: { request: InstallRequest | 
                   <span aria-hidden>·</span>
                   <span>{formatBytes(preview.size, i18n.language)}</span>
                   <span aria-hidden>·</span>
-                  <span className="flex items-center gap-1.5 text-ctp-green" title={preview.sha256}>
+                  <span className="flex items-center gap-1.5 text-success-text" title={preview.sha256}>
                     <CircleCheck className="size-3.5" />
                     {t('extensions.install.shaVerified')}
                   </span>
@@ -168,14 +168,14 @@ function RepoLine({ preview }: { preview: InstallPreview }) {
   const { t } = useTranslation();
   if (preview.trust === 'trusted') {
     return (
-      <p className="flex items-center gap-1 text-xs text-ctp-blue">
+      <p className="flex items-center gap-1 text-xs text-info-text">
         <Shield className="size-3.5" />
         {t('extensions.install.repoTrusted', { repo: preview.repoName })}
       </p>
     );
   }
   return (
-    <p className="flex items-center gap-1 text-xs text-ctp-yellow">
+    <p className="flex items-center gap-1 text-xs text-warning-text">
       <ShieldAlert className="size-3.5" />
       {t('extensions.install.repoUnverified', { repo: preview.repoName })}
     </p>
@@ -186,7 +186,7 @@ function InstallError({ error }: { error: unknown }) {
   const { t } = useTranslation();
   const { title, detail } = useErrorText(error);
   return (
-    <div role="alert" className="flex items-start gap-2.5 rounded-lg bg-ctp-red/10 px-3 py-2.5 text-ctp-red">
+    <div role="alert" className="flex items-start gap-2.5 rounded-lg bg-ctp-red/10 px-3 py-2.5 text-danger-text">
       <AlertTriangle className="mt-0.5 size-4 shrink-0" />
       <div className="min-w-0 select-text">
         <p className="font-medium">{t('extensions.install.failed')}</p>

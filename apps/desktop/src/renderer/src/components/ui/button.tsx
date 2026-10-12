@@ -11,7 +11,7 @@ export const buttonVariants = cva(
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
         secondary: 'border border-input bg-secondary text-secondary-foreground hover:bg-ctp-surface1',
         ghost: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-        destructive: 'border border-destructive/40 text-destructive hover:bg-destructive/10',
+        destructive: 'border border-destructive/40 text-danger-text hover:bg-destructive/10',
       },
       size: {
         default: 'h-9 px-4',

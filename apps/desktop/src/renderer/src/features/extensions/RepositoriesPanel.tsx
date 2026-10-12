@@ -119,7 +119,7 @@ export function RepoCard({ repo, now }: { repo: RepoInfo; now: number }) {
                 <Copy />
                 {t('extensions.repos.copyUrl')}
               </DropdownMenu.Item>
-              <DropdownMenu.Item className={cn(menuItem, 'text-destructive')} onSelect={() => setConfirmRemove(true)}>
+              <DropdownMenu.Item className={cn(menuItem, 'text-danger-text')} onSelect={() => setConfirmRemove(true)}>
                 <Trash2 />
                 {t('extensions.repos.remove')}
               </DropdownMenu.Item>
@@ -134,10 +134,10 @@ export function RepoCard({ repo, now }: { repo: RepoInfo; now: number }) {
         )}
       </p>
       {repo.problem && (
-        <p className="mt-1.5 text-xs text-ctp-yellow">{t(`extensions.repos.problem.${repo.problem}`)}</p>
+        <p className="mt-1.5 text-xs text-warning-text">{t(`extensions.repos.problem.${repo.problem}`)}</p>
       )}
       {repo.lastError && (
-        <p className="mt-1.5 flex items-start gap-1.5 text-xs text-ctp-red select-text">
+        <p className="mt-1.5 flex items-start gap-1.5 text-xs text-danger-text select-text">
           <AlertTriangle className="mt-px size-3.5 shrink-0" />
           {repo.lastError}
         </p>
@@ -174,7 +174,7 @@ export function RepoCard({ repo, now }: { repo: RepoInfo; now: number }) {
 function MutationError({ error }: { error: unknown }) {
   const { title, detail } = useErrorText(error);
   return (
-    <p className="mt-1.5 text-xs text-ctp-red select-text">
+    <p className="mt-1.5 text-xs text-danger-text select-text">
       {title}: {detail}
     </p>
   );
@@ -232,7 +232,7 @@ export function AddRepoDialog({ open, onOpenChange }: { open: boolean; onOpenCha
             {pending && (
               <div
                 role="alert"
-                className="flex items-start gap-2.5 rounded-lg border border-ctp-yellow/40 bg-ctp-yellow/10 px-3 py-2.5 text-ctp-yellow"
+                className="flex items-start gap-2.5 rounded-lg border border-ctp-yellow/40 bg-ctp-yellow/10 px-3 py-2.5 text-warning-text"
               >
                 <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                 <div>

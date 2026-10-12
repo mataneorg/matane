@@ -93,7 +93,7 @@ export function KeymapEditor({ keymap, onChange }: { keymap: Keymap; onChange: (
                         keys[action].filter((k) => k !== key),
                       )
                     }
-                    className="text-muted-foreground opacity-60 hover:text-ctp-red group-hover:opacity-100"
+                    className="text-muted-foreground opacity-60 hover:text-danger-text group-hover:opacity-100"
                   >
                     <X className="size-3" />
                   </button>
@@ -102,10 +102,10 @@ export function KeymapEditor({ keymap, onChange }: { keymap: Keymap; onChange: (
             </div>
             {active ? (
               <>
-                <span className="inline-flex h-7 items-center rounded-md border-2 border-primary px-2 font-mono text-xs text-primary">
+                <span className="inline-flex h-7 items-center rounded-md border-2 border-primary px-2 font-mono text-xs text-primary-text">
                   {t('settings.reader.pressKey')}
                 </span>
-                <Button variant="ghost" size="sm" className="text-ctp-red" onClick={() => setCapturing(null)}>
+                <Button variant="ghost" size="sm" className="text-danger-text" onClick={() => setCapturing(null)}>
                   {t('common.cancel')}
                 </Button>
               </>
@@ -136,7 +136,7 @@ export function KeymapEditor({ keymap, onChange }: { keymap: Keymap; onChange: (
         );
       })}
       {conflict && (
-        <p role="alert" className="mt-3 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs text-ctp-red">
+        <p role="alert" className="mt-3 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs text-danger-text">
           {conflict}
         </p>
       )}

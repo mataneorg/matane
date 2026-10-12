@@ -52,7 +52,9 @@ export function OnboardingPage() {
         <div className="flex max-h-full w-full max-w-3xl flex-col rounded-2xl border bg-background shadow-2xl">
           <div className="border-b px-8 pt-6 pb-5">
             <div className="mb-5 flex items-center justify-between">
-              <p className="text-xs font-semibold tracking-wider text-primary uppercase">{t('onboarding.label')}</p>
+              <p className="text-xs font-semibold tracking-wider text-primary-text uppercase">
+                {t('onboarding.label')}
+              </p>
               <span className="rounded-full border bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
                 {t('onboarding.stepOf', { step: index + 1, total: STEPS.length })}
               </span>
@@ -64,14 +66,16 @@ export function OnboardingPage() {
                     aria-current={i === index ? 'step' : undefined}
                     className={cn(
                       'flex size-7 items-center justify-center rounded-full border text-xs font-semibold',
-                      i < index && 'border-ctp-green/50 bg-ctp-green/15 text-ctp-green',
+                      i < index && 'border-ctp-green/50 bg-ctp-green/15 text-success-text',
                       i === index && 'border-primary bg-primary text-primary-foreground',
                       i > index && 'text-muted-foreground',
                     )}
                   >
                     {i < index ? <Check className="size-3.5" /> : i + 1}
                   </span>
-                  <span className={cn('text-xs', i === index ? 'font-semibold text-primary' : 'text-muted-foreground')}>
+                  <span
+                    className={cn('text-xs', i === index ? 'font-semibold text-primary-text' : 'text-muted-foreground')}
+                  >
                     {t(`onboarding.steps.${name}`)}
                   </span>
                 </li>
@@ -220,7 +224,7 @@ function LanguagesStep() {
       </div>
       <div className="mt-5 flex items-center justify-between gap-4 border-t pt-4">
         <p className="text-sm">
-          <span className="font-medium text-primary">
+          <span className="font-medium text-primary-text">
             {t('onboarding.languages.selected', { count: languages.length })}
           </span>
           <span className="text-muted-foreground">
@@ -297,7 +301,7 @@ function SourcesStep() {
           <ul data-testid="onboarding-ready" className="flex flex-wrap gap-2">
             {ready.map((extension) => (
               <li key={extension.id} className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm">
-                <Check className="size-3.5 text-ctp-green" />
+                <Check className="size-3.5 text-success-text" />
                 {extension.name}
               </li>
             ))}

@@ -54,7 +54,7 @@ export function ThemePicker() {
             )}
           >
             <ThemePreview mode={mode} />
-            <span className={cn(selected && 'font-semibold text-primary')}>{t(`settings.theme.${mode}`)}</span>
+            <span className={cn(selected && 'font-semibold text-primary-text')}>{t(`settings.theme.${mode}`)}</span>
           </button>
         );
       })}

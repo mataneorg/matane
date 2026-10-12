@@ -19,7 +19,7 @@ export function IncognitoToggle({ className }: { className?: string }) {
       className={cn(
         'no-drag flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors',
         on
-          ? 'border border-ctp-peach/40 bg-ctp-peach/15 text-ctp-peach hover:bg-ctp-peach/25'
+          ? 'border border-ctp-peach/40 bg-ctp-peach/15 text-warning-text hover:bg-ctp-peach/25'
           : 'text-muted-foreground hover:bg-accent hover:text-foreground',
         className,
       )}

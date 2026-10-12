@@ -112,7 +112,7 @@ export function DataSettings() {
             <Link
               to="/settings/$section"
               params={{ section: 'downloads' }}
-              className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+              className="flex items-center gap-1 text-xs font-medium text-primary-text hover:underline"
             >
               {t('downloads.page.settings')}
               <ArrowRight className="size-3.5" />

@@ -36,7 +36,7 @@ export function DownloadButton({ chapterId, download }: { chapterId: number; dow
   if (download.status === 'done') {
     return (
       <span
-        className={cn(base, 'flex size-7 items-center justify-center text-primary')}
+        className={cn(base, 'flex size-7 items-center justify-center text-primary-text')}
         title={t('downloads.downloaded')}
       >
         <CircleCheck className="size-4" aria-label={t('downloads.downloaded')} />
@@ -50,7 +50,7 @@ export function DownloadButton({ chapterId, download }: { chapterId: number; dow
         size="icon-sm"
         title={t('downloads.failedRetry', { error: download.error ?? '' })}
         onClick={() => retry.mutate(download.id)}
-        className={cn(base, 'text-destructive hover:text-destructive')}
+        className={cn(base, 'text-danger-text hover:text-danger-text')}
       >
         <CircleAlert />
       </Button>
@@ -72,7 +72,7 @@ export function DownloadButton({ chapterId, download }: { chapterId: number; dow
       title={`${label} · ${t('downloads.clickToCancel')}`}
       aria-label={label}
       onClick={() => cancel.mutate(download.id)}
-      className={cn(base, 'text-primary hover:text-destructive')}
+      className={cn(base, 'text-primary-text hover:text-danger-text')}
     >
       {download.status === 'downloading' ? (
         <ProgressRing percent={percent} />

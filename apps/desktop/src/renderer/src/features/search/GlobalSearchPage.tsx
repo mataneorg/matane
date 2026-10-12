@@ -237,7 +237,7 @@ function SourceRow({
             {t('globalSearch.searching')}
           </span>
         ) : status === 'error' ? (
-          <span className="flex items-center gap-1.5 rounded-md border border-destructive/40 px-2 py-0.5 text-xs text-destructive">
+          <span className="flex items-center gap-1.5 rounded-md border border-destructive/40 px-2 py-0.5 text-xs text-danger-text">
             <CircleAlert className="size-3" />
             {t('globalSearch.failed')}
           </span>
@@ -251,7 +251,7 @@ function SourceRow({
             to="/browse/sources/$extensionId/$sourceKey"
             params={{ extensionId, sourceKey }}
             search={{ tab: 'search', q: query }}
-            className="ml-auto flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            className="ml-auto flex items-center gap-1 text-xs font-medium text-primary-text hover:underline"
           >
             {t('globalSearch.seeAll')}
             <ArrowRight className="size-3.5" />

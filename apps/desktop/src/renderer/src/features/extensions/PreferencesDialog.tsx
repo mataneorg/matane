@@ -43,7 +43,7 @@ export function PreferencesDialog({
           <div className="overflow-y-auto px-5 py-2">
             {query.isPending ? (
               <div className="flex justify-center p-8">
-                <Loader2 className="size-5 animate-spin text-primary" />
+                <Loader2 className="size-5 animate-spin text-primary-text" />
               </div>
             ) : query.isError ? (
               <ErrorState compact error={query.error} onRetry={() => void query.refetch()} />

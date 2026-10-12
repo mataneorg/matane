@@ -139,7 +139,7 @@ export function ExtensionsPage({ initialTab = 'installed' }: { initialTab?: Exte
               <span
                 className={cn(
                   'rounded-md bg-muted px-1.5 text-[11px] font-semibold',
-                  key === 'updates' && counts.updates > 0 && 'bg-primary/20 text-primary',
+                  key === 'updates' && counts.updates > 0 && 'bg-primary/20 text-primary-text',
                 )}
               >
                 {counts[key]}
@@ -175,7 +175,11 @@ export function ExtensionsPage({ initialTab = 'installed' }: { initialTab?: Exte
           {hidden[tab] > 0 && (
             <p className="mb-3 text-xs text-muted-foreground" data-testid="hidden-by-content">
               {t('extensions.hiddenByContent', { count: hidden[tab] })}{' '}
-              <Link to="/settings/$section" params={{ section: 'browse' }} className="text-primary hover:underline">
+              <Link
+                to="/settings/$section"
+                params={{ section: 'browse' }}
+                className="text-primary-text hover:underline"
+              >
                 {t('extensions.changeContent')}
               </Link>
             </p>
@@ -273,7 +277,7 @@ function OriginLine({ extension, repo }: { extension: ExtensionEntry; repo: Repo
   }
   if (extension.origin === 'builtin') {
     return (
-      <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-ctp-green">
+      <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-success-text">
         <ShieldCheck className="size-3.5" />
         {t('extensions.builtin')}
       </span>
@@ -394,7 +398,7 @@ function InstalledRow({
                 )}
                 {extension.origin === 'repo' && (
                   <DropdownMenu.Item
-                    className={cn(menuItem, 'text-destructive')}
+                    className={cn(menuItem, 'text-danger-text')}
                     onSelect={() => setConfirmUninstall(true)}
                   >
                     <Trash2 />
@@ -413,7 +417,7 @@ function InstalledRow({
         </div>
       </div>
       {broken && (
-        <p className="mt-3 flex items-start gap-2 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs text-ctp-red select-text">
+        <p className="mt-3 flex items-start gap-2 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs text-danger-text select-text">
           <AlertTriangle className="mt-px size-3.5 shrink-0" />
           {extension.error}
         </p>
@@ -505,7 +509,7 @@ function AvailableRow({
 function InlineError({ error }: { error: unknown }) {
   const { title, detail } = useErrorText(error);
   return (
-    <p className="mt-3 mb-1 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs whitespace-pre-line text-ctp-red select-text">
+    <p className="mt-3 mb-1 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs whitespace-pre-line text-danger-text select-text">
       {title}: {detail}
     </p>
   );

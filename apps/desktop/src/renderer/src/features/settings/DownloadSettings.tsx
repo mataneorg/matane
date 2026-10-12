@@ -152,7 +152,7 @@ export function DownloadSettings() {
                           key={category.id}
                           className={cn(
                             'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-xs',
-                            excluded && 'border-primary bg-primary/10 text-primary',
+                            excluded && 'border-primary bg-primary/10 text-primary-text',
                           )}
                         >
                           <input

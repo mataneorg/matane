@@ -144,7 +144,9 @@ export function SourceBrowsePage({
               {hasFilters && (
                 <Button
                   variant={panelOpen || activeFilters > 0 ? 'default' : 'secondary'}
-                  className={cn(!panelOpen && activeFilters > 0 && 'bg-primary/15 text-primary hover:bg-primary/25')}
+                  className={cn(
+                    !panelOpen && activeFilters > 0 && 'bg-primary/15 text-primary-text hover:bg-primary/25',
+                  )}
                   onClick={() => setPanelOpen((open) => !open)}
                   aria-expanded={panelOpen}
                 >

@@ -47,12 +47,12 @@ function TrackerCard({ tracker }: { tracker: TrackerInfo }) {
               t('settings.tracking.notConfigured', { name: tracker.name })
             ) : tracker.connected && !tracker.expired ? (
               <>
-                <CircleCheck className="size-3.5 text-ctp-green" />
+                <CircleCheck className="size-3.5 text-success-text" />
                 {t('settings.tracking.connectedAs', { name: tracker.username })}
               </>
             ) : tracker.expired ? (
               <>
-                <CircleAlert className="size-3.5 text-ctp-yellow" />
+                <CircleAlert className="size-3.5 text-warning-text" />
                 {t('settings.tracking.expired')}
               </>
             ) : (
@@ -77,12 +77,12 @@ function TrackerCard({ tracker }: { tracker: TrackerInfo }) {
       </div>
 
       {connect.isError && !connecting && (
-        <p role="alert" className="mt-3 text-xs text-destructive">
+        <p role="alert" className="mt-3 text-xs text-danger-text">
           {error.title}: {error.detail}
         </p>
       )}
       {tracker.connected && tracker.encrypted === false && (
-        <p className="mt-3 text-xs text-ctp-yellow">{t('settings.tracking.plain')}</p>
+        <p className="mt-3 text-xs text-warning-text">{t('settings.tracking.plain')}</p>
       )}
       {(tracker.queued > 0 || tracker.lastError) && (
         <div
@@ -91,7 +91,9 @@ function TrackerCard({ tracker }: { tracker: TrackerInfo }) {
         >
           {tracker.queued > 0 && <span>{t('settings.tracking.queued', { count: tracker.queued })}</span>}
           {tracker.lastError && (
-            <span className="text-ctp-yellow">{t('settings.tracking.lastError', { message: tracker.lastError })}</span>
+            <span className="text-warning-text">
+              {t('settings.tracking.lastError', { message: tracker.lastError })}
+            </span>
           )}
           <Button variant="ghost" size="sm" onClick={() => retry.mutate()}>
             <RefreshCw />
@@ -144,7 +146,7 @@ function SyncControls({ tracker }: { tracker: TrackerInfo }) {
         </Button>
         {sync.data && <span data-testid="tracker-synced">{t('settings.tracking.synced', sync.data)}</span>}
         {sync.isError && (
-          <span role="alert" className="text-destructive">
+          <span role="alert" className="text-danger-text">
             {error.title}: {error.detail}
           </span>
         )}
@@ -200,7 +202,7 @@ function PasswordLogin({ tracker }: { tracker: TrackerInfo }) {
       </div>
       <p className="text-[11px] text-muted-foreground">{t('settings.tracking.passwordNote', { name: tracker.name })}</p>
       {login.isError && (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="text-xs text-danger-text">
           {error.title}: {error.detail}
         </p>
       )}
@@ -244,7 +246,7 @@ function TokenLogin({ tracker }: { tracker: TrackerInfo }) {
         </Button>
       </form>
       {save.isError && (
-        <p role="alert" className="mt-2 text-destructive">
+        <p role="alert" className="mt-2 text-danger-text">
           {error.title}: {error.detail}
         </p>
       )}

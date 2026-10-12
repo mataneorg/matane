@@ -91,7 +91,7 @@ function DevExtensionsCard() {
               <p className="truncate font-mono text-xs text-muted-foreground" title={extension.path}>
                 {extension.path}
               </p>
-              {extension.error && <p className="text-xs text-ctp-red">{extension.error}</p>}
+              {extension.error && <p className="text-xs text-danger-text">{extension.error}</p>}
             </div>
             <Button
               variant="ghost"

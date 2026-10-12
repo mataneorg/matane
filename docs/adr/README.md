@@ -42,3 +42,4 @@ Short records of decisions that shape the codebase. The full design discussion (
 | [0036](0036-mal-code-flow-and-refresh.md) | MyAnimeList: the code flow with PKCE, and logins that are renewed |
 | [0037](0037-password-logins-kitsu-mangaupdates.md) | Password logins: Kitsu (GraphQL) and MangaUpdates |
 | [0038](0038-two-way-tracker-sync.md) | Two-way tracker sync: one pure rule, no bounce, switches per tracker and manga |
+| [0039](0039-latte-text-contrast.md) | Text in accent and status colours keeps its contrast on Latte |

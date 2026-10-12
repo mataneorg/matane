@@ -358,7 +358,7 @@ export function ReaderPage({
               aria-pressed={shown.bookmarked}
               title={shown.bookmarked ? t('reader.unbookmarkChapter') : t('reader.bookmarkChapter')}
               onClick={() => setChapterBookmark.mutate({ chapterId: shown.id, bookmarked: !shown.bookmarked })}
-              className={cn(shown.bookmarked && 'text-primary hover:text-primary')}
+              className={cn(shown.bookmarked && 'text-primary-text hover:text-primary-text')}
             >
               <Bookmark className={cn(shown.bookmarked && 'fill-current')} />
             </Button>

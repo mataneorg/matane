@@ -40,7 +40,7 @@ function SettingsPage() {
             params={{ section: item }}
             className="flex h-8 items-center justify-between rounded-lg px-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             activeProps={{
-              className: 'bg-primary/15 font-semibold text-primary hover:bg-primary/15 hover:text-primary',
+              className: 'bg-primary/15 font-semibold text-primary-text hover:bg-primary/15 hover:text-primary-text',
             }}
           >
             <span className="truncate">{t(`settings.sections.${item}`)}</span>

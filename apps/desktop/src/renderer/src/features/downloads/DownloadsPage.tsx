@@ -86,8 +86,8 @@ export function DownloadsPage() {
                 <span
                   className={cn(
                     'rounded-md bg-muted px-1.5 text-[11px] font-semibold',
-                    key === 'errors' && byTab.errors.length > 0 && 'bg-destructive/20 text-destructive',
-                    tab === key && key !== 'errors' && 'bg-primary/20 text-primary',
+                    key === 'errors' && byTab.errors.length > 0 && 'bg-destructive/20 text-danger-text',
+                    tab === key && key !== 'errors' && 'bg-primary/20 text-primary-text',
                   )}
                 >
                   {byTab[key].length}
@@ -179,7 +179,7 @@ function DownloadsHeader({ queue, completed }: { queue: DownloadItem[]; complete
                 style={{ width: `${percent}%` }}
               />
             </div>
-            <span className={cn('text-xs', percent >= 100 ? 'text-destructive' : 'text-ctp-peach')}>
+            <span className={cn('text-xs', percent >= 100 ? 'text-danger-text' : 'text-warning-text')}>
               {t('downloads.page.percent', { percent, used: size(used), limit: size(limit) })}
             </span>
           </div>
@@ -218,7 +218,7 @@ function DownloadsHeader({ queue, completed }: { queue: DownloadItem[]; complete
                 {t('downloads.page.openFolder')}
               </DropdownMenu.Item>
               <DropdownMenu.Item
-                className={cn(menuItem, 'text-destructive')}
+                className={cn(menuItem, 'text-danger-text')}
                 disabled={queue.length === 0}
                 onSelect={() => setConfirmCancel(true)}
               >
@@ -262,7 +262,7 @@ function LimitBanner() {
   return (
     <div
       role="status"
-      className="flex items-center gap-3 rounded-xl border border-ctp-peach/40 bg-ctp-peach/10 px-4 py-3 text-sm text-ctp-peach"
+      className="flex items-center gap-3 rounded-xl border border-ctp-peach/40 bg-ctp-peach/10 px-4 py-3 text-sm text-warning-text"
     >
       <TriangleAlert className="size-4.5 shrink-0" />
       <span className="flex-1">
@@ -271,7 +271,7 @@ function LimitBanner() {
           limit: formatBytes(limitBytesOf(limitGb) ?? 0, i18n.language),
         })}
       </span>
-      <Button asChild variant="ghost" size="sm" className="text-ctp-peach">
+      <Button asChild variant="ghost" size="sm" className="text-warning-text">
         <Link to="/settings/$section" params={{ section: 'downloads' }}>
           {t('downloads.page.settings')}
         </Link>
@@ -502,7 +502,7 @@ function DownloadsFooter() {
       <Link
         to="/settings/$section"
         params={{ section: 'downloads' }}
-        className="ml-auto flex items-center gap-1 font-medium text-primary hover:underline"
+        className="ml-auto flex items-center gap-1 font-medium text-primary-text hover:underline"
       >
         {t('downloads.page.settings')}
         <ArrowRight className="size-3.5" />

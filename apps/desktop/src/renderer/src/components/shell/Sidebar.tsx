@@ -14,7 +14,8 @@ import { NAV_ITEMS, type NavLeaf } from './nav';
 
 const itemClass =
   'flex h-9 items-center gap-3 rounded-lg border-l-2 border-transparent px-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground';
-const activeClass = 'border-primary bg-primary/15 font-semibold text-primary hover:bg-primary/15 hover:text-primary';
+const activeClass =
+  'border-primary bg-primary/15 font-semibold text-primary-text hover:bg-primary/15 hover:text-primary-text';
 
 function SidebarLink({
   item,
@@ -47,7 +48,7 @@ function SidebarLink({
       <Icon className="size-4 shrink-0" />
       {!collapsed && <span className="flex-1 truncate">{t(`nav.${item.labelKey}`)}</span>}
       {!collapsed && badge !== undefined && badge > 0 && (
-        <span className="rounded-md bg-primary/20 px-1.5 text-[11px] font-semibold text-primary">{badge}</span>
+        <span className="rounded-md bg-primary/20 px-1.5 text-[11px] font-semibold text-primary-text">{badge}</span>
       )}
       {dot && (
         <span

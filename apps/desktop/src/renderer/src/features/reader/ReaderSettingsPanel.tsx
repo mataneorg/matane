@@ -146,7 +146,7 @@ export function ReaderSettingsPanel({
       className="absolute top-16 right-4 bottom-20 z-30 flex w-80 flex-col rounded-2xl border border-ctp-surface1 bg-ctp-mantle/95 text-ctp-text shadow-2xl backdrop-blur"
     >
       <header className="flex items-center gap-2 border-b border-ctp-surface1 px-4 py-3">
-        <SlidersHorizontal className="size-4 text-primary" />
+        <SlidersHorizontal className="size-4 text-primary-text" />
         <h2 className="text-xs font-semibold tracking-wider uppercase">{t('reader.settings.title')}</h2>
         <Button variant="ghost" size="icon" className="ml-auto" title={t('common.close')} onClick={onClose}>
           <X />
@@ -285,7 +285,7 @@ export function ReaderSettingsPanel({
         <Link
           to="/settings/$section"
           params={{ section: 'reader' }}
-          className="self-start text-xs font-medium text-primary hover:underline"
+          className="self-start text-xs font-medium text-primary-text hover:underline"
         >
           {t('reader.settings.allSettings')}
         </Link>
@@ -295,8 +295,8 @@ export function ReaderSettingsPanel({
         {mangaOverride ? (
           <>
             <p className="flex items-center gap-2 text-xs">
-              <BookMarked className="size-3.5 shrink-0 text-primary" />
-              <span className="font-medium text-primary">{t('reader.settings.mangaOverride')}</span>
+              <BookMarked className="size-3.5 shrink-0 text-primary-text" />
+              <span className="font-medium text-primary-text">{t('reader.settings.mangaOverride')}</span>
             </p>
             <p className="text-[11px] text-ctp-subtext0">{t('reader.settings.mangaOverrideHint')}</p>
             <Button variant="ghost" size="sm" className="self-start" onClick={onResetManga}>
@@ -307,7 +307,7 @@ export function ReaderSettingsPanel({
         ) : (
           <>
             <p className="text-[11px] text-ctp-subtext0">{t('reader.settings.globalHint')}</p>
-            <Button variant="ghost" size="sm" className="self-start text-primary" onClick={onSaveForManga}>
+            <Button variant="ghost" size="sm" className="self-start text-primary-text" onClick={onSaveForManga}>
               <Save />
               {t('reader.settings.saveForManga')}
             </Button>

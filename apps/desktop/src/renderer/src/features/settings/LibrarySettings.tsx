@@ -171,7 +171,7 @@ function CategoryRow({ category }: { category: Category }) {
             variant="ghost"
             size="icon"
             title={t('settings.library.delete')}
-            className="hover:text-destructive"
+            className="hover:text-danger-text"
             onClick={() => setConfirmDelete(true)}
           >
             <Trash2 />

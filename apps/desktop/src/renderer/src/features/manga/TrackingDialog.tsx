@@ -56,7 +56,7 @@ function TrackingBody({ manga }: { manga: MangaInfo }) {
     return (
       <p className="text-sm text-muted-foreground" data-testid="tracking-none">
         {t('tracking.none')}{' '}
-        <Link to="/settings/$section" params={{ section: 'tracking' }} className="text-primary underline">
+        <Link to="/settings/$section" params={{ section: 'tracking' }} className="text-primary-text underline">
           {t('tracking.openSettings')}
         </Link>
       </p>
@@ -125,7 +125,7 @@ function SearchAndLink({ manga, tracker }: { manga: MangaInfo; tracker: TrackerI
         <Loader2 className="size-4 animate-spin text-muted-foreground" aria-label={t('tracking.searching')} />
       )}
       {results.isError && (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="text-xs text-danger-text">
           {searchError.title}: {searchError.detail}
         </p>
       )}
@@ -150,7 +150,7 @@ function SearchAndLink({ manga, tracker }: { manga: MangaInfo; tracker: TrackerI
         ))}
       </ul>
       {link.isError && (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="text-xs text-danger-text">
           {linkError.title}: {linkError.detail}
         </p>
       )}
@@ -185,7 +185,7 @@ function LinkedEditor({ track, tracker }: { track: TrackEntry; tracker: TrackerI
             href={track.remoteUrl}
             target="_blank"
             rel="noreferrer"
-            className="flex shrink-0 items-center gap-1 text-xs text-primary hover:underline"
+            className="flex shrink-0 items-center gap-1 text-xs text-primary-text hover:underline"
           >
             <ExternalLink className="size-3.5" />
             {t('tracking.openOn', { name: tracker.name })}
@@ -272,16 +272,16 @@ function LinkedEditor({ track, tracker }: { track: TrackEntry; tracker: TrackerI
 
       <div className="flex items-center gap-3">
         {track.pending && (
-          <span className="text-xs text-ctp-yellow" data-testid="tracking-pending">
+          <span className="text-xs text-warning-text" data-testid="tracking-pending">
             {t('tracking.pending')}
           </span>
         )}
-        <Button variant="ghost" size="sm" className="ml-auto text-destructive" onClick={() => unlink.mutate()}>
+        <Button variant="ghost" size="sm" className="ml-auto text-danger-text" onClick={() => unlink.mutate()}>
           {t('tracking.unlink')}
         </Button>
       </div>
       {(update.isError || sync.isError) && (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="text-xs text-danger-text">
           {error.title}: {error.detail}
         </p>
       )}

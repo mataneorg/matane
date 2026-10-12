@@ -182,7 +182,7 @@ export function ReaderSettings() {
                       />
                     ))}
                   </span>
-                  <span className={cn('text-xs', active ? 'font-semibold text-primary' : 'text-muted-foreground')}>
+                  <span className={cn('text-xs', active ? 'font-semibold text-primary-text' : 'text-muted-foreground')}>
                     {t(`reader.settings.zones.${zones}`)}
                   </span>
                 </button>
@@ -397,7 +397,7 @@ function Slider({
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-1.5 flex-1 accent-(--app-accent)"
       />
-      <span className="w-20 text-right font-mono text-sm text-primary">
+      <span className="w-20 text-right font-mono text-sm text-primary-text">
         {value}
         {unit}
       </span>

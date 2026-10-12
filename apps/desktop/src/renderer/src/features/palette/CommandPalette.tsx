@@ -245,7 +245,7 @@ function Palette({ onClose }: { onClose: () => void }) {
                     .join(' · ')}
                   hint={
                     reading ? (
-                      <span className="flex items-center gap-1 text-xs font-medium text-primary">
+                      <span className="flex items-center gap-1 text-xs font-medium text-primary-text">
                         {t('palette.continue')}
                         <ArrowRight className="size-3.5" />
                       </span>
@@ -311,7 +311,7 @@ function Palette({ onClose }: { onClose: () => void }) {
             onSelect={searchSources}
             className="mt-2 flex h-11 cursor-default items-center gap-3 rounded-lg border px-3 text-sm data-[selected=true]:bg-accent"
           >
-            <ScanSearch className="size-4 text-primary" />
+            <ScanSearch className="size-4 text-primary-text" />
             <span className="flex-1 truncate">{t('palette.searchSources', { query: q })}</span>
             <span className="text-xs text-muted-foreground">{t('nav.browse')}</span>
             <Kbd label="Tab" />

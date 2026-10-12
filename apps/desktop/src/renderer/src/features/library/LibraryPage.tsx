@@ -261,7 +261,10 @@ function TabButton({
       <span className="max-w-48 truncate">{children}</span>
       {count !== undefined && (
         <span
-          className={cn('rounded-md bg-muted px-1.5 text-[11px] font-medium', active && 'bg-primary/20 text-primary')}
+          className={cn(
+            'rounded-md bg-muted px-1.5 text-[11px] font-medium',
+            active && 'bg-primary/20 text-primary-text',
+          )}
         >
           {count}
         </span>
@@ -397,7 +400,9 @@ function LibraryCard({
         </div>
         {display === 'comfortable' && (
           <div className="min-w-0">
-            <p className="truncate text-[13px] leading-snug font-semibold group-hover:text-primary">{item.title}</p>
+            <p className="truncate text-[13px] leading-snug font-semibold group-hover:text-primary-text">
+              {item.title}
+            </p>
             <p className="truncate text-xs text-muted-foreground">
               <ItemMeta item={item} />
             </p>
@@ -456,7 +461,7 @@ function LibraryList({ items, scrollElement, selected, onItemClick, onToggle }: 
               onClick={() => onToggle(item.mangaId)}
               className={cn(
                 'absolute top-1/2 left-8 z-10 -translate-y-1/2 text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-                isSelected && 'text-primary opacity-100',
+                isSelected && 'text-primary-text opacity-100',
               )}
             >
               {isSelected ? <CircleCheck className="size-4" /> : <Circle className="size-4" />}
@@ -480,7 +485,7 @@ function LibraryList({ items, scrollElement, selected, onItemClick, onToggle }: 
                 className="aspect-[2/3] h-12 shrink-0 rounded"
               />
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold group-hover:text-primary">{item.title}</p>
+                <p className="truncate font-semibold group-hover:text-primary-text">{item.title}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   <ItemMeta item={item} />
                 </p>
@@ -568,7 +573,7 @@ function SelectionBar({
       aria-label={t('library.selection.toolbar')}
       className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-xl border bg-popover/95 p-1.5 shadow-2xl backdrop-blur"
     >
-      <span className="flex items-center gap-2 px-3 font-medium text-primary">
+      <span className="flex items-center gap-2 px-3 font-medium text-primary-text">
         <span className="size-2 rounded-full bg-primary" />
         {t('library.selection.count', { count: ids.length })}
       </span>
@@ -606,7 +611,7 @@ function SelectionBar({
           {t('library.selection.open')}
         </Button>
       )}
-      <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setConfirmRemove(true)}>
+      <Button variant="ghost" size="sm" className="text-danger-text" onClick={() => setConfirmRemove(true)}>
         <BookmarkMinus />
         {t('library.selection.remove')}
       </Button>

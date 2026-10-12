@@ -7,6 +7,8 @@
  * - .amoled: Mocha with pure black surfaces
  * - data-accent: one of the 14 Catppuccin accents; text on the accent uses crust (base on Latte)
  * Semantic tokens below follow shadcn/ui naming so generated components work unchanged.
+ * Text in an accent or status colour uses the `*-text` tokens: on Latte they are darkened to keep 4.5:1 contrast
+ * (ADR 0039). Icons, borders and fills keep the plain palette colours (`ctp-*`, `primary`, `destructive`).
  */
 
 @custom-variant amoled (&:where(.amoled, .amoled *));
@@ -23,25 +25,57 @@
   --color-popover-foreground: var(--catppuccin-color-text);
   --color-primary: var(--app-accent);
   --color-primary-foreground: var(--app-on-accent);
+  --color-primary-text: var(--app-accent-text);
+  --color-success-text: var(--app-success-text);
+  --color-warning-text: var(--app-warning-text);
+  --color-info-text: var(--app-info-text);
+  --color-danger-text: var(--app-danger-text);
   --color-secondary: var(--catppuccin-color-surface0);
   --color-secondary-foreground: var(--catppuccin-color-text);
   --color-muted: var(--catppuccin-color-surface0);
-  --color-muted-foreground: var(--catppuccin-color-subtext0);
+  --color-muted-foreground: var(--app-muted);
   --color-accent: var(--catppuccin-color-surface0);
   --color-accent-foreground: var(--catppuccin-color-text);
   --color-destructive: var(--catppuccin-color-red);
+  --color-destructive-foreground: var(--app-on-destructive);
   --color-border: var(--catppuccin-color-surface0);
   --color-input: var(--catppuccin-color-surface1);
   --color-ring: var(--app-accent);
+  /* Fixed near-black for marks drawn on a raw palette colour (the accent swatches), whatever the flavor. */
+  --color-ink: #11111b;
 }
 
 @layer base {
   :root {
     --app-accent: var(--catppuccin-color-mauve);
     --app-on-accent: var(--catppuccin-color-crust);
+    --app-on-destructive: var(--catppuccin-color-crust);
+    --app-accent-text: var(--app-accent);
+    --app-success-text: var(--catppuccin-color-green);
+    --app-warning-text: var(--catppuccin-color-peach);
+    --app-info-text: var(--catppuccin-color-blue);
+    --app-danger-text: var(--catppuccin-color-red);
+    /* subtext0 reads at 7:1 or better on the dark flavors, but only 4.4:1 on Latte. */
+    --app-muted: var(--catppuccin-color-subtext0);
   }
   .latte {
     --app-on-accent: var(--catppuccin-color-base);
+    /* `base` on Latte red is 4.8:1, while the lighter on-accent override below would only give 3.45:1. */
+    --app-on-destructive: var(--catppuccin-color-base);
+    /*
+     * Accent text on Latte: the pastel accents are 2.3 to 3.5:1 on base, so mix them with the Mocha crust. At 55% every
+     * one of the 14 accents is 4.8:1 or better on base, mantle and the 15% accent tint.
+     */
+    --app-accent-text: color-mix(in oklab, var(--app-accent) 55%, #11111b);
+    /*
+     * Status text on Latte, darkened like the accent text. Each is 4.8:1 or better on base, mantle, card and a 10-15%
+     * tint of its own colour (plain: green 2.7, peach 2.4, blue 3.8, red 4.1 on the tint).
+     */
+    --app-success-text: color-mix(in oklab, var(--catppuccin-color-green) 55%, #11111b);
+    --app-warning-text: color-mix(in oklab, var(--catppuccin-color-peach) 55%, #11111b);
+    --app-info-text: color-mix(in oklab, var(--catppuccin-color-blue) 65%, #11111b);
+    --app-danger-text: color-mix(in oklab, var(--catppuccin-color-red) 75%, #11111b);
+    --app-muted: var(--catppuccin-color-subtext1);
   }
   [data-accent='rosewater'] {
     --app-accent: var(--catppuccin-color-rosewater);
@@ -84,6 +118,25 @@
   }
   [data-accent='lavender'] {
     --app-accent: var(--catppuccin-color-lavender);
+  }
+  /*
+   * `base` on a Latte accent only reaches AA (4.5:1) for mauve and red (blue is 4.3:1). The lighter accents get
+   * the Mocha crust, which is 4.7 to 7.2:1 on them.
+   */
+  .latte:is(
+    [data-accent='rosewater'],
+    [data-accent='flamingo'],
+    [data-accent='pink'],
+    [data-accent='maroon'],
+    [data-accent='peach'],
+    [data-accent='yellow'],
+    [data-accent='green'],
+    [data-accent='teal'],
+    [data-accent='sky'],
+    [data-accent='sapphire'],
+    [data-accent='lavender']
+  ) {
+    --app-on-accent: #11111b;
   }
   .amoled {
     --catppuccin-color-base: #000000;

@@ -65,12 +65,12 @@ export function BackupSettings() {
             {t('backup.restore')}
           </Button>
           {create.data && (
-            <p role="status" className="flex items-center gap-1.5 text-xs text-ctp-green">
+            <p role="status" className="flex items-center gap-1.5 text-xs text-success-text">
               <Check className="size-3.5" />
               {t('backup.saved', { path: create.data })}
             </p>
           )}
-          {create.isError && <p className="text-xs text-ctp-red">{appError(create.error).message}</p>}
+          {create.isError && <p className="text-xs text-danger-text">{appError(create.error).message}</p>}
         </div>
         <Row label={t('backup.auto.label')} description={t('backup.auto.hint')}>
           <Segmented
@@ -184,7 +184,7 @@ function RestoreDialog({ path, onClose }: { path: string; onClose: () => void })
           className="fixed top-1/2 left-1/2 z-50 flex max-h-[85vh] w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border bg-popover shadow-2xl"
         >
           <header className="flex items-start gap-3 border-b p-5">
-            <ArchiveRestore className="mt-0.5 size-5 text-primary" />
+            <ArchiveRestore className="mt-0.5 size-5 text-primary-text" />
             <div className="min-w-0 flex-1">
               <Dialog.Title className="text-lg font-semibold">{t('backup.dialog.title')}</Dialog.Title>
               <p className="truncate font-mono text-xs text-muted-foreground">{path}</p>
@@ -203,7 +203,7 @@ function RestoreDialog({ path, onClose }: { path: string; onClose: () => void })
                 {t('backup.dialog.reading')}
               </p>
             ) : preview.isError ? (
-              <p role="alert" className="flex items-start gap-2 text-ctp-red">
+              <p role="alert" className="flex items-start gap-2 text-danger-text">
                 <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                 {appError(preview.error).message}
               </p>
@@ -284,7 +284,7 @@ function RestoreDialog({ path, onClose }: { path: string; onClose: () => void })
                   </label>
                 )}
                 {!mihon && mode === 'replace' && (
-                  <label className="flex items-start gap-2 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs text-ctp-red">
+                  <label className="flex items-start gap-2 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs text-danger-text">
                     <input
                       type="checkbox"
                       checked={sure}
@@ -310,7 +310,7 @@ function RestoreDialog({ path, onClose }: { path: string; onClose: () => void })
                     </div>
                   </div>
                 )}
-                {restore.isError && <p className="text-xs text-ctp-red">{appError(restore.error).message}</p>}
+                {restore.isError && <p className="text-xs text-danger-text">{appError(restore.error).message}</p>}
               </div>
             )}
           </div>
@@ -428,7 +428,7 @@ function RestoreSummary({ result }: { result: RestoreResult }) {
   const [request, setRequest] = useState<InstallRequest | null>(null);
   return (
     <div className="flex flex-col gap-4" data-testid="restore-summary">
-      <p className="flex items-center gap-2 font-medium text-ctp-green">
+      <p className="flex items-center gap-2 font-medium text-success-text">
         <Check className="size-4" />
         {t('backup.summary.done')}
       </p>
@@ -446,7 +446,9 @@ function RestoreSummary({ result }: { result: RestoreResult }) {
       )}
       {result.failed.length > 0 && (
         <div className="rounded-lg bg-ctp-red/10 px-3 py-2 text-xs">
-          <p className="mb-1 font-medium text-ctp-red">{t('backup.summary.failed', { count: result.failed.length })}</p>
+          <p className="mb-1 font-medium text-danger-text">
+            {t('backup.summary.failed', { count: result.failed.length })}
+          </p>
           <ul>
             {result.failed.map((failure) => (
               <li key={failure.title}>
@@ -482,7 +484,7 @@ function RestoreSummary({ result }: { result: RestoreResult }) {
                   <Puzzle className="size-4 text-muted-foreground" />
                   <span className="min-w-0 flex-1 truncate">{missing.name}</span>
                   {offer?.installedVersion ? (
-                    <span className="flex items-center gap-1 text-xs text-ctp-green">
+                    <span className="flex items-center gap-1 text-xs text-success-text">
                       <Check className="size-3.5" />
                       {t('onboarding.sources.installed')}
                     </span>

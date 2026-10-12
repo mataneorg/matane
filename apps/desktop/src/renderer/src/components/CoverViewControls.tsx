@@ -39,7 +39,7 @@ export function CoverViewControls({
               onClick={() => onChange({ display: mode })}
               className={cn(
                 'flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground',
-                display === mode && 'bg-primary/15 text-primary hover:text-primary',
+                display === mode && 'bg-primary/15 text-primary-text hover:text-primary-text',
               )}
             >
               <Icon className="size-4" />

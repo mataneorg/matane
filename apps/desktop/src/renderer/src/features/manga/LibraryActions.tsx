@@ -69,7 +69,7 @@ export function LibraryButton({ manga }: { manga: MangaInfo }) {
       {manga.inLibrary ? (
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <Button variant="secondary" className="h-10 border-primary/50 text-primary">
+            <Button variant="secondary" className="h-10 border-primary/50 text-primary-text">
               <BookmarkCheck className="fill-current/20" />
               {t('library.inLibrary')}
               <ChevronDown />
@@ -81,7 +81,7 @@ export function LibraryButton({ manga }: { manga: MangaInfo }) {
                 <Folder className="size-4" />
                 {t('library.editCategories')}
               </DropdownMenu.Item>
-              <DropdownMenu.Item className={`${menuItem} text-destructive`} onSelect={() => setConfirmRemove(true)}>
+              <DropdownMenu.Item className={`${menuItem} text-danger-text`} onSelect={() => setConfirmRemove(true)}>
                 <BookmarkMinus className="size-4" />
                 {t('library.removeOne')}
               </DropdownMenu.Item>
@@ -142,7 +142,7 @@ function DuplicateDialog({
         <Dialog.Overlay className="fixed inset-0 z-40 bg-ctp-crust/70 backdrop-blur-sm" />
         <Dialog.Content className="fixed top-1/2 left-1/2 z-50 flex w-[min(30rem,90vw)] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-xl border bg-popover p-5 shadow-2xl">
           <Dialog.Title className="flex items-center gap-2 text-base font-semibold">
-            <TriangleAlert className="size-5 text-ctp-peach" />
+            <TriangleAlert className="size-5 text-warning-text" />
             {t('library.duplicate.title')}
           </Dialog.Title>
           <Dialog.Description className="text-muted-foreground">
@@ -224,7 +224,7 @@ export function MoreMenu({ manga }: { manga: MangaInfo }) {
 function ActionError({ error }: { error: unknown }) {
   const { title, detail } = useErrorText(error);
   return (
-    <p role="alert" className="basis-full text-xs text-destructive" title={detail}>
+    <p role="alert" className="basis-full text-xs text-danger-text" title={detail}>
       {title}: {detail}
     </p>
   );

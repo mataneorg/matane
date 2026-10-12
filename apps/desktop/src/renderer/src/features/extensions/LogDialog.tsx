@@ -14,9 +14,9 @@ const RANK: Record<ExtensionLogEntry['level'], number> = { debug: 0, info: 1, wa
 const MIN_RANK: Record<LevelFilter, number> = { all: 0, info: 1, warn: 2, error: 3 };
 const LEVEL_CLASS: Record<ExtensionLogEntry['level'], string> = {
   debug: 'text-muted-foreground',
-  info: 'text-ctp-blue',
-  warn: 'text-ctp-yellow',
-  error: 'text-ctp-red',
+  info: 'text-info-text',
+  warn: 'text-warning-text',
+  error: 'text-danger-text',
 };
 
 const time = (at: number) => new Date(at).toLocaleTimeString([], { hour12: false });

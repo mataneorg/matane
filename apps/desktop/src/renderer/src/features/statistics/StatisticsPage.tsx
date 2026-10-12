@@ -196,7 +196,7 @@ function Tile({
     <section className="flex flex-col gap-2 rounded-xl border bg-card/40 p-4">
       <p className="flex items-center justify-between text-sm text-muted-foreground">
         {label}
-        <Icon className="size-4 text-primary" />
+        <Icon className="size-4 text-primary-text" />
       </p>
       <p className="text-3xl font-bold tracking-tight">
         {value}

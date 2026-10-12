@@ -34,7 +34,7 @@ export function LicensesDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           className="fixed top-1/2 left-1/2 z-50 flex h-[80vh] w-[min(44rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border bg-popover shadow-2xl"
         >
           <header className="flex items-start gap-3 border-b p-5">
-            <Scale className="mt-0.5 size-5 text-primary" />
+            <Scale className="mt-0.5 size-5 text-primary-text" />
             <div className="flex-1">
               <Dialog.Title className="text-lg font-semibold">{t('settings.about.licensesTitle')}</Dialog.Title>
               <p className="text-sm text-muted-foreground">
@@ -73,7 +73,7 @@ export function LicensesDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                       href={entry.repository}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-1 block truncate text-xs text-primary hover:underline"
+                      className="mt-1 block truncate text-xs text-primary-text hover:underline"
                     >
                       {entry.repository}
                     </a>

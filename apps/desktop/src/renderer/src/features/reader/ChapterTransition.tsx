@@ -34,7 +34,7 @@ export function ChapterTransition({
     <div className={cn('flex items-center justify-center p-6', className)}>
       <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-ctp-surface1 bg-ctp-mantle/90 p-6 text-center text-ctp-text shadow-xl">
         <span className="flex items-center gap-1.5 rounded-full bg-ctp-surface0 px-3 py-1 text-xs text-ctp-subtext1">
-          <CheckCircle2 className="size-3.5 text-ctp-green" />
+          <CheckCircle2 className="size-3.5 text-success-text" />
           {direction === 'next'
             ? t('reader.transition.finished', { chapter: from.name })
             : t('reader.transition.start', { chapter: from.name })}
@@ -42,13 +42,13 @@ export function ChapterTransition({
         {to ? (
           <>
             <div>
-              <p className="text-[11px] font-semibold tracking-wider text-primary uppercase">
+              <p className="text-[11px] font-semibold tracking-wider text-primary-text uppercase">
                 {direction === 'next' ? t('reader.transition.upNext') : t('reader.transition.previous')}
               </p>
               <p className="mt-1 text-lg font-semibold">{label(to)}</p>
             </div>
             {missing > 0 && (
-              <p className="flex items-center gap-2 rounded-lg bg-ctp-peach/10 px-3 py-2 text-xs text-ctp-peach">
+              <p className="flex items-center gap-2 rounded-lg bg-ctp-peach/10 px-3 py-2 text-xs text-warning-text">
                 <AlertTriangle className="size-4 shrink-0" />
                 {t('reader.transition.missing', { count: missing })}
               </p>

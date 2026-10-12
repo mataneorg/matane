@@ -40,7 +40,7 @@ export function ErrorState({
       )}
     >
       {!compact && (
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-ctp-red/10 text-ctp-red">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-ctp-red/10 text-danger-text">
           <AlertTriangle className="size-7" />
         </div>
       )}

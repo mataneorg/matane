@@ -100,7 +100,7 @@ export function QueueGroupHeader({
               {first.mangaTitle}
             </Link>
             {first.sourceName && (
-              <span className="shrink-0 rounded-md bg-primary/15 px-1.5 py-0.5 text-[11px] font-medium text-primary">
+              <span className="shrink-0 rounded-md bg-primary/15 px-1.5 py-0.5 text-[11px] font-medium text-primary-text">
                 {first.sourceName}
               </span>
             )}
@@ -156,12 +156,12 @@ export function QueueRow({
   const error = item.status === 'error';
 
   const status = running ? (
-    <span className="font-medium text-primary">{t('downloads.page.status.downloading', { percent })}</span>
+    <span className="font-medium text-primary-text">{t('downloads.page.status.downloading', { percent })}</span>
   ) : item.status === 'paused' ? (
     <span>{t('downloads.page.status.paused')}</span>
   ) : error ? (
     <span
-      className="flex min-w-0 items-center gap-1.5 rounded-md border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-destructive"
+      className="flex min-w-0 items-center gap-1.5 rounded-md border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-danger-text"
       title={item.error ?? undefined}
     >
       <CircleAlert className="size-3.5 shrink-0" />
@@ -261,7 +261,7 @@ export function QueueRow({
         variant="ghost"
         size="icon-sm"
         title={t('downloads.cancel')}
-        className="hover:text-destructive"
+        className="hover:text-danger-text"
         onClick={() => cancel.mutate()}
       >
         <X />
@@ -307,7 +307,7 @@ export function CompletedRow({ item }: { item: DownloadItem }) {
         variant="ghost"
         size="icon-sm"
         title={t('downloads.delete')}
-        className="hover:text-destructive"
+        className="hover:text-danger-text"
         onClick={() => remove.mutate()}
       >
         <Trash2 />
@@ -332,7 +332,7 @@ export function ErrorDetailsDialog({ item, onClose }: { item: DownloadItem | nul
           <Dialog.Description className="text-muted-foreground">
             {item && `${item.mangaTitle} · ${item.chapterName}${item.sourceName ? ` · ${item.sourceName}` : ''}`}
           </Dialog.Description>
-          <pre className="max-h-60 overflow-auto rounded-lg border bg-muted/40 p-3 text-xs whitespace-pre-wrap text-destructive">
+          <pre className="max-h-60 overflow-auto rounded-lg border bg-muted/40 p-3 text-xs whitespace-pre-wrap text-danger-text">
             {item?.error}
           </pre>
           {item && item.pagesTotal !== null && (

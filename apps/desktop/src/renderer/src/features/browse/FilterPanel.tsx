@@ -61,7 +61,7 @@ export function FilterPanel({
       <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
         <h2 className="text-base font-semibold">{t('browse.filters.title')}</h2>
         {active > 0 && (
-          <span className="rounded-full border border-primary/40 bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary">
+          <span className="rounded-full border border-primary/40 bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary-text">
             {t('browse.filters.active', { count: active })}
           </span>
         )}
@@ -258,8 +258,8 @@ function TriStateChip({ filter, read, set }: ControlProps & { filter: Extract<Fi
       onClick={() => set(filter.id, next)}
       className={cn(
         'inline-flex h-7 items-center gap-1 rounded-full border border-input px-3 text-xs transition-colors hover:border-foreground/40',
-        state === 'include' && 'border-ctp-green/50 bg-ctp-green/10 text-ctp-green',
-        state === 'exclude' && 'border-ctp-red/50 bg-ctp-red/10 text-ctp-red',
+        state === 'include' && 'border-ctp-green/50 bg-ctp-green/10 text-success-text',
+        state === 'exclude' && 'border-ctp-red/50 bg-ctp-red/10 text-danger-text',
       )}
     >
       {state === 'include' && <Check className="size-3" />}

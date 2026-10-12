@@ -163,7 +163,7 @@ export function MigrationPage({ ids }: { ids: number[] }) {
             <Button
               variant="ghost"
               size="sm"
-              className="text-primary"
+              className="text-primary-text"
               disabled={run.isPending}
               onClick={() => void queryClient.invalidateQueries({ queryKey: ['migration', 'candidates'] })}
             >
@@ -199,7 +199,7 @@ export function MigrationPage({ ids }: { ids: number[] }) {
       <footer className="flex flex-wrap items-center gap-4 border-t bg-sidebar px-6 py-3 text-xs">
         {run.isPending && progress ? (
           <div className="flex flex-1 items-center gap-3" aria-live="polite">
-            <Loader2 className="size-4 animate-spin text-primary" />
+            <Loader2 className="size-4 animate-spin text-primary-text" />
             <span>{t('migration.running', { done: progress.done, total: progress.total })}</span>
             <div className="h-1 max-w-72 flex-1 overflow-hidden rounded-full bg-muted">
               <div
@@ -215,7 +215,7 @@ export function MigrationPage({ ids }: { ids: number[] }) {
               {t('migration.ready', { count: ready.length, total: ids.length })}
             </span>
             {needsChoice > 0 && (
-              <span className="flex items-center gap-1.5 text-ctp-red">
+              <span className="flex items-center gap-1.5 text-danger-text">
                 <span className="size-2 rounded-full bg-ctp-red" />
                 {t('migration.needsChoice', { count: needsChoice })}
               </span>
@@ -238,7 +238,7 @@ export function MigrationPage({ ids }: { ids: number[] }) {
 function RunError({ error }: { error: unknown }) {
   const { title, detail } = useErrorText(error);
   return (
-    <span role="alert" className="text-destructive" title={detail}>
+    <span role="alert" className="text-danger-text" title={detail}>
       {title}: {detail}
     </span>
   );
@@ -344,7 +344,7 @@ function OptionsCard({
   return (
     <section className="flex flex-col gap-4 rounded-xl border bg-card/40 p-5" aria-label={t('migration.options')}>
       <h2 className="flex items-center gap-2 font-semibold">
-        <SlidersHorizontal className="size-4 text-primary" />
+        <SlidersHorizontal className="size-4 text-primary-text" />
         {t('migration.options')}
       </h2>
       <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
@@ -454,7 +454,7 @@ function MigrationRow({
           <p className="mt-1 flex gap-2 text-xs">
             <span className="rounded border px-1.5">{t('manga.chapterCount', { count: chapters?.length ?? 0 })}</span>
             {lastRead !== null && (
-              <span className="flex items-center gap-1 text-ctp-green">
+              <span className="flex items-center gap-1 text-success-text">
                 <CheckCheck className="size-3.5" />
                 {t('migration.readUpTo', { number: lastRead })}
               </span>
@@ -465,22 +465,22 @@ function MigrationRow({
 
       <div className="flex shrink-0 flex-col items-center gap-1 whitespace-nowrap text-[11px] text-muted-foreground">
         {search.isPending ? (
-          <Loader2 className="size-5 animate-spin text-primary" />
+          <Loader2 className="size-5 animate-spin text-primary-text" />
         ) : choice === 'skip' ? (
           <span>{t('migration.skipped')}</span>
         ) : picked?.match === 'exact' ? (
           <>
-            <ArrowRight className="size-5 text-ctp-green" />
+            <ArrowRight className="size-5 text-success-text" />
             {t('migration.exactShort')}
           </>
         ) : picked ? (
           <>
-            <ArrowRightLeft className="size-5 text-ctp-yellow" />
+            <ArrowRightLeft className="size-5 text-warning-text" />
             {t('migration.verify')}
           </>
         ) : (
           <>
-            <TriangleAlert className="size-5 text-ctp-red" />
+            <TriangleAlert className="size-5 text-danger-text" />
             {t('migration.noMatchShort')}
           </>
         )}
@@ -520,7 +520,7 @@ function MigrationRow({
             </>
           ) : (
             <>
-              <span className="rounded bg-ctp-red/15 px-1.5 py-0.5 text-[11px] font-medium text-ctp-red">
+              <span className="rounded bg-ctp-red/15 px-1.5 py-0.5 text-[11px] font-medium text-danger-text">
                 {t('migration.noMatch')}
               </span>
               <p className="mt-1 truncate text-xs text-muted-foreground">
@@ -530,7 +530,7 @@ function MigrationRow({
           )}
           {search.data && search.data.errors.length > 0 && (
             <p
-              className="mt-1 flex items-center gap-1 text-[11px] text-ctp-peach"
+              className="mt-1 flex items-center gap-1 text-[11px] text-warning-text"
               title={search.data.errors.map((e) => `${sourceName(e.sourceId)}: ${e.message}`).join('\n')}
             >
               <CircleAlert className="size-3" />
@@ -620,7 +620,7 @@ function MigrationRow({
 function SearchError({ error }: { error: unknown }) {
   const { title, detail } = useErrorText(error);
   return (
-    <p className="mt-1 text-[11px] text-destructive" title={detail}>
+    <p className="mt-1 text-[11px] text-danger-text" title={detail}>
       {title}
     </p>
   );
@@ -629,9 +629,9 @@ function SearchError({ error }: { error: unknown }) {
 function MatchBadge({ choice }: { choice: Pick<Choice, 'match' | 'score'> }) {
   const { t } = useTranslation();
   const styles = {
-    exact: 'bg-ctp-green/15 text-ctp-green',
-    similar: 'bg-ctp-yellow/15 text-ctp-yellow',
-    manual: 'bg-primary/15 text-primary',
+    exact: 'bg-ctp-green/15 text-success-text',
+    similar: 'bg-ctp-yellow/15 text-warning-text',
+    manual: 'bg-primary/15 text-primary-text',
   } as const;
   return (
     <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium', styles[choice.match])}>
@@ -662,25 +662,25 @@ function MigrationSummary({
       <div className="mx-auto flex max-w-4xl flex-col gap-5 px-6 py-8">
         <h1 className="text-xl font-semibold">{t('migration.summaryTitle')}</h1>
         <div className="grid grid-cols-3 gap-3" data-testid="migration-summary">
-          <Stat label={t('migration.stat.migrated')} value={migrated.length} tone="text-ctp-green" />
+          <Stat label={t('migration.stat.migrated')} value={migrated.length} tone="text-success-text" />
           <Stat label={t('migration.stat.skipped')} value={skipped} tone="text-muted-foreground" />
-          <Stat label={t('migration.stat.failed')} value={failed.length} tone="text-ctp-red" />
+          <Stat label={t('migration.stat.failed')} value={failed.length} tone="text-danger-text" />
         </div>
         <ul className="flex flex-col gap-2">
           {results.map((result) => (
             <li key={result.fromMangaId} className="flex flex-col gap-1 rounded-xl border bg-card/40 p-3 text-sm">
               <p className="flex items-center gap-2">
                 {result.status === 'migrated' ? (
-                  <CheckCheck className="size-4 text-ctp-green" />
+                  <CheckCheck className="size-4 text-success-text" />
                 ) : (
-                  <CircleAlert className="size-4 text-ctp-red" />
+                  <CircleAlert className="size-4 text-danger-text" />
                 )}
                 <span className="font-medium">{titleOf(result.fromMangaId)}</span>
                 {result.status === 'migrated' && (
                   <Link
                     to="/manga/$mangaId"
                     params={{ mangaId: String(result.toMangaId) }}
-                    className="ml-auto text-xs text-primary hover:underline"
+                    className="ml-auto text-xs text-primary-text hover:underline"
                   >
                     {t('migration.openNew')}
                   </Link>
@@ -693,7 +693,7 @@ function MigrationSummary({
                     ` · ${t('migration.unmatched', { count: result.unmatched.length, chapters: result.unmatched.join(', ') })}`}
                 </p>
               ) : (
-                <p className="text-xs text-destructive">{result.error}</p>
+                <p className="text-xs text-danger-text">{result.error}</p>
               )}
             </li>
           ))}

@@ -130,7 +130,7 @@ function DohSection({
                   placeholder="https://dns.example/dns-query"
                   onCommit={(customUrl) => onChange({ ...doh, customUrl: customUrl.trim() })}
                 />
-                {customInvalid && <p className="text-xs text-ctp-red">{t('settings.network.doh.invalid')}</p>}
+                {customInvalid && <p className="text-xs text-danger-text">{t('settings.network.doh.invalid')}</p>}
               </div>
             )}
           </div>
@@ -237,10 +237,10 @@ function ProxySection({
                 </Button>
               )}
             </div>
-            {savePassword.isError && <p className="text-xs text-ctp-red">{appError(savePassword.error).message}</p>}
+            {savePassword.isError && <p className="text-xs text-danger-text">{appError(savePassword.error).message}</p>}
             <p className="text-xs text-muted-foreground">{t('settings.network.proxy.passwordHint')}</p>
             {info && !info.passwordEncrypted && (
-              <p className="text-xs text-ctp-peach">{t('settings.network.proxy.noKeyring')}</p>
+              <p className="text-xs text-warning-text">{t('settings.network.proxy.noKeyring')}</p>
             )}
           </div>
         </div>
@@ -302,9 +302,9 @@ function TestSection() {
         {result && (
           <p role="status" data-testid="network-test" className="flex items-center gap-2 text-sm">
             {result.ok ? (
-              <CircleCheck className="size-4 text-ctp-green" />
+              <CircleCheck className="size-4 text-success-text" />
             ) : (
-              <CircleX className="size-4 text-ctp-red" />
+              <CircleX className="size-4 text-danger-text" />
             )}
             {result.ok
               ? t('settings.network.test.ok', { ms: result.ms, status: result.status })
