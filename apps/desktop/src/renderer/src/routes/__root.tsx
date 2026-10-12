@@ -2,6 +2,7 @@ import type { AppSettings, EventPayload } from '@manga-reader/shared';
 import type { QueryClient } from '@tanstack/react-query';
 import { Outlet, createRootRouteWithContext, useNavigate } from '@tanstack/react-router';
 import { useCallback } from 'react';
+import { Toaster } from '../components/Toaster';
 import { receiveSettings, useIpcEvent } from '../lib/ipc';
 import { DownloadLimitDialog } from '../features/downloads/DownloadLimitDialog';
 import { useDownloadProgressSync } from '../lib/downloads';
@@ -42,6 +43,7 @@ function RootComponent() {
       <LanguageSync />
       <Outlet />
       <DownloadLimitDialog />
+      <Toaster />
     </>
   );
 }

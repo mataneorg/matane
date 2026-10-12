@@ -38,6 +38,7 @@ import { EMPTY_SELECTION, type Selection, select, visibleSelection } from './sel
 import { filterCount, filtersOf, useLibrarySettings } from './settings';
 import { TabUnderline } from '../../components/ui/tab-underline';
 import { AnimatePresence, m, slideUpBar } from '../../lib/motion';
+import { notifyError } from '../../lib/toast';
 
 const PADDING = 24;
 const LIST_ROW = 64;
@@ -550,6 +551,7 @@ function SelectionBar({
   const [confirmRemove, setConfirmRemove] = useState(false);
   const markRead = useMutation({
     mutationFn: (read: boolean) => ipc.invoke('library.markRead', { mangaIds: ids, read }),
+    onError: (error) => notifyError(error, t),
   });
   // Per-manga update check (no skip rules); progress shows on the Updates page.
   const checkUpdates = useMutation({
@@ -557,14 +559,17 @@ function SelectionBar({
     onSuccess: ({ started }) => {
       if (started) void navigate({ to: '/updates' });
     },
+    onError: (error) => notifyError(error, t),
   });
   const setCategories = useMutation({
     mutationFn: (categoryIds: number[]) => ipc.invoke('library.setCategories', { mangaIds: ids, categoryIds }),
     onSuccess: onClear,
+    onError: (error) => notifyError(error, t),
   });
   const remove = useMutation({
     mutationFn: () => ipc.invoke('library.remove', { mangaIds: ids }),
     onSuccess: onClear,
+    onError: (error) => notifyError(error, t),
   });
   // Pre-check the categories every selected manga already shares.
   const chosen = items.filter((item) => ids.includes(item.mangaId));

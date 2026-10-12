@@ -1,4 +1,5 @@
 import { type AppErrorData, decodeIpcError } from '@manga-reader/shared/errors';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 export type { AppErrorData };
@@ -9,12 +10,20 @@ export function appError(error: unknown): AppErrorData {
 }
 
 /** Short, translated headline for an error plus the raw detail for the curious. */
-export function useErrorText(error: unknown): { code: AppErrorData['code']; title: string; detail: string } {
-  const { t } = useTranslation();
+export function describeError(
+  error: unknown,
+  t: TFunction,
+): { code: AppErrorData['code']; title: string; detail: string } {
   const data = appError(error);
   const title =
     data.code === 'http' && data.status !== undefined
       ? t('errors.httpStatus', { status: data.status })
       : t(`errors.${data.code}`);
   return { code: data.code, title, detail: data.message };
+}
+
+/** `describeError` for a component. */
+export function useErrorText(error: unknown): { code: AppErrorData['code']; title: string; detail: string } {
+  const { t } = useTranslation();
+  return describeError(error, t);
 }

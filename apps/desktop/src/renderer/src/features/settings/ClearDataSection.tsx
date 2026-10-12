@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { Button } from '../../components/ui/button';
 import { ipc } from '../../lib/ipc';
+import { notify, notifyError } from '../../lib/toast';
 
 type Target = 'history' | 'stats';
 
@@ -15,8 +16,11 @@ export function ClearDataSection() {
   const [confirm, setConfirm] = useState<Target | null>(null);
   const clear = useMutation({
     mutationFn: (target: Target) => ipc.invoke(target === 'history' ? 'history.clear' : 'stats.clear'),
-    onSuccess: (_, target) =>
-      queryClient.invalidateQueries({ queryKey: target === 'history' ? ['history'] : ['stats'] }),
+    onSuccess: (_, target) => {
+      void queryClient.invalidateQueries({ queryKey: target === 'history' ? ['history'] : ['stats'] });
+      notify.success(t(target === 'history' ? 'settings.data.historyCleared' : 'settings.data.statsCleared'));
+    },
+    onError: (error) => notifyError(error, t),
   });
 
   return (

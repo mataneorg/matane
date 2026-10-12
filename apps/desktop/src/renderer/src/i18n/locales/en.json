@@ -294,7 +294,9 @@
       "clearStatsTitle": "Clear the statistics?",
       "clearStatsDescription": "Reading time, streaks and the statistics page start over. This cannot be undone.",
       "clearData": "Clear data",
-      "clearHistoryHint": "Empties the History page. Reading progress and read chapters stay."
+      "clearHistoryHint": "Empties the History page. Reading progress and read chapters stay.",
+      "historyCleared": "History cleared",
+      "statsCleared": "Statistics cleared"
     },
     "updater": {
       "title": "App updates",
@@ -1559,5 +1561,8 @@
     "syncBack": "Mark chapters read here when read on {{name}}",
     "syncNow": "Sync now",
     "synced": "{{readHere}} marked read here, {{pushed}} sent."
+  },
+  "toast": {
+    "copied": "Copied to the clipboard"
   }
 }

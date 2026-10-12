@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/button';
 import { ipc, useIpcEvent } from '../../lib/ipc';
 import { cn } from '../../lib/utils';
 import { Segmented } from '../settings/controls';
+import { notify } from '../../lib/toast';
 
 type LevelFilter = 'all' | 'info' | 'warn' | 'error';
 const FILTERS: LevelFilter[] = ['all', 'info', 'warn', 'error'];
@@ -71,7 +72,7 @@ export function LogDialog({
   }, [shown.length]);
 
   const copy = () => {
-    void navigator.clipboard.writeText(shown.map(format).join('\n'));
+    void navigator.clipboard.writeText(shown.map(format).join('\n')).then(() => notify.success(t('toast.copied')));
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };

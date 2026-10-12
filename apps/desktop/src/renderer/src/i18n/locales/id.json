@@ -294,7 +294,9 @@
       "clearStatsTitle": "Hapus statistik?",
       "clearStatsDescription": "Waktu baca, streak, dan halaman statistik mulai dari awal. Tidak bisa dibatalkan.",
       "clearData": "Hapus data",
-      "clearHistoryHint": "Mengosongkan halaman Riwayat. Progres baca dan chapter yang sudah dibaca tetap ada."
+      "clearHistoryHint": "Mengosongkan halaman Riwayat. Progres baca dan chapter yang sudah dibaca tetap ada.",
+      "historyCleared": "Riwayat dihapus",
+      "statsCleared": "Statistik dihapus"
     },
     "updater": {
       "title": "Update aplikasi",
@@ -1530,5 +1532,8 @@
     "syncBack": "Tandai terbaca di sini bila dibaca di {{name}}",
     "syncNow": "Sinkronkan sekarang",
     "synced": "{{readHere}} ditandai terbaca di sini, {{pushed}} dikirim."
+  },
+  "toast": {
+    "copied": "Disalin ke clipboard"
   }
 }

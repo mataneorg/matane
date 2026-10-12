@@ -35,6 +35,7 @@ import { EMPTY_SELECTION, type Selection, select, visibleSelection } from '../li
 import { DownloadButton } from '../manga/DownloadButton';
 import { type UpdateRowEntry, flattenGroups } from './entries';
 import { AnimatePresence, m, slideUpBar } from '../../lib/motion';
+import { notifyError } from '../../lib/toast';
 
 /** New chapters of library manga, grouped by day (docs/BRAINSTORM.md §6.4; mockup 07). */
 export function UpdatesPage() {
@@ -511,6 +512,7 @@ function SelectionBar({
   const markRead = useMutation({
     mutationFn: (read: boolean) => ipc.invoke('chapters.markRead', { chapterIds, read }),
     onSuccess: onClear,
+    onError: (error) => notifyError(error, t),
   });
   return (
     <div className="pointer-events-none sticky bottom-5 z-20 flex justify-center">

@@ -26,6 +26,7 @@ import { ipc } from '../../lib/ipc';
 import { cn } from '../../lib/utils';
 import { Badge } from '../../components/ui/badge';
 import { TrustBadge } from './parts';
+import { notify } from '../../lib/toast';
 
 const menuItem =
   'flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent [&_svg]:size-4';
@@ -116,7 +117,12 @@ export function RepoCard({ repo, now }: { repo: RepoInfo; now: number }) {
                   {t('extensions.repos.trustKey')}
                 </DropdownMenu.Item>
               )}
-              <DropdownMenu.Item className={menuItem} onSelect={() => void navigator.clipboard.writeText(repo.url)}>
+              <DropdownMenu.Item
+                className={menuItem}
+                onSelect={() =>
+                  void navigator.clipboard.writeText(repo.url).then(() => notify.success(t('toast.copied')))
+                }
+              >
                 <Copy />
                 {t('extensions.repos.copyUrl')}
               </DropdownMenu.Item>
