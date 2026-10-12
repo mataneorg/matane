@@ -82,8 +82,8 @@ test('lists the extension and browses its source with covers and infinite scroll
 
 test('filters with tri-state genres and keeps them in the URL', async () => {
   await page.getByRole('button', { name: /^Filters/ }).click();
-  await page.getByRole('button', { name: 'Action', exact: true }).click();
-  await page.getByRole('button', { name: 'Apply' }).click();
+  await page.getByRole('checkbox', { name: 'Action' }).click();
+  await page.getByRole('button', { name: 'Apply filters' }).click();
   await expect(page.getByRole('tab', { name: 'Search', selected: true })).toBeVisible();
   await expect(page.getByText('Paged Hero')).toBeVisible();
   await expect(page.getByText('Scroll Garden')).toHaveCount(0);
