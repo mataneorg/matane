@@ -3,7 +3,7 @@
 # `node packaging/update-aur.mjs <version>`, which also writes .SRCINFO.
 
 pkgname=matane-bin
-_pkgver=0.1.0-beta.1
+_pkgver=1.1.0
 pkgver=${_pkgver//-/_}
 pkgrel=1
 pkgdesc='Open-source desktop manga reader with a sandboxed extension system'
@@ -19,7 +19,7 @@ source=("Matane-${_pkgver}-linux-x64.tar.gz::${url}/releases/download/v${_pkgver
         "matane-${_pkgver}.png::https://raw.githubusercontent.com/mataneorg/matane/v${_pkgver}/apps/desktop/resources/icon.png"
         'matane.sh'
         'matane.desktop')
-sha256sums=('7ca2a2a311c84e1a910797a19b68b418b0f593529fe5c9f32c837ebe94913ac7'
+sha256sums=('da5151c3894007f8936a29b74345b848a8e8e1904f5a0f0995bb7c46c257d78a'
             'bf77e75640062c07a8c2c23a4bf22f8ac719ef106ad76e3d39eb307138eb1088'
             '27f92835bee29410970973343996724e5883574f548328f7a9a450e5855c6006'
             '7a984ee59db052e17f1e4ff6609e7706e150e1c4c35b419940219c5389c4233a')
