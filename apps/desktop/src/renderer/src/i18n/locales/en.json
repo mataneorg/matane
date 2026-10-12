@@ -1583,6 +1583,11 @@
     },
     "extensions": {
       "copyId": "Copy extension ID"
+    },
+    "lists": {
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "openManga": "Open manga"
     }
   }
 }

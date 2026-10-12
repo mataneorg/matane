@@ -1,10 +1,13 @@
 import type { DownloadItem } from '@manga-reader/shared';
 import { useMutation } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
+  ArrowDown,
+  ArrowUp,
   BookOpen,
   ChevronDown,
   CircleAlert,
+  ExternalLink,
   FolderOpen,
   GripVertical,
   Pause,
@@ -23,6 +26,14 @@ import { formatBytes, formatDuration, formatRelative } from '../../lib/format';
 import { ipc } from '../../lib/ipc';
 import { cn } from '../../lib/utils';
 import { type QueueGroup, etaSeconds } from './queue';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '../../components/ui/context-menu';
+import { queueMenuRows } from './rowMenu';
 
 interface DragProps {
   draggable: boolean;
@@ -142,6 +153,7 @@ export function QueueRow({
   dragProps: DragProps;
 }) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const live = useDownloadProgress((state) => state.byChapter.get(item.chapterId));
   const pause = useMutation({ mutationFn: () => ipc.invoke('downloads.pause', { ids: [item.id] }) });
   const resume = useMutation({ mutationFn: () => ipc.invoke('downloads.resume', { ids: [item.id] }) });
@@ -154,6 +166,8 @@ export function QueueRow({
   const eta = running ? etaSeconds(live) : null;
   const size = live ? live.bytes : item.sizeBytes;
   const error = item.status === 'error';
+
+  const rows = queueMenuRows(item.status);
 
   const status = running ? (
     <span className="font-medium text-primary-text">{t('downloads.page.status.downloading', { percent })}</span>
@@ -175,98 +189,154 @@ export function QueueRow({
   );
 
   return (
-    <div
-      {...dragProps}
-      tabIndex={0}
-      onKeyDown={moveKeys(onMove)}
-      data-testid="download-item"
-      aria-label={`${item.mangaTitle} · ${item.chapterName}`}
-      className={cn(
-        'flex items-center gap-3 border-x border-t px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
-        last && 'rounded-b-xl border-b',
-        error ? 'bg-destructive/5' : 'bg-background',
-        dragging && 'opacity-50',
-        dropTarget && 'border-t-2 border-t-primary',
-      )}
-    >
-      <Handle />
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex items-center gap-3">
-          <p className="min-w-0 flex-1 truncate font-medium">{item.chapterName}</p>
-          <div className="flex min-w-0 shrink text-xs text-muted-foreground">{status}</div>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          {...dragProps}
+          tabIndex={0}
+          onKeyDown={moveKeys(onMove)}
+          data-testid="download-item"
+          aria-label={`${item.mangaTitle} · ${item.chapterName}`}
+          className={cn(
+            'flex items-center gap-3 border-x border-t px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+            last && 'rounded-b-xl border-b',
+            error ? 'bg-destructive/5' : 'bg-background',
+            dragging && 'opacity-50',
+            dropTarget && 'border-t-2 border-t-primary',
+          )}
+        >
+          <Handle />
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <p className="min-w-0 flex-1 truncate font-medium">{item.chapterName}</p>
+              <div className="flex min-w-0 shrink text-xs text-muted-foreground">{status}</div>
+            </div>
+            {error ? (
+              <div className="flex items-center gap-2 text-xs">
+                <button
+                  type="button"
+                  className="flex items-center gap-1 font-medium text-foreground hover:underline"
+                  onClick={() => retry.mutate()}
+                >
+                  <RotateCcw className="size-3.5" />
+                  {t('downloads.page.retry')}
+                </button>
+                <span className="text-muted-foreground">·</span>
+                <button type="button" className="text-muted-foreground hover:underline" onClick={onDetails}>
+                  {t('downloads.page.details')}
+                </button>
+              </div>
+            ) : (
+              <p className="flex flex-wrap gap-x-2 text-xs text-muted-foreground">
+                {item.scanlator && <span>{item.scanlator}</span>}
+                {total !== null && (running || done > 0) && (
+                  <>
+                    {item.scanlator && <span aria-hidden>·</span>}
+                    <span className="font-medium text-foreground">{t('downloads.page.pages', { done, total })}</span>
+                  </>
+                )}
+                {running && live && live.bytesPerSecond > 0 && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span>{t('downloads.page.speed', { speed: formatBytes(live.bytesPerSecond, i18n.language) })}</span>
+                  </>
+                )}
+                {eta !== null && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span>{t('downloads.page.eta', { eta: formatDuration(eta) })}</span>
+                  </>
+                )}
+              </p>
+            )}
+            {(running || (item.status === 'paused' && done > 0)) && total !== null && (
+              <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn(
+                    'h-full rounded-full transition-[width]',
+                    running ? 'bg-primary' : 'bg-muted-foreground',
+                  )}
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+            )}
+          </div>
+          <FormatChip item={item} />
+          <span className="w-16 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
+            {size ? formatBytes(size, i18n.language) : ''}
+          </span>
+          {item.status === 'paused' ? (
+            <Button variant="ghost" size="icon-sm" title={t('downloads.page.resume')} onClick={() => resume.mutate()}>
+              <Play />
+            </Button>
+          ) : error ? (
+            <span className="size-7" />
+          ) : (
+            <Button variant="ghost" size="icon-sm" title={t('downloads.page.pause')} onClick={() => pause.mutate()}>
+              <Pause />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            title={t('downloads.cancel')}
+            className="hover:text-danger-text"
+            onClick={() => cancel.mutate()}
+          >
+            <X />
+          </Button>
         </div>
-        {error ? (
-          <div className="flex items-center gap-2 text-xs">
-            <button
-              type="button"
-              className="flex items-center gap-1 font-medium text-foreground hover:underline"
-              onClick={() => retry.mutate()}
-            >
-              <RotateCcw className="size-3.5" />
-              {t('downloads.page.retry')}
-            </button>
-            <span className="text-muted-foreground">·</span>
-            <button type="button" className="text-muted-foreground hover:underline" onClick={onDetails}>
-              {t('downloads.page.details')}
-            </button>
-          </div>
-        ) : (
-          <p className="flex flex-wrap gap-x-2 text-xs text-muted-foreground">
-            {item.scanlator && <span>{item.scanlator}</span>}
-            {total !== null && (running || done > 0) && (
-              <>
-                {item.scanlator && <span aria-hidden>·</span>}
-                <span className="font-medium text-foreground">{t('downloads.page.pages', { done, total })}</span>
-              </>
-            )}
-            {running && live && live.bytesPerSecond > 0 && (
-              <>
-                <span aria-hidden>·</span>
-                <span>{t('downloads.page.speed', { speed: formatBytes(live.bytesPerSecond, i18n.language) })}</span>
-              </>
-            )}
-            {eta !== null && (
-              <>
-                <span aria-hidden>·</span>
-                <span>{t('downloads.page.eta', { eta: formatDuration(eta) })}</span>
-              </>
-            )}
-          </p>
-        )}
-        {(running || (item.status === 'paused' && done > 0)) && total !== null && (
-          <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
-            <div
-              className={cn('h-full rounded-full transition-[width]', running ? 'bg-primary' : 'bg-muted-foreground')}
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-        )}
-      </div>
-      <FormatChip item={item} />
-      <span className="w-16 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
-        {size ? formatBytes(size, i18n.language) : ''}
-      </span>
-      {item.status === 'paused' ? (
-        <Button variant="ghost" size="icon-sm" title={t('downloads.page.resume')} onClick={() => resume.mutate()}>
-          <Play />
-        </Button>
-      ) : error ? (
-        <span className="size-7" />
-      ) : (
-        <Button variant="ghost" size="icon-sm" title={t('downloads.page.pause')} onClick={() => pause.mutate()}>
-          <Pause />
-        </Button>
-      )}
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        title={t('downloads.cancel')}
-        className="hover:text-danger-text"
-        onClick={() => cancel.mutate()}
-      >
-        <X />
-      </Button>
-    </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        {rows.pause ? (
+          <ContextMenuItem onSelect={() => pause.mutate()}>
+            <Pause aria-hidden />
+            {t('downloads.page.pause')}
+          </ContextMenuItem>
+        ) : null}
+        {rows.resume ? (
+          <ContextMenuItem onSelect={() => resume.mutate()}>
+            <Play aria-hidden />
+            {t('downloads.page.resume')}
+          </ContextMenuItem>
+        ) : null}
+        {rows.retry ? (
+          <ContextMenuItem onSelect={() => retry.mutate()}>
+            <RotateCcw aria-hidden />
+            {t('downloads.page.retry')}
+          </ContextMenuItem>
+        ) : null}
+        {rows.details ? (
+          <ContextMenuItem onSelect={onDetails}>
+            <CircleAlert aria-hidden />
+            {t('downloads.page.details')}
+          </ContextMenuItem>
+        ) : null}
+        {rows.reorder ? (
+          <>
+            <ContextMenuItem onSelect={() => onMove(-1)}>
+              <ArrowUp aria-hidden />
+              {t('contextMenu.lists.moveUp')}
+            </ContextMenuItem>
+            <ContextMenuItem onSelect={() => onMove(1)}>
+              <ArrowDown aria-hidden />
+              {t('contextMenu.lists.moveDown')}
+            </ContextMenuItem>
+          </>
+        ) : null}
+        <ContextMenuItem
+          onSelect={() => void navigate({ to: '/manga/$mangaId', params: { mangaId: String(item.mangaId) } })}
+        >
+          <ExternalLink aria-hidden />
+          {t('contextMenu.lists.openManga')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem destructive onSelect={() => cancel.mutate()}>
+          <X aria-hidden />
+          {t('downloads.cancel')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -275,44 +345,85 @@ export function CompletedRow({ item }: { item: DownloadItem }) {
   const { t, i18n } = useTranslation();
   const remove = useMutation({ mutationFn: () => ipc.invoke('downloads.delete', { chapterIds: [item.chapterId] }) });
   const reveal = useMutation({ mutationFn: () => ipc.invoke('downloads.openFolder', { chapterId: item.chapterId }) });
+  const navigate = useNavigate();
   return (
-    <div data-testid="download-done" className="flex items-center gap-3 border-b bg-background px-4 py-2.5">
-      <CoverImage mangaId={item.mangaId} coverKey={item.coverKey} alt="" className="h-11 w-8 shrink-0 rounded-sm" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate">
-          <Link to="/manga/$mangaId" params={{ mangaId: String(item.mangaId) }} className="font-medium hover:underline">
-            {item.mangaTitle}
-          </Link>
-          <span className="text-muted-foreground"> · {item.chapterName}</span>
-        </p>
-        <p className="truncate text-xs text-muted-foreground">
-          {[item.scanlator, item.sourceName, item.completedAt ? formatRelative(item.completedAt, i18n.language) : null]
-            .filter(Boolean)
-            .join(' · ')}
-        </p>
-      </div>
-      <FormatChip item={item} />
-      <span className="w-16 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
-        {item.sizeBytes ? formatBytes(item.sizeBytes, i18n.language) : ''}
-      </span>
-      <Button asChild variant="ghost" size="icon-sm" title={t('downloads.page.read')}>
-        <Link to="/reader/$chapterId" params={{ chapterId: String(item.chapterId) }}>
-          <BookOpen />
-        </Link>
-      </Button>
-      <Button variant="ghost" size="icon-sm" title={t('downloads.page.showInFolder')} onClick={() => reveal.mutate()}>
-        <FolderOpen />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        title={t('downloads.delete')}
-        className="hover:text-danger-text"
-        onClick={() => remove.mutate()}
-      >
-        <Trash2 />
-      </Button>
-    </div>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div data-testid="download-done" className="flex items-center gap-3 border-b bg-background px-4 py-2.5">
+          <CoverImage mangaId={item.mangaId} coverKey={item.coverKey} alt="" className="h-11 w-8 shrink-0 rounded-sm" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate">
+              <Link
+                to="/manga/$mangaId"
+                params={{ mangaId: String(item.mangaId) }}
+                className="font-medium hover:underline"
+              >
+                {item.mangaTitle}
+              </Link>
+              <span className="text-muted-foreground"> · {item.chapterName}</span>
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {[
+                item.scanlator,
+                item.sourceName,
+                item.completedAt ? formatRelative(item.completedAt, i18n.language) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          </div>
+          <FormatChip item={item} />
+          <span className="w-16 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
+            {item.sizeBytes ? formatBytes(item.sizeBytes, i18n.language) : ''}
+          </span>
+          <Button asChild variant="ghost" size="icon-sm" title={t('downloads.page.read')}>
+            <Link to="/reader/$chapterId" params={{ chapterId: String(item.chapterId) }}>
+              <BookOpen />
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            title={t('downloads.page.showInFolder')}
+            onClick={() => reveal.mutate()}
+          >
+            <FolderOpen />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            title={t('downloads.delete')}
+            className="hover:text-danger-text"
+            onClick={() => remove.mutate()}
+          >
+            <Trash2 />
+          </Button>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem
+          onSelect={() => void navigate({ to: '/reader/$chapterId', params: { chapterId: String(item.chapterId) } })}
+        >
+          <BookOpen aria-hidden />
+          {t('downloads.page.read')}
+        </ContextMenuItem>
+        <ContextMenuItem
+          onSelect={() => void navigate({ to: '/manga/$mangaId', params: { mangaId: String(item.mangaId) } })}
+        >
+          <ExternalLink aria-hidden />
+          {t('contextMenu.lists.openManga')}
+        </ContextMenuItem>
+        <ContextMenuItem onSelect={() => reveal.mutate()}>
+          <FolderOpen aria-hidden />
+          {t('downloads.page.showInFolder')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem destructive onSelect={() => remove.mutate()}>
+          <Trash2 aria-hidden />
+          {t('downloads.delete')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 

@@ -1554,6 +1554,11 @@
     },
     "extensions": {
       "copyId": "Salin ID extension"
+    },
+    "lists": {
+      "moveUp": "Naikkan",
+      "moveDown": "Turunkan",
+      "openManga": "Buka manga"
     }
   }
 }
