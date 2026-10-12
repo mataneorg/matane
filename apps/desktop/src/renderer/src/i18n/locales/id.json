@@ -1269,7 +1269,11 @@
     "markUnread": "Tandai belum dibaca",
     "read": "Dibaca",
     "markRead": "Tandai dibaca",
-    "readNow": "Baca sekarang"
+    "readNow": "Baca sekarang",
+    "markSeen": "Tandai sudah dilihat",
+    "markAllSeen": "Tandai semua sudah dilihat",
+    "markAllSeenTitle": "Tandai semua pembaruan sudah dilihat?",
+    "markAllSeenDescription": "Semuanya hilang dari daftar ini dan lencana. Progres baca tidak berubah."
   },
   "offline": {
     "title": "Kamu sedang offline",

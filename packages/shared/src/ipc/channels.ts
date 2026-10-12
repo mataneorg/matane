@@ -135,6 +135,7 @@ export const INVOKE_CHANNELS = [
   'updates.list',
   'updates.status',
   'updates.markSeen',
+  'updates.markAllSeen',
   'categories.setAutoDownload',
   'chapters.setBookmarked',
 ] as const;

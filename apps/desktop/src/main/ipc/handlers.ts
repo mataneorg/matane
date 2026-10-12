@@ -478,7 +478,8 @@ export function createIpcHandlers({
     'updates.cancel': () => updates.cancel(),
     'updates.list': (input) => updates.list(input?.categoryId),
     'updates.status': () => updates.status(),
-    'updates.markSeen': () => updates.markSeen(),
+    'updates.markSeen': ({ chapterIds }) => updates.markSeen(chapterIds),
+    'updates.markAllSeen': () => updates.markAllSeen(),
     'categories.setAutoDownload': ({ id, value }) => categories.setAutoDownload(id, value),
     'migration.findCandidates': ({ mangaId, targets, requestId }) =>
       requests.run(requestId, (signal) => migration.findCandidates(mangaId, targets, signal)),

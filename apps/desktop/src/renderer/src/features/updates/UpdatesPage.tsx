@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
+  BellOff,
   Check,
   CheckCheck,
   ChevronDown,
@@ -18,9 +19,10 @@ import {
 } from 'lucide-react';
 import { DropdownMenu } from 'radix-ui';
 import { Dialog } from '../../components/ui/dialog';
-import { type MouseEvent, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { type MouseEvent, useLayoutEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNow } from '../../lib/now';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { CoverImage } from '../../components/CoverImage';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
@@ -53,7 +55,6 @@ export function UpdatesPage() {
   const { data: downloadList } = useQuery(downloadsQuery());
   const [selection, setSelection] = useState<Selection>(EMPTY_SELECTION);
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
-  const markSeen = useMutation({ mutationFn: () => ipc.invoke('updates.markSeen') });
   const entries = useMemo(() => list.data ?? [], [list.data]);
   const groups = useMemo(() => groupByDay(entries, (e) => e.fetchedAt), [entries]);
   const order = useMemo(() => entries.map((e) => e.chapterId), [entries]);
@@ -61,19 +62,13 @@ export function UpdatesPage() {
   const selected = visibleSelection(selection, order);
   const now = useNow();
 
-  // Opening the page (and new chapters arriving while it is open) clears the sidebar badge.
-  const { mutate: seen } = markSeen;
-  useEffect(() => {
-    if (list.isSuccess) seen();
-  }, [list.isSuccess, list.data, seen]);
-
   const toggle = (chapterId: number, event: MouseEvent) =>
     setSelection((current) => select(current, order, chapterId, event.shiftKey ? 'range' : 'toggle'));
 
   return (
     <div ref={setScrollElement} className="relative h-full overflow-y-auto">
       <div className="mx-auto flex max-w-6xl flex-col gap-5 px-6 py-5">
-        <UpdatesHeader categoryId={categoryId} onCategory={setCategoryId} />
+        <UpdatesHeader categoryId={categoryId} onCategory={setCategoryId} hasEntries={entries.length > 0} />
         <CheckBanner />
         {list.isError ? (
           <ErrorState error={list.error} onRetry={() => void list.refetch()} />
@@ -115,9 +110,11 @@ export function UpdatesPage() {
 function UpdatesHeader({
   categoryId,
   onCategory,
+  hasEntries,
 }: {
   categoryId: number | undefined;
   onCategory: (id: number | undefined) => void;
+  hasEntries: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -126,6 +123,11 @@ function UpdatesHeader({
   const { data: categories = [] } = useQuery(categoriesQuery);
   const [notice, setNotice] = useState<'offline' | 'empty' | null>(null);
   const [errorsOpen, setErrorsOpen] = useState(false);
+  const [confirmSeen, setConfirmSeen] = useState(false);
+  const markAllSeen = useMutation({
+    mutationFn: () => ipc.invoke('updates.markAllSeen'),
+    onError: (error) => notifyError(error, t),
+  });
   const check = useMutation({
     mutationFn: () =>
       ipc.invoke('updates.check', {
@@ -211,6 +213,10 @@ function UpdatesHeader({
                 sideOffset={4}
                 className="z-50 min-w-52 rounded-lg border bg-popover p-1 text-popover-foreground shadow-xl"
               >
+                <DropdownMenu.Item className={item} disabled={!hasEntries} onSelect={() => setConfirmSeen(true)}>
+                  <CheckCheck className="size-4" />
+                  {t('updates.markAllSeen')}
+                </DropdownMenu.Item>
                 <DropdownMenu.Item className={item} disabled={errors.length === 0} onSelect={() => setErrorsOpen(true)}>
                   <CircleAlert className="size-4" />
                   {t('updates.errors', { count: errors.length })}
@@ -242,6 +248,15 @@ function UpdatesHeader({
           {t('updates.lastErrors', { count: errors.length })}
         </button>
       )}
+      <ConfirmDialog
+        open={confirmSeen}
+        onOpenChange={setConfirmSeen}
+        title={t('updates.markAllSeenTitle')}
+        description={t('updates.markAllSeenDescription')}
+        confirmLabel={t('updates.markAllSeen')}
+        destructive={false}
+        onConfirm={() => markAllSeen.mutate()}
+      />
       <Dialog.Root open={errorsOpen} onOpenChange={setErrorsOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-40 bg-ctp-crust/70 backdrop-blur-sm" />
@@ -432,6 +447,10 @@ function UpdateRow({
   const markRead = useMutation({
     mutationFn: (read: boolean) => ipc.invoke('chapters.markRead', { chapterIds: [entry.chapterId], read }),
   });
+  const markSeen = useMutation({
+    mutationFn: () => ipc.invoke('updates.markSeen', { chapterIds: [entry.chapterId] }),
+    onError: (error) => notifyError(error, t),
+  });
   const read = () => void navigate({ to: '/reader/$chapterId', params: { chapterId: String(entry.chapterId) } });
   const enqueue = useEnqueueDownloads();
   const when =
@@ -521,6 +540,10 @@ function UpdateRow({
           {entry.read ? <EyeOff aria-hidden /> : <Check aria-hidden />}
           {entry.read ? t('updates.markUnread') : t('updates.markRead')}
         </ContextMenuItem>
+        <ContextMenuItem onSelect={() => markSeen.mutate()}>
+          <BellOff aria-hidden />
+          {t('updates.markSeen')}
+        </ContextMenuItem>
         {download === undefined ? (
           <ContextMenuItem onSelect={() => enqueue([entry.chapterId])}>
             <CircleArrowDown aria-hidden />
@@ -555,6 +578,11 @@ function SelectionBar({
     onSuccess: onClear,
     onError: (error) => notifyError(error, t),
   });
+  const markSeen = useMutation({
+    mutationFn: () => ipc.invoke('updates.markSeen', { chapterIds }),
+    onSuccess: onClear,
+    onError: (error) => notifyError(error, t),
+  });
   return (
     <div className="pointer-events-none sticky bottom-5 z-20 flex justify-center">
       <m.div
@@ -585,6 +613,10 @@ function SelectionBar({
         <Button variant="ghost" size="sm" onClick={() => markRead.mutate(false)}>
           <EyeOff />
           {t('library.selection.markUnread')}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => markSeen.mutate()}>
+          <BellOff />
+          {t('updates.markSeen')}
         </Button>
         <span className="h-5 w-px bg-border" />
         <Button variant="ghost" size="icon-sm" title={t('library.selection.clear')} onClick={onClear}>

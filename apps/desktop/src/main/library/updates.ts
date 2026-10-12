@@ -67,9 +67,9 @@ export function notificationText(
 }
 
 export interface UpdateServiceDeps {
-  repo: Pick<UpdatesRepository, 'targets' | 'unseen' | 'list'>;
+  repo: Pick<UpdatesRepository, 'targets' | 'unseen' | 'list' | 'markSeen' | 'markAllSeen'>;
   settings: () => UpdateSettings;
-  /** Small persistent values: last check, when the Updates page was seen, the last result. */
+  /** Small persistent values: the last check and the last result. */
   store: {
     get: <T>(key: string, fallback: T) => T;
     set: (key: string, value: unknown) => void;
@@ -96,7 +96,6 @@ export interface UpdateServiceDeps {
 }
 
 const LAST_CHECK_KEY = 'updates.lastCheckAt';
-const SEEN_KEY = 'updates.seenAt';
 const RESULT_KEY = 'updates.lastResult';
 
 /**
@@ -180,9 +179,17 @@ export class UpdateService {
     return this.deps.repo.list({ categoryId });
   }
 
-  markSeen(): void {
-    this.deps.store.set(SEEN_KEY, this.now());
-    this.deps.changed();
+  /** Dismisses entries from the Updates page and the badge; reading progress is not touched. */
+  markSeen(chapterIds: readonly number[]): number {
+    const count = this.deps.repo.markSeen(chapterIds, this.now());
+    if (count > 0) this.deps.changed();
+    return count;
+  }
+
+  markAllSeen(): number {
+    const count = this.deps.repo.markAllSeen(this.now());
+    if (count > 0) this.deps.changed();
+    return count;
   }
 
   status(): UpdateStatus {
@@ -191,7 +198,7 @@ export class UpdateService {
       progress: this.progress,
       lastCheckAt,
       nextCheckAt: nextCheckAt(lastCheckAt, this.deps.settings().intervalHours, this.now()),
-      unseen: this.deps.repo.unseen(this.deps.store.get<number>(SEEN_KEY, 0)),
+      unseen: this.deps.repo.unseen(),
       lastResult: this.deps.store.get<UpdateResult | null>(RESULT_KEY, null),
     };
   }

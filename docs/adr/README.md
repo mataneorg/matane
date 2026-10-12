@@ -44,3 +44,4 @@ Short records of decisions that shape the codebase. The full design discussion (
 | [0038](0038-two-way-tracker-sync.md) | Two-way tracker sync: one pure rule, no bounce, switches per tracker and manga |
 | [0039](0039-latte-text-contrast.md) | Text in accent and status colours keeps its contrast on Latte |
 | [0040](0040-browse-memory-and-prefetch.md) | Browse remembers its first page, fetches ahead, and drops rows nobody kept |
+| [0041](0041-updates-mark-seen.md) | Updates: entries are marked as seen on purpose, not by opening the page |

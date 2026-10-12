@@ -1297,7 +1297,11 @@
     "markUnread": "Mark as unread",
     "read": "Read",
     "markRead": "Mark as read",
-    "readNow": "Read now"
+    "readNow": "Read now",
+    "markSeen": "Mark as seen",
+    "markAllSeen": "Mark all as seen",
+    "markAllSeenTitle": "Mark all updates as seen?",
+    "markAllSeenDescription": "They leave this list and the badge. Reading progress is not changed."
   },
   "offline": {
     "title": "You're offline",

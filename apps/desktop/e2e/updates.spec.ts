@@ -57,7 +57,7 @@ test('"Check library" finds a new chapter, shows it on Updates and counts it in 
   t.site.addChapter('paged', 6);
   t.site.addChapter('strip', 3);
   await goto('#/library');
-  // Checked from elsewhere: the sidebar badge counts it until the page is opened.
+  // Checked from elsewhere: the sidebar badge counts it until it is marked as seen.
   const started = await page.evaluate(() => window.api.invoke('updates.check', { scope: { kind: 'all' } }));
   expect(started).toEqual({ started: true, reason: null });
   const updatesLink = page.getByRole('link', { name: /^Updates/ });
@@ -69,7 +69,8 @@ test('"Check library" finds a new chapter, shows it on Updates and counts it in 
   await expect(row('Paged Hero')).toContainText('Ch. 6');
   // Scroll Garden is completed: skipped.
   await expect(row('Scroll Garden')).toHaveCount(0);
-  await expect(updatesLink).not.toContainText('1');
+  // Opening the page leaves the badge as it is: it goes when entries are marked as seen.
+  await expect(updatesLink).toContainText('1');
   await expect(page.getByTestId('updates-schedule')).toContainText('Last checked');
   await expect(page.getByTestId('updates-schedule')).toContainText('next check in 12 hours');
 });
@@ -134,4 +135,33 @@ test('checks by itself when the app opens after the interval passed', async () =
   await goto('#/updates');
   await expect(row('Ch. 8')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId('updates-schedule')).toContainText('next check in 12 hours');
+});
+
+test('marking an entry as seen takes it off the list and the badge, and keeps it unread', async () => {
+  await goto('#/updates');
+  const first = page.getByTestId('update-row').first();
+  const title = (await first.locator('a').nth(1).innerText()).trim();
+  const before = await page.getByTestId('update-row').count();
+  await first.click({ button: 'right' });
+  await page.getByRole('menuitem', { name: 'Mark as seen' }).click();
+  await expect(page.getByTestId('update-row')).toHaveCount(before - 1);
+  // Progress is untouched: the manga still has unread chapters.
+  const unread = await page.evaluate(() =>
+    window.api.invoke('library.list', {
+      tab: 'all',
+      sort: 'title',
+      ascending: true,
+      filters: { unread: true, reading: false, bookmarked: false, downloaded: false, status: [], sourceIds: [] },
+    }),
+  );
+  expect(unread.map((item) => item.title)).toContain(title);
+});
+
+test('"Mark all as seen" empties the list and the badge', async () => {
+  await goto('#/updates');
+  await page.getByRole('button', { name: 'More actions' }).click();
+  await page.getByRole('menuitem', { name: 'Mark all as seen' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Mark all as seen' }).click();
+  await expect(page.getByTestId('update-row')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /^Updates/ })).not.toContainText(/\d/);
 });

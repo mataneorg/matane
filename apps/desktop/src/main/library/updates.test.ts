@@ -128,10 +128,37 @@ describe('UpdatesRepository', () => {
       ['Beta', 'Ch. 3', now + 200],
       ['Alpha', 'Ch. 3', now + 100],
     ]);
-    expect(repo.list({ since: now + 150 }).map((e) => e.mangaTitle)).toEqual(['Beta']);
-    expect(repo.unseen(0)).toBe(2);
+    expect(repo.unseen()).toBe(2);
     connection.sqlite.prepare("UPDATE chapters SET read = 1 WHERE url = 'Beta-3'").run();
-    expect(repo.unseen(0)).toBe(1);
+    expect(repo.unseen()).toBe(1);
+  });
+
+  it('dismisses entries without touching reading progress, and only the ones the list shows', () => {
+    const a = libraryManga('Alpha');
+    chapters.sync(a, [ch('Alpha-4', 4), ch('Alpha-3', 3), ch('Alpha-2', 2), ch('Alpha-1', 1)], now + 100);
+    const ids = repo.list().map((e) => e.chapterId);
+    expect(ids).toHaveLength(2);
+    const old = (connection.sqlite.prepare("SELECT id FROM chapters WHERE url = 'Alpha-1'").get() as { id: number }).id;
+
+    // A chapter that is not in the list (it was there before the manga joined) is not stamped.
+    expect(repo.markSeen([ids[0]!, old], now + 200)).toBe(1);
+    expect(repo.list().map((e) => e.chapterId)).toEqual([ids[1]]);
+    expect(repo.unseen()).toBe(1);
+    expect(connection.sqlite.prepare('SELECT count(*) AS n FROM chapters WHERE read = 1').get()).toEqual({ n: 0 });
+    // Stamping again changes nothing.
+    expect(repo.markSeen([ids[0]!], now + 300)).toBe(0);
+
+    // Sighted again by a later sync, a dismissed entry stays dismissed; a new chapter is listed.
+    chapters.sync(
+      a,
+      [ch('Alpha-5', 5), ch('Alpha-4', 4), ch('Alpha-3', 3), ch('Alpha-2', 2), ch('Alpha-1', 1)],
+      now + 400,
+    );
+    expect(repo.list().map((e) => e.chapterName)).toEqual(['Ch. 5', 'Ch. 3']);
+
+    expect(repo.markAllSeen(now + 500)).toBe(2);
+    expect(repo.list()).toEqual([]);
+    expect(repo.markAllSeen(now + 600)).toBe(0);
   });
 
   it('does not list the chapters of a manga that was only fetched ahead from a listing', () => {
@@ -240,7 +267,7 @@ describe('UpdateService', () => {
     // Manual check with the window focused: no notification.
     expect(notify).not.toHaveBeenCalled();
     now += 10;
-    updates.markSeen();
+    updates.markAllSeen();
     expect(updates.status().unseen).toBe(0);
   });
 

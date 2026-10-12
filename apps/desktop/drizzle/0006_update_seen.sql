@@ -1,0 +1,1 @@
+ALTER TABLE `chapters` ADD `update_seen_at` integer;

@@ -488,8 +488,10 @@ export const invokeContract = {
   /** New chapters of library manga, newest first. */
   'updates.list': invoke(z.object({ categoryId: idSchema.optional() }).optional(), z.array(updateEntrySchema)),
   'updates.status': invoke(z.void(), updateStatusSchema),
-  /** The Updates page was seen: the sidebar badge starts again from zero. */
-  'updates.markSeen': invoke(z.void(), z.void()),
+  /** Dismisses entries from the Updates page and the badge (reading progress is kept); returns how many. */
+  'updates.markSeen': invoke(z.object({ chapterIds: z.array(idSchema).min(1) }), z.number()),
+  /** Dismisses everything the Updates page lists; returns how many. */
+  'updates.markAllSeen': invoke(z.void(), z.number()),
   'categories.setAutoDownload': invoke(
     z.object({ id: idSchema, value: z.enum(['include', 'exclude']).nullable() }),
     z.void(),

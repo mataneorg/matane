@@ -81,6 +81,8 @@ export const chapters = sqliteTable(
     /** Scroll offset inside the last page, for webtoon mode. */
     pageOffset: real(),
     sourceMissing: integer({ mode: 'boolean' }).notNull().default(false),
+    /** When the user dismissed this chapter from the Updates page; null = still listed (ADR 0041). */
+    updateSeenAt: integer(),
   },
   (t) => [
     uniqueIndex('chapters_manga_url_unique').on(t.mangaId, t.url),

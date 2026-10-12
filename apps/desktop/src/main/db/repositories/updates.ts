@@ -64,10 +64,10 @@ export class UpdatesRepository {
   }
 
   /**
-   * New chapters, newest first (then by manga and source order). Chapters of hidden scanlators
-   * and chapters the source dropped are left out. `since` keeps only those first seen after it.
+   * New chapters, newest first (then by manga and source order). Chapters of hidden scanlators,
+   * chapters the source dropped and chapters the user dismissed (`markSeen`) are left out.
    */
-  list(options: { categoryId?: number; since?: number } = {}): UpdateEntry[] {
+  list(options: { categoryId?: number } = {}): UpdateEntry[] {
     const rows = this.db.all<{
       chapterId: number;
       mangaId: number;
@@ -94,7 +94,7 @@ export class UpdatesRepository {
       JOIN manga m ON m.id = c.manga_id
       LEFT JOIN sources s ON s.id = m.source_id
       WHERE m.in_library = 1 AND m.added_at IS NOT NULL AND c.fetched_at > m.added_at AND c.source_missing = 0
-        ${options.since === undefined ? sql`` : sql`AND c.fetched_at > ${options.since}`}
+        AND c.update_seen_at IS NULL
         ${
           options.categoryId === undefined
             ? sql``
@@ -112,8 +112,40 @@ export class UpdatesRepository {
       }));
   }
 
-  /** Unread new chapters first seen after `since` (the sidebar badge). */
-  unseen(since: number): number {
-    return this.list({ since }).filter((entry) => !entry.read).length;
+  /** Unread entries of the list (the sidebar badge). */
+  unseen(): number {
+    return this.list().filter((entry) => !entry.read).length;
+  }
+
+  /**
+   * Takes entries off the list and the badge without touching reading progress. Only chapters the list shows now
+   * are stamped (the others are not news), so the count is what the user saw go. Returns how many.
+   */
+  markSeen(chapterIds: readonly number[], now = Date.now()): number {
+    const wanted = new Set(chapterIds);
+    const ids = this.list()
+      .map((entry) => entry.chapterId)
+      .filter((id) => wanted.has(id));
+    return this.stamp(ids, now);
+  }
+
+  /** `markSeen` for everything the list shows. */
+  markAllSeen(now = Date.now()): number {
+    return this.stamp(
+      this.list().map((entry) => entry.chapterId),
+      now,
+    );
+  }
+
+  private stamp(ids: readonly number[], now: number): number {
+    if (ids.length === 0) return 0;
+    this.db.run(sql`
+      UPDATE chapters SET update_seen_at = ${now}
+      WHERE update_seen_at IS NULL AND id IN (${sql.join(
+        ids.map((id) => sql`${id}`),
+        sql`, `,
+      )})
+    `);
+    return ids.length;
   }
 }
