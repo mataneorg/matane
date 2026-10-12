@@ -102,6 +102,7 @@ export class SourceService {
   }
 
   async filters(sourceId: string, signal?: AbortSignal) {
+    this.assertVisible(this.source(sourceId).extensionId);
     const { capabilities } = await this.info(sourceId, signal);
     if (!capabilities.includes('getFilters')) return [];
     const source = this.source(sourceId);

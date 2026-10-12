@@ -213,6 +213,7 @@ describe('SourceService', () => {
     await expect(guarded.browse({ sourceId: 'demo/en', kind: 'popular', page: 1 })).rejects.toMatchObject({
       code: 'nsfw_hidden',
     });
+    await expect(guarded.filters('demo/en')).rejects.toMatchObject({ code: 'nsfw_hidden' });
     await expect(guarded.resolveUrl('https://example.com/manga/x')).resolves.toBeNull();
     showNsfw = true;
     await expect(guarded.browse({ sourceId: 'demo/en', kind: 'popular', page: 1 })).resolves.toMatchObject({
