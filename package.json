@@ -27,7 +27,8 @@
     "test": "pnpm -r test",
     "e2e": "pnpm --filter @manga-reader/desktop e2e",
     "dist": "pnpm --filter @manga-reader/desktop dist",
-    "dist:linux": "pnpm --filter @manga-reader/desktop dist:linux"
+    "dist:linux": "pnpm --filter @manga-reader/desktop dist:linux",
+    "smoke:packaged": "pnpm --filter @manga-reader/desktop smoke:packaged"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

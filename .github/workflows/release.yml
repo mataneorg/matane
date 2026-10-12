@@ -3,7 +3,9 @@ name: Release
 # A `v*` tag builds every OS and publishes a GitHub release: a pre-release when the tag has a
 # suffix (v0.1.0-beta.1). electron-updater reads the latest*.yml files uploaded with it.
 # Linux: AppImage, deb, rpm, tar.gz; Windows: installer and portable; macOS: dmg (ADR 0021).
-# Native modules (better-sqlite3) are built per OS, so every platform builds on its own runner.
+# Native modules (better-sqlite3) are built per OS, so every platform builds on its own runner. The Linux build
+# starts its AppImage once before the release is published (smoke test); after a stable release the AUR files in the
+# repository follow it.
 on:
   push:
     tags: ['v*']
@@ -72,6 +74,18 @@ jobs:
           # No code signing yet (docs/BRAINSTORM.md §10).
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: pnpm exec electron-builder ${{ matrix.target }} --publish always
+      # The AppImage that was just built must start: native SQLite, the migrations, the extension sandbox and sharp
+      # load from the package, and the renderer mounts. A failure keeps the draft from being published.
+      # Ubuntu 24.04 runners restrict unprivileged user namespaces, which Chromium's sandbox needs.
+      - name: Allow user namespaces for the Chromium sandbox
+        if: runner.os == 'Linux'
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Smoke test the AppImage
+        if: runner.os == 'Linux'
+        working-directory: apps/desktop
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: xvfb-run -a pnpm smoke:packaged
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -89,3 +103,32 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: gh release edit "$TAG" --draft=false
+
+  # Keeps packaging/aur on the latest stable release: the version and the checksums of what it serves. Pre-releases
+  # are skipped. The AUR repository itself is still updated by hand (packaging/README.md). Pushing with GITHUB_TOKEN
+  # does not start other workflows; this needs `main` to accept pushes from Actions.
+  aur:
+    needs: publish
+    if: ${{ !contains(github.ref_name, '-') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: Write the version and the checksums
+        env:
+          TAG: ${{ github.ref_name }}
+        run: node packaging/update-aur.mjs "${TAG#v}"
+      - name: Commit it to main
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if git diff --quiet; then echo "packaging/aur already up to date"; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am "chore(packaging): AUR package for $TAG"
+          git pull --rebase origin main
+          git push origin HEAD:main

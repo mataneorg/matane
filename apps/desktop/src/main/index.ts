@@ -11,6 +11,7 @@ import { HIDDEN_ARG, applyLoginItem } from './app/login-item';
 import { OnlineMonitor } from './app/online';
 import { APP_PERMISSIONS, denyPermissionsByDefault, restrictPermissions } from './app/permissions';
 import { AppTray } from './app/tray';
+import { printSmokeReport, isSmokeRun, runSmoke } from './app/smoke';
 import { AppUpdater, fetchGithubReleases } from './app/updater';
 import { detectPackaging, updaterKindFor } from './app/packaging';
 import { detectTraySupport } from './app/tray-support';
@@ -857,13 +858,22 @@ async function bootstrap(): Promise<void> {
     mainWindow.show();
     mainWindow.focus();
   }
-  if (!online.isOnline()) void downloads.setOnline(false);
-  downloads.start(settings.getAppSettings().downloads.resumeOnStart);
-  updates.start();
-  repos.start();
-  online.start();
-  trackers.start();
-  appUpdater.start();
+  if (isSmokeRun()) {
+    // scripts/smoke-packaged.mjs: check the packaged pieces, report, quit. Nothing runs in the background, no network.
+    void runSmoke({ app, sqlite: connection.sqlite, extensions, window: mainWindow }).then((report) => {
+      printSmokeReport(report);
+      if (report.ok) app.quit();
+      else app.exit(1);
+    });
+  } else {
+    if (!online.isOnline()) void downloads.setOnline(false);
+    downloads.start(settings.getAppSettings().downloads.resumeOnStart);
+    updates.start();
+    repos.start();
+    online.start();
+    trackers.start();
+    appUpdater.start();
+  }
 
   app.on('second-instance', () => showWindow());
   app.on('activate', () => {
