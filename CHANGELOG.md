@@ -2,6 +2,41 @@
 
 All notable changes to Matane. Versions follow [semver](https://semver.org); betas are published as GitHub pre-releases.
 
+## 1.1.0 — 2026-10-12
+
+Smoother motion, right-click menus almost everywhere, a quicker Browse and a clearer view of what downloads use.
+
+### Interface
+
+- **Motion:** dialogs, the confirm dialog, page changes and the sidebar animate in and out, the active tab underline slides, and selection bars animate.
+- **Right-click menus:** library cards, rows and category tabs, manga cards and sources in Browse, chapter rows, updates and history entries, the download queue and completed downloads, extensions and repositories. Text fields get a native menu (cut, copy, paste).
+- **Toasts** tell you when something was copied, data was cleared or a bulk action failed.
+- **Latte theme:** coloured text stays readable.
+- **Library:** placeholders while loading now have the shape of the display you chose.
+- **Updates:** entries are marked as seen on purpose instead of by opening the page.
+- **Language:** the tray, notifications and the Discord status follow your language, and so do repository and install errors.
+
+### Browse
+
+- The last Popular and Latest are shown while the source answers, and a manga is fetched ahead when you hover its card.
+- A redesigned filter panel that also sends the filter defaults; the sources you used last are listed first.
+- Browse rows nobody kept are dropped after two weeks.
+- Covers in Browse time out sooner and retry once. The next page is no longer requested again while the last request failed.
+- An adult source's filters are not read while adult content is hidden.
+
+### Downloads, data and network
+
+- A storage card shows what downloads use, the free space and the folder.
+- **Settings → Data & storage** can clear the reading history.
+- The connection test says why it failed.
+- Backups: a relative backup folder is ignored, a clock set back no longer upsets the schedule, and the schedule starts once.
+
+### Extensions
+
+- A developer folder that replaces an installed copy is announced, and installing over one is refused, as are two developer folders for the same extension.
+- Installed files that changed after the install are refused.
+- A repository index can list the oldest app version an extension needs and its icon hash.
+
 ## 1.0.0 — 2026-10-07
 
 The first stable release. It is the 1.0 release candidate with one change: new installs follow stable releases by default.
