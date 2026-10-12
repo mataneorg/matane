@@ -1551,6 +1551,9 @@
       "addToCategory": "Tambah ke kategori…",
       "openSource": "Buka sumber",
       "openLatest": "Buka pembaruan terbaru"
+    },
+    "extensions": {
+      "copyId": "Salin ID extension"
     }
   }
 }

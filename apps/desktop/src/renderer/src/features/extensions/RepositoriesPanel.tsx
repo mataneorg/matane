@@ -27,6 +27,14 @@ import { cn } from '../../lib/utils';
 import { Badge } from '../../components/ui/badge';
 import { TrustBadge } from './parts';
 import { notify } from '../../lib/toast';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '../../components/ui/context-menu';
+import { repoMenuRows } from './menus';
 
 const menuItem =
   'flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent [&_svg]:size-4';
@@ -77,104 +85,136 @@ export function RepoCard({ repo, now }: { repo: RepoInfo; now: number }) {
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [confirmTrust, setConfirmTrust] = useState(false);
 
+  const rows = repoMenuRows(repo);
+
   return (
-    <article className="rounded-xl border bg-card/40 p-3.5" aria-label={repo.name} data-testid="repo-card">
-      <div className="flex items-center gap-2">
-        <h3 className="min-w-0 truncate font-medium" title={repo.url}>
-          {repo.name}
-        </h3>
-        {repo.synced ? (
-          <TrustBadge trust={repo.trust} />
-        ) : (
-          <Badge variant="outline">{t('extensions.repos.notSynced')}</Badge>
-        )}
-        <span className="flex-1" />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-7"
-          title={t('extensions.repos.sync')}
-          onClick={() => sync.mutate(repo.id)}
-          disabled={sync.isPending}
-        >
-          <RefreshCw className={cn(sync.isPending && 'animate-spin')} />
-        </Button>
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <Button variant="ghost" size="icon" className="size-7" title={t('extensions.repos.more')}>
-              <EllipsisVertical />
-            </Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content
-              align="end"
-              sideOffset={4}
-              className="z-50 min-w-48 rounded-lg border bg-popover p-1 text-popover-foreground shadow-xl"
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <article className="rounded-xl border bg-card/40 p-3.5" aria-label={repo.name} data-testid="repo-card">
+          <div className="flex items-center gap-2">
+            <h3 className="min-w-0 truncate font-medium" title={repo.url}>
+              {repo.name}
+            </h3>
+            {repo.synced ? (
+              <TrustBadge trust={repo.trust} />
+            ) : (
+              <Badge variant="outline">{t('extensions.repos.notSynced')}</Badge>
+            )}
+            <span className="flex-1" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              title={t('extensions.repos.sync')}
+              onClick={() => sync.mutate(repo.id)}
+              disabled={sync.isPending}
             >
-              {repo.problem === 'unknown-key' && (
-                <DropdownMenu.Item className={menuItem} onSelect={() => setConfirmTrust(true)}>
-                  <KeyRound />
-                  {t('extensions.repos.trustKey')}
-                </DropdownMenu.Item>
-              )}
-              <DropdownMenu.Item
-                className={menuItem}
-                onSelect={() =>
-                  void navigator.clipboard.writeText(repo.url).then(() => notify.success(t('toast.copied')))
-                }
-              >
-                <Copy />
-                {t('extensions.repos.copyUrl')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item className={cn(menuItem, 'text-danger-text')} onSelect={() => setConfirmRemove(true)}>
-                <Trash2 />
-                {t('extensions.repos.remove')}
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
-      </div>
-      <p className="mt-1.5 text-xs text-muted-foreground">
-        {t('extensions.repos.count', { count: repo.extensionCount })}
-        {repo.lastSyncedAt !== null && (
-          <> · {t('extensions.repos.synced', { when: formatRelative(repo.lastSyncedAt, i18n.language, now) })}</>
-        )}
-      </p>
-      {repo.problem && (
-        <p className="mt-1.5 text-xs text-warning-text">{t(`extensions.repos.problem.${repo.problem}`)}</p>
-      )}
-      {repo.lastError && (
-        <p className="mt-1.5 flex items-start gap-1.5 text-xs text-danger-text select-text">
-          <AlertTriangle className="mt-px size-3.5 shrink-0" />
-          {repo.lastError}
-        </p>
-      )}
-      {(trust.error ?? remove.error) && <MutationError error={trust.error ?? remove.error} />}
-      <ConfirmDialog
-        open={confirmRemove}
-        onOpenChange={setConfirmRemove}
-        title={t('extensions.repos.removeTitle', { name: repo.name })}
-        description={t('extensions.repos.removeDescription')}
-        confirmLabel={t('extensions.repos.remove')}
-        onConfirm={() => remove.mutate()}
-      />
-      <ConfirmDialog
-        open={confirmTrust}
-        onOpenChange={setConfirmTrust}
-        title={t('extensions.repos.trustTitle', { name: repo.name })}
-        description={
-          <>
-            {t('extensions.repos.trustDescription')}
-            <code className="mt-2 block rounded-md bg-muted px-2 py-1.5 font-mono text-xs break-all text-foreground">
-              {repo.signedBy}
-            </code>
-          </>
-        }
-        confirmLabel={t('extensions.repos.trustKey')}
-        destructive={false}
-        onConfirm={() => trust.mutate()}
-      />
-    </article>
+              <RefreshCw className={cn(sync.isPending && 'animate-spin')} />
+            </Button>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <Button variant="ghost" size="icon" className="size-7" title={t('extensions.repos.more')}>
+                  <EllipsisVertical />
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  align="end"
+                  sideOffset={4}
+                  className="z-50 min-w-48 rounded-lg border bg-popover p-1 text-popover-foreground shadow-xl"
+                >
+                  {repo.problem === 'unknown-key' && (
+                    <DropdownMenu.Item className={menuItem} onSelect={() => setConfirmTrust(true)}>
+                      <KeyRound />
+                      {t('extensions.repos.trustKey')}
+                    </DropdownMenu.Item>
+                  )}
+                  <DropdownMenu.Item
+                    className={menuItem}
+                    onSelect={() =>
+                      void navigator.clipboard.writeText(repo.url).then(() => notify.success(t('toast.copied')))
+                    }
+                  >
+                    <Copy />
+                    {t('extensions.repos.copyUrl')}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    className={cn(menuItem, 'text-danger-text')}
+                    onSelect={() => setConfirmRemove(true)}
+                  >
+                    <Trash2 />
+                    {t('extensions.repos.remove')}
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            {t('extensions.repos.count', { count: repo.extensionCount })}
+            {repo.lastSyncedAt !== null && (
+              <> · {t('extensions.repos.synced', { when: formatRelative(repo.lastSyncedAt, i18n.language, now) })}</>
+            )}
+          </p>
+          {repo.problem && (
+            <p className="mt-1.5 text-xs text-warning-text">{t(`extensions.repos.problem.${repo.problem}`)}</p>
+          )}
+          {repo.lastError && (
+            <p className="mt-1.5 flex items-start gap-1.5 text-xs text-danger-text select-text">
+              <AlertTriangle className="mt-px size-3.5 shrink-0" />
+              {repo.lastError}
+            </p>
+          )}
+          {(trust.error ?? remove.error) && <MutationError error={trust.error ?? remove.error} />}
+          <ConfirmDialog
+            open={confirmRemove}
+            onOpenChange={setConfirmRemove}
+            title={t('extensions.repos.removeTitle', { name: repo.name })}
+            description={t('extensions.repos.removeDescription')}
+            confirmLabel={t('extensions.repos.remove')}
+            onConfirm={() => remove.mutate()}
+          />
+          <ConfirmDialog
+            open={confirmTrust}
+            onOpenChange={setConfirmTrust}
+            title={t('extensions.repos.trustTitle', { name: repo.name })}
+            description={
+              <>
+                {t('extensions.repos.trustDescription')}
+                <code className="mt-2 block rounded-md bg-muted px-2 py-1.5 font-mono text-xs break-all text-foreground">
+                  {repo.signedBy}
+                </code>
+              </>
+            }
+            confirmLabel={t('extensions.repos.trustKey')}
+            destructive={false}
+            onConfirm={() => trust.mutate()}
+          />
+        </article>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onSelect={() => sync.mutate(repo.id)} disabled={sync.isPending}>
+          <RefreshCw aria-hidden />
+          {t('extensions.repos.sync')}
+        </ContextMenuItem>
+        {rows.trust ? (
+          <ContextMenuItem onSelect={() => setConfirmTrust(true)}>
+            <KeyRound aria-hidden />
+            {t('extensions.repos.trustKey')}
+          </ContextMenuItem>
+        ) : null}
+        <ContextMenuItem
+          onSelect={() => void navigator.clipboard.writeText(repo.url).then(() => notify.success(t('toast.copied')))}
+        >
+          <Copy aria-hidden />
+          {t('extensions.repos.copyUrl')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem destructive onSelect={() => setConfirmRemove(true)}>
+          <Trash2 aria-hidden />
+          {t('extensions.repos.remove')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 

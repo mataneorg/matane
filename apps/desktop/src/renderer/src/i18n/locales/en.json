@@ -1580,6 +1580,9 @@
       "addToCategory": "Add to category…",
       "openSource": "Open source",
       "openLatest": "Open latest updates"
+    },
+    "extensions": {
+      "copyId": "Copy extension ID"
     }
   }
 }

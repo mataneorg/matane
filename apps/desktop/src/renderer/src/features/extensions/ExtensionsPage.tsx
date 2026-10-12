@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ArrowUpCircle,
   Check,
+  Copy,
   Download,
   EllipsisVertical,
   FolderOpen,
@@ -39,6 +40,15 @@ import { ExtensionIcon, LangBadges, TrustLine } from './parts';
 import { PreferencesDialog } from './PreferencesDialog';
 import { RepositoriesPanel } from './RepositoriesPanel';
 import { TabUnderline } from '../../components/ui/tab-underline';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '../../components/ui/context-menu';
+import { notify } from '../../lib/toast';
+import { availableMenuRows, installedMenuRows } from './menus';
 
 export type ExtensionsTab = 'installed' | 'available' | 'updates';
 type Tab = ExtensionsTab;
@@ -314,135 +324,186 @@ function InstalledRow({
   const broken = extension.error !== null;
   const actionError = uninstall.error ?? removeFolder.error;
 
+  const rows = installedMenuRows({ origin: extension.origin, broken, hasUpdate: update !== undefined });
+
   return (
-    <li
-      className={cn('rounded-xl border bg-card/40 px-4 py-3.5', broken && 'border-ctp-red/40')}
-      aria-label={extension.name}
-      data-testid="extension-row"
-    >
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <ExtensionIcon
-          id={extension.id}
-          name={extension.name}
-          src={extension.hasIcon ? extensionIconUrl(extension.id) : null}
-          className="size-11"
-        />
-        <div className="min-w-56 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold">{extension.name}</span>
-            <span className="font-mono text-xs text-muted-foreground">
-              {t('extensions.version', { version: extension.version })}
-            </span>
-            <LangBadges langs={extension.langs} />
-            {extension.nsfw && <Badge variant="danger">18+</Badge>}
-            {extension.origin === 'repo' && !update && !broken && (
-              <Badge variant="success">{t('extensions.upToDate')}</Badge>
-            )}
-          </div>
-          <div className="mt-1 flex min-w-0 items-center gap-2 text-xs">
-            <OriginLine extension={extension} repo={repo} />
-            {extension.description && (
-              <>
-                <span aria-hidden className="text-muted-foreground">
-                  ·
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <li
+          className={cn('rounded-xl border bg-card/40 px-4 py-3.5', broken && 'border-ctp-red/40')}
+          aria-label={extension.name}
+          data-testid="extension-row"
+        >
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <ExtensionIcon
+              id={extension.id}
+              name={extension.name}
+              src={extension.hasIcon ? extensionIconUrl(extension.id) : null}
+              className="size-11"
+            />
+            <div className="min-w-56 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold">{extension.name}</span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {t('extensions.version', { version: extension.version })}
                 </span>
-                <span className="min-w-0 truncate text-muted-foreground">{extension.description}</span>
-              </>
-            )}
-          </div>
-        </div>
-        <div className="ml-auto flex shrink-0 items-center gap-1">
-          {update && (
-            <Button size="sm" onClick={() => onUpdate(update)}>
-              <ArrowUpCircle />
-              {t('extensions.updateTo', { version: update.version })}
-            </Button>
-          )}
-          {extension.origin === 'dev' && (
-            <Button variant="secondary" size="sm" onClick={() => reload.mutate()} disabled={reload.isPending}>
-              <RotateCw className={cn(reload.isPending && 'animate-spin')} />
-              {t('extensions.reload')}
-            </Button>
-          )}
-          {!broken && (
-            <Button
-              variant="ghost"
-              size="icon"
-              title={t('extensions.preferences.open')}
-              onClick={() => setPrefsOpen(true)}
-            >
-              <Settings2 />
-            </Button>
-          )}
-          {extension.origin === 'dev' && (
-            <Button variant="secondary" size="sm" onClick={() => setLogsOpen(true)}>
-              <ScrollText />
-              {t('extensions.logs.open')}
-            </Button>
-          )}
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <Button variant="ghost" size="icon" title={t('extensions.more')}>
-                <EllipsisVertical />
-              </Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                align="end"
-                sideOffset={4}
-                className="z-50 min-w-48 rounded-lg border bg-popover p-1 text-popover-foreground shadow-xl"
-              >
-                {extension.origin !== 'dev' && (
-                  <DropdownMenu.Item className={menuItem} onSelect={() => setLogsOpen(true)}>
-                    <ScrollText />
-                    {t('extensions.logs.open')}
-                  </DropdownMenu.Item>
+                <LangBadges langs={extension.langs} />
+                {extension.nsfw && <Badge variant="danger">18+</Badge>}
+                {extension.origin === 'repo' && !update && !broken && (
+                  <Badge variant="success">{t('extensions.upToDate')}</Badge>
                 )}
-                {extension.origin === 'repo' && (
-                  <DropdownMenu.Item
-                    className={cn(menuItem, 'text-danger-text')}
-                    onSelect={() => setConfirmUninstall(true)}
+              </div>
+              <div className="mt-1 flex min-w-0 items-center gap-2 text-xs">
+                <OriginLine extension={extension} repo={repo} />
+                {extension.description && (
+                  <>
+                    <span aria-hidden className="text-muted-foreground">
+                      ·
+                    </span>
+                    <span className="min-w-0 truncate text-muted-foreground">{extension.description}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="ml-auto flex shrink-0 items-center gap-1">
+              {update && (
+                <Button size="sm" onClick={() => onUpdate(update)}>
+                  <ArrowUpCircle />
+                  {t('extensions.updateTo', { version: update.version })}
+                </Button>
+              )}
+              {extension.origin === 'dev' && (
+                <Button variant="secondary" size="sm" onClick={() => reload.mutate()} disabled={reload.isPending}>
+                  <RotateCw className={cn(reload.isPending && 'animate-spin')} />
+                  {t('extensions.reload')}
+                </Button>
+              )}
+              {!broken && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title={t('extensions.preferences.open')}
+                  onClick={() => setPrefsOpen(true)}
+                >
+                  <Settings2 />
+                </Button>
+              )}
+              {extension.origin === 'dev' && (
+                <Button variant="secondary" size="sm" onClick={() => setLogsOpen(true)}>
+                  <ScrollText />
+                  {t('extensions.logs.open')}
+                </Button>
+              )}
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <Button variant="ghost" size="icon" title={t('extensions.more')}>
+                    <EllipsisVertical />
+                  </Button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content
+                    align="end"
+                    sideOffset={4}
+                    className="z-50 min-w-48 rounded-lg border bg-popover p-1 text-popover-foreground shadow-xl"
                   >
-                    <Trash2 />
-                    {t('extensions.uninstall')}
-                  </DropdownMenu.Item>
-                )}
-                {extension.origin === 'dev' && (
-                  <DropdownMenu.Item className={menuItem} onSelect={() => removeFolder.mutate()}>
-                    <FolderX />
-                    {t('extensions.removeFolder')}
-                  </DropdownMenu.Item>
-                )}
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
-        </div>
-      </div>
-      {broken && (
-        <p className="mt-3 flex items-start gap-2 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs text-danger-text select-text">
-          <AlertTriangle className="mt-px size-3.5 shrink-0" />
-          {extension.error}
-        </p>
-      )}
-      {actionError && <InlineError error={actionError} />}
-      {!broken && (
-        <PreferencesDialog
-          extensionId={extension.id}
-          name={extension.name}
-          open={prefsOpen}
-          onOpenChange={setPrefsOpen}
-        />
-      )}
-      <LogDialog extensionId={extension.id} name={extension.name} open={logsOpen} onOpenChange={setLogsOpen} />
-      <ConfirmDialog
-        open={confirmUninstall}
-        onOpenChange={setConfirmUninstall}
-        title={t('extensions.uninstallTitle', { name: extension.name })}
-        description={t('extensions.uninstallDescription')}
-        confirmLabel={t('extensions.uninstall')}
-        onConfirm={() => uninstall.mutate()}
-      />
-    </li>
+                    {extension.origin !== 'dev' && (
+                      <DropdownMenu.Item className={menuItem} onSelect={() => setLogsOpen(true)}>
+                        <ScrollText />
+                        {t('extensions.logs.open')}
+                      </DropdownMenu.Item>
+                    )}
+                    {extension.origin === 'repo' && (
+                      <DropdownMenu.Item
+                        className={cn(menuItem, 'text-danger-text')}
+                        onSelect={() => setConfirmUninstall(true)}
+                      >
+                        <Trash2 />
+                        {t('extensions.uninstall')}
+                      </DropdownMenu.Item>
+                    )}
+                    {extension.origin === 'dev' && (
+                      <DropdownMenu.Item className={menuItem} onSelect={() => removeFolder.mutate()}>
+                        <FolderX />
+                        {t('extensions.removeFolder')}
+                      </DropdownMenu.Item>
+                    )}
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            </div>
+          </div>
+          {broken && (
+            <p className="mt-3 flex items-start gap-2 rounded-lg bg-ctp-red/10 px-3 py-2 text-xs text-danger-text select-text">
+              <AlertTriangle className="mt-px size-3.5 shrink-0" />
+              {extension.error}
+            </p>
+          )}
+          {actionError && <InlineError error={actionError} />}
+          {!broken && (
+            <PreferencesDialog
+              extensionId={extension.id}
+              name={extension.name}
+              open={prefsOpen}
+              onOpenChange={setPrefsOpen}
+            />
+          )}
+          <LogDialog extensionId={extension.id} name={extension.name} open={logsOpen} onOpenChange={setLogsOpen} />
+          <ConfirmDialog
+            open={confirmUninstall}
+            onOpenChange={setConfirmUninstall}
+            title={t('extensions.uninstallTitle', { name: extension.name })}
+            description={t('extensions.uninstallDescription')}
+            confirmLabel={t('extensions.uninstall')}
+            onConfirm={() => uninstall.mutate()}
+          />
+        </li>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        {update && rows.update ? (
+          <ContextMenuItem onSelect={() => onUpdate(update)}>
+            <ArrowUpCircle aria-hidden />
+            {t('extensions.updateTo', { version: update.version })}
+          </ContextMenuItem>
+        ) : null}
+        {rows.reload ? (
+          <ContextMenuItem onSelect={() => reload.mutate()}>
+            <RotateCw aria-hidden />
+            {t('extensions.reload')}
+          </ContextMenuItem>
+        ) : null}
+        {rows.preferences ? (
+          <ContextMenuItem onSelect={() => setPrefsOpen(true)}>
+            <Settings2 aria-hidden />
+            {t('extensions.preferences.open')}
+          </ContextMenuItem>
+        ) : null}
+        <ContextMenuItem onSelect={() => setLogsOpen(true)}>
+          <ScrollText aria-hidden />
+          {t('extensions.logs.open')}
+        </ContextMenuItem>
+        <ContextMenuItem
+          onSelect={() =>
+            void navigator.clipboard.writeText(extension.id).then(() => notify.success(t('toast.copied')))
+          }
+        >
+          <Copy aria-hidden />
+          {t('contextMenu.extensions.copyId')}
+        </ContextMenuItem>
+        {rows.uninstall || rows.removeFolder ? <ContextMenuSeparator /> : null}
+        {rows.uninstall ? (
+          <ContextMenuItem destructive onSelect={() => setConfirmUninstall(true)}>
+            <Trash2 aria-hidden />
+            {t('extensions.uninstall')}
+          </ContextMenuItem>
+        ) : null}
+        {rows.removeFolder ? (
+          <ContextMenuItem destructive onSelect={() => removeFolder.mutate()}>
+            <FolderX aria-hidden />
+            {t('extensions.removeFolder')}
+          </ContextMenuItem>
+        ) : null}
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -458,53 +519,72 @@ function AvailableRow({
   const { t } = useTranslation();
   // Installed from another repository: updates only come from there (§5.8).
   const elsewhere = installed?.origin === 'repo' && !item.installedHere;
+  const rows = availableMenuRows({ update: item.update, elsewhere });
   return (
-    <li className="rounded-xl border bg-card/40 px-4 py-3.5" aria-label={item.name} data-testid="available-row">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <ExtensionIcon
-          id={item.id}
-          name={item.name}
-          src={item.hasIcon ? repoIconUrl(item.repoId, item.id) : null}
-          className="size-11"
-        />
-        <div className="min-w-56 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold">{item.name}</span>
-            <span className="font-mono text-xs text-muted-foreground">
-              {item.update
-                ? t('extensions.versionUpdate', { from: item.installedVersion, to: item.version })
-                : t('extensions.version', { version: item.version })}
-            </span>
-            <LangBadges langs={item.langs} />
-            {item.nsfw && <Badge variant="danger">18+</Badge>}
-          </div>
-          <div className="mt-1 flex min-w-0 items-center gap-2 text-xs">
-            <TrustLine trust={item.trust} repoName={item.repoName} />
-            {item.description && (
-              <>
-                <span aria-hidden className="text-muted-foreground">
-                  ·
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <li className="rounded-xl border bg-card/40 px-4 py-3.5" aria-label={item.name} data-testid="available-row">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <ExtensionIcon
+              id={item.id}
+              name={item.name}
+              src={item.hasIcon ? repoIconUrl(item.repoId, item.id) : null}
+              className="size-11"
+            />
+            <div className="min-w-56 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold">{item.name}</span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {item.update
+                    ? t('extensions.versionUpdate', { from: item.installedVersion, to: item.version })
+                    : t('extensions.version', { version: item.version })}
                 </span>
-                <span className="min-w-0 truncate text-muted-foreground">{item.description}</span>
-              </>
+                <LangBadges langs={item.langs} />
+                {item.nsfw && <Badge variant="danger">18+</Badge>}
+              </div>
+              <div className="mt-1 flex min-w-0 items-center gap-2 text-xs">
+                <TrustLine trust={item.trust} repoName={item.repoName} />
+                {item.description && (
+                  <>
+                    <span aria-hidden className="text-muted-foreground">
+                      ·
+                    </span>
+                    <span className="min-w-0 truncate text-muted-foreground">{item.description}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            {elsewhere ? (
+              <span className="ml-auto text-xs text-muted-foreground">{t('extensions.installedElsewhere')}</span>
+            ) : (
+              <Button
+                size="sm"
+                className="ml-auto"
+                variant={item.update ? 'default' : 'secondary'}
+                onClick={() => onInstall(item)}
+              >
+                {item.update ? <ArrowUpCircle /> : <Download />}
+                {item.update ? t('extensions.updateTo', { version: item.version }) : t('extensions.install.install')}
+              </Button>
             )}
           </div>
-        </div>
-        {elsewhere ? (
-          <span className="ml-auto text-xs text-muted-foreground">{t('extensions.installedElsewhere')}</span>
-        ) : (
-          <Button
-            size="sm"
-            className="ml-auto"
-            variant={item.update ? 'default' : 'secondary'}
-            onClick={() => onInstall(item)}
-          >
-            {item.update ? <ArrowUpCircle /> : <Download />}
-            {item.update ? t('extensions.updateTo', { version: item.version }) : t('extensions.install.install')}
-          </Button>
-        )}
-      </div>
-    </li>
+        </li>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        {rows.action ? (
+          <ContextMenuItem onSelect={() => onInstall(item)}>
+            {rows.update ? <ArrowUpCircle aria-hidden /> : <Download aria-hidden />}
+            {rows.update ? t('extensions.updateTo', { version: item.version }) : t('extensions.install.install')}
+          </ContextMenuItem>
+        ) : null}
+        <ContextMenuItem
+          onSelect={() => void navigator.clipboard.writeText(item.id).then(() => notify.success(t('toast.copied')))}
+        >
+          <Copy aria-hidden />
+          {t('contextMenu.extensions.copyId')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
