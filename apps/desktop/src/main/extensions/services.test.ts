@@ -174,7 +174,7 @@ describe('ExtensionService', () => {
   it('lets a dev folder override the built-in and reports broken folders', async () => {
     writeExtension(join(dir, 'dev'), CODE, '1.1.0-dev');
     const entry = await extensions.addDevFolder(join(dir, 'dev'));
-    expect(entry).toMatchObject({ origin: 'dev', version: '1.1.0-dev' });
+    expect(entry).toMatchObject({ origin: 'dev', version: '1.1.0-dev', shadows: true });
     expect(extensionsRepo.get('demo')?.version).toBe('1.1.0-dev');
 
     // An unbuilt folder stays registered with its error, so building it later hot-reloads it.
@@ -186,7 +186,9 @@ describe('ExtensionService', () => {
 
     await extensions.removeDevFolder(join(dir, 'dev'));
     await extensions.removeDevFolder(join(dir, 'empty'));
-    expect(extensions.list()).toEqual([expect.objectContaining({ origin: 'builtin', version: '1.0.0' })]);
+    expect(extensions.list()).toEqual([
+      expect.objectContaining({ origin: 'builtin', version: '1.0.0', shadows: false }),
+    ]);
   });
 
   it('exposes preferences with stored values over defaults', async () => {

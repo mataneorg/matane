@@ -593,7 +593,8 @@
         "noKeyToTrust": "Repository ini tidak punya tanda tangan yang sah, jadi tidak ada kunci untuk dipercaya",
         "noIndex": "Tidak ada {{file}} di {{url}}",
         "notUtf8": "{{file}} bukan teks UTF-8",
-        "tooLarge": "{{url}} lebih besar dari {{kb}} KB"
+        "tooLarge": "{{url}} lebih besar dari {{kb}} KB",
+        "shadowedByFolder": "{{name}} dimuat dari folder pengembang; hapus foldernya dulu"
       }
     }
   },
@@ -778,7 +779,9 @@
       "empty": "Belum ada log. Pakai extension-nya (browse, buka manga) dan barisnya muncul di sini.",
       "lines": "Baris log"
     },
-    "getExtensions": "Cari extension"
+    "getExtensions": "Cari extension",
+    "shadows": "Menggantikan salinan terpasang",
+    "shadowsHint": "Folder pengembang dengan id yang sama dipakai, bukan salinan terpasang atau bawaan."
   },
   "manga": {
     "author": "Penulis: {{name}}",

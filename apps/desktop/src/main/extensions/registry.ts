@@ -109,6 +109,8 @@ export interface RegistryOptions {
  */
 export class ExtensionRegistry {
   private entries = new Map<string, RegisteredExtension>();
+  /** Ids a developer folder provides although a built-in or installed copy exists: the folder wins. */
+  private shadowing = new Set<string>();
   private watchers: FSWatcher[] = [];
 
   constructor(private readonly options: RegistryOptions) {}
@@ -118,14 +120,17 @@ export class ExtensionRegistry {
     const installed = this.options.installedDir ? await readExtensionFolders(this.options.installedDir, 'repo') : [];
     const dev = await Promise.all(this.options.devFolders().map((folder) => readExtension(folder, 'dev')));
     const next = new Map<string, RegisteredExtension>();
+    const shadowing = new Set<string>();
     for (const entry of [...builtins, ...installed, ...dev]) {
       const current = next.get(entry.id);
       // A broken copy should not hide a working one.
       if (current && entry.error && !current.error) continue;
+      if (current && entry.origin === 'dev' && current.origin !== 'dev') shadowing.add(entry.id);
       next.set(entry.id, entry);
     }
     for (const entry of this.options.native ?? []) next.set(entry.id, entry);
     this.entries = next;
+    this.shadowing = shadowing;
     this.watchDevFolders();
     return this.list();
   }
@@ -136,6 +141,11 @@ export class ExtensionRegistry {
 
   get(id: string): RegisteredExtension | undefined {
     return this.entries.get(id);
+  }
+
+  /** Whether the developer folder that provides `id` hides a built-in or installed copy of it. */
+  shadows(id: string): boolean {
+    return this.shadowing.has(id);
   }
 
   close(): void {

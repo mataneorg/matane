@@ -117,6 +117,16 @@ export class ExtensionInstaller {
     const entry = this.deps.repos.index(repoId)?.extensions.find((e) => e.id === extensionId);
     if (!repo || !entry) throw new AppError('not_found', `${extensionId} is not in this repository`);
 
+    // A developer folder with this id would win over the copy being installed: say so before downloading.
+    if (this.deps.extensions.list().some((e) => e.id === extensionId && e.origin === 'dev')) {
+      throw AppError.keyed(
+        'repo',
+        `${entry.name} is loaded from a developer folder; remove the folder first`,
+        'repo.shadowedByFolder',
+        { name: entry.name },
+      );
+    }
+
     const current = this.deps.extensions.list().find((e) => e.id === extensionId && e.origin === 'repo');
     const from = this.deps.origin.get(extensionId);
     // Updates only come from the repository an extension was installed from (§5.8).

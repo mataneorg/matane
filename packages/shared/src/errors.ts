@@ -36,6 +36,7 @@ export type AppErrorCode = (typeof APP_ERROR_CODES)[number];
  */
 export const MAIN_ERROR_KEYS = [
   'repo.otherRepository',
+  'repo.shadowedByFolder',
   'repo.fileMissing',
   'repo.installExpired',
   'repo.busy',

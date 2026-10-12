@@ -30,6 +30,7 @@ let served: Map<string, string>;
 let fetched: string[];
 let repos: RepoService;
 let installer: ExtensionInstaller;
+let devFolders: string[];
 let extensions: ExtensionService;
 let extensionsRepo: ExtensionsRepository;
 let clearedSessions: string[];
@@ -86,11 +87,12 @@ beforeEach(async () => {
   const changes = new DbChanges(() => undefined);
   extensionsRepo = new ExtensionsRepository(connection.db, changes);
   const reposRepo = new ReposRepository(connection.db, changes);
+  devFolders = [];
   mkdirSync(join(dir, 'builtin'));
   const registry = new ExtensionRegistry({
     builtinDir: join(dir, 'builtin'),
     installedDir: join(dir, 'installed'),
-    devFolders: () => [],
+    devFolders: () => devFolders,
   });
   extensions = new ExtensionService({
     registry,
@@ -304,6 +306,30 @@ describe('ExtensionInstaller', () => {
       update: false,
     });
     await expect(installer.prepare(other.repo.id, 'demo')).rejects.toThrow(/another repository/);
+  });
+
+  it('refuses to install an id that a developer folder provides', async () => {
+    const repo = await addTrusted();
+    const folder = join(dir, 'dev-demo');
+    mkdirSync(folder);
+    writeFileSync(
+      join(folder, 'manifest.json'),
+      JSON.stringify({
+        id: 'demo',
+        name: 'Demo',
+        version: '9.9.9-dev',
+        apiVersion: 1,
+        sources: [{ key: 'en', lang: 'en', name: 'Demo' }],
+      }),
+    );
+    writeFileSync(join(folder, 'index.js'), 'globalThis.__extension = { createSource: () => ({}) };');
+    devFolders = [folder];
+    await extensions.init();
+    expect(extensions.list().find((e) => e.id === 'demo')).toMatchObject({ origin: 'dev', shadows: false });
+    await expect(installer.prepare(repo.id, 'demo')).rejects.toMatchObject({
+      code: 'repo',
+      key: 'repo.shadowedByFolder',
+    });
   });
 
   it('refuses an archive that does not match the signed index', async () => {

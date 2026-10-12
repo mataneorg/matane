@@ -286,6 +286,7 @@ export class ExtensionService {
       langs: [...new Set(manifest?.sources.map((s) => s.lang) ?? [])].sort(),
       repoId,
       hasIcon: entry.iconPath !== null,
+      shadows: this.deps.registry.shadows(entry.id),
     };
   }
 }

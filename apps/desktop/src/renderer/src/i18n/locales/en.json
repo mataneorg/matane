@@ -595,7 +595,8 @@
         "noKeyToTrust": "This repository has no valid signature, so there is no key to trust",
         "noIndex": "There is no {{file}} at {{url}}",
         "notUtf8": "{{file}} is not UTF-8 text",
-        "tooLarge": "{{url}} is larger than {{kb}} KB"
+        "tooLarge": "{{url}} is larger than {{kb}} KB",
+        "shadowedByFolder": "{{name}} is loaded from a developer folder; remove the folder first"
       }
     }
   },
@@ -786,7 +787,9 @@
       "empty": "Nothing logged yet. Use the extension (browse, open a manga) and lines appear here.",
       "lines": "Log lines"
     },
-    "getExtensions": "Get extensions"
+    "getExtensions": "Get extensions",
+    "shadows": "Replaces the installed copy",
+    "shadowsHint": "A developer folder with the same id is used instead of the installed or built-in copy."
   },
   "manga": {
     "author": "Author: {{name}}",

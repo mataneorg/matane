@@ -349,6 +349,11 @@ function InstalledRow({
                 </span>
                 <LangBadges langs={extension.langs} />
                 {extension.nsfw && <Badge variant="danger">18+</Badge>}
+                {extension.shadows && (
+                  <Badge variant="warning" title={t('extensions.shadowsHint')}>
+                    {t('extensions.shadows')}
+                  </Badge>
+                )}
                 {extension.origin === 'repo' && !update && !broken && (
                   <Badge variant="success">{t('extensions.upToDate')}</Badge>
                 )}

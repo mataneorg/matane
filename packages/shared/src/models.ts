@@ -30,6 +30,8 @@ export const extensionEntrySchema = z.object({
   repoId: z.number().nullable(),
   /** Served as `manga://extension-icon/<id>`. */
   hasIcon: z.boolean(),
+  /** A developer folder hides a built-in or installed copy of this id (the folder wins, ADR 0023). */
+  shadows: z.boolean(),
 });
 export type ExtensionEntry = z.infer<typeof extensionEntrySchema>;
 
