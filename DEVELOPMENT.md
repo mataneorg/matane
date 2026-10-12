@@ -52,6 +52,8 @@ Run these from the repository root.
 | `pnpm e2e`                                  | Playwright end-to-end tests of the built app (fake local site, no network) |
 | `pnpm dist`                                 | Build installers for the current OS into `apps/desktop/release/`           |
 | `pnpm dist:linux`                           | Build a Linux AppImage into `apps/desktop/release/`                        |
+| `pnpm smoke:packaged`                       | Start the built AppImage once and check it (database, sandbox, sharp, UI)  |
+| `pnpm verify:packages`                      | Pack the SDK packages and test the tarballs in an empty project            |
 | `pnpm --filter @manga-reader/desktop bench` | Benchmark script in `apps/desktop/scripts/bench`                           |
 | `pnpm --filter @manga-reader/docs dev`      | Run the documentation site locally                                         |
 
@@ -84,6 +86,7 @@ packages/
   extension-templates/         Ready-made sources for Madara and MangaThemesia sites (MIT)
   extension-cli/               mr-ext: create, build, test, bench and publish extensions (MIT)
 packaging/                     AUR and Flathub packages and the scripts that update them
+scripts/                       verify-packages.mjs (checks the npm packages as published)
 docs/
   adr/                         Architecture decision records
   plans/                       Phase plans
