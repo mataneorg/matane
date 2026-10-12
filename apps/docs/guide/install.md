@@ -2,6 +2,8 @@
 
 Download Matane from [GitHub Releases](https://github.com/mataneorg/matane/releases). Pre-releases (betas) are marked as such.
 
+<DownloadButton />
+
 | System                        | File                                       | Updates                                |
 | ----------------------------- | ------------------------------------------ | -------------------------------------- |
 | Windows 10/11                 | `Matane-<version>-win-x64.exe` (installer) | installs them itself                   |
