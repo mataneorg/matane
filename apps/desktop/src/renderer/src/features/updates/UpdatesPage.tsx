@@ -34,6 +34,7 @@ import { groupByDay } from '../history/groups';
 import { EMPTY_SELECTION, type Selection, select, visibleSelection } from '../library/selection';
 import { DownloadButton } from '../manga/DownloadButton';
 import { type UpdateRowEntry, flattenGroups } from './entries';
+import { AnimatePresence, m, slideUpBar } from '../../lib/motion';
 
 /** New chapters of library manga, grouped by day (docs/BRAINSTORM.md §6.4; mockup 07). */
 export function UpdatesPage() {
@@ -86,13 +87,16 @@ export function UpdatesPage() {
           />
         )}
       </div>
-      {selected.length > 0 && (
-        <SelectionBar
-          chapterIds={selected}
-          onSelectAll={() => setSelection({ ids: new Set(order), anchor: null })}
-          onClear={() => setSelection(EMPTY_SELECTION)}
-        />
-      )}
+      <AnimatePresence>
+        {selected.length > 0 && (
+          <SelectionBar
+            key="selection-bar"
+            chapterIds={selected}
+            onSelectAll={() => setSelection({ ids: new Set(order), anchor: null })}
+            onClear={() => setSelection(EMPTY_SELECTION)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -510,9 +514,13 @@ function SelectionBar({
   });
   return (
     <div className="pointer-events-none sticky bottom-5 z-20 flex justify-center">
-      <div
+      <m.div
         role="toolbar"
         aria-label={t('library.selection.toolbar')}
+        variants={slideUpBar}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
         className="pointer-events-auto flex items-center gap-1 rounded-xl border bg-popover/95 p-1.5 shadow-2xl backdrop-blur"
       >
         <span className="flex items-center gap-2 px-3 font-medium text-primary-text">
@@ -539,7 +547,7 @@ function SelectionBar({
         <Button variant="ghost" size="icon-sm" title={t('library.selection.clear')} onClick={onClear}>
           <X />
         </Button>
-      </div>
+      </m.div>
     </div>
   );
 }

@@ -32,6 +32,7 @@ import { cn } from '../../lib/utils';
 import { useUiStore } from '../../stores/ui';
 import { CompletedRow, ErrorDetailsDialog, QueueGroupHeader, QueueRow } from './DownloadRows';
 import { type QueueGroup, applyOrder, groupQueue, inQueue, moveGroup, moveItem } from './queue';
+import { TabUnderline } from '../../components/ui/tab-underline';
 
 type Tab = 'queue' | 'completed' | 'errors';
 const TABS: Tab[] = ['queue', 'completed', 'errors'];
@@ -78,10 +79,11 @@ export function DownloadsPage() {
                 aria-selected={tab === key}
                 onClick={() => setTab(key)}
                 className={cn(
-                  '-mb-px flex items-center gap-2 border-b-2 border-transparent pb-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground',
-                  tab === key && 'border-primary font-semibold text-foreground',
+                  'relative -mb-px flex items-center gap-2 border-b-2 border-transparent pb-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground',
+                  tab === key && 'font-semibold text-foreground',
                 )}
               >
+                {tab === key && <TabUnderline layoutId="downloads-tab-underline" />}
                 {t(`downloads.page.tabs.${key}`)}
                 <span
                   className={cn(

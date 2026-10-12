@@ -26,6 +26,7 @@ import { MangaCardSkeleton, MangaGrid, gridStyle } from './MangaGrid';
 import { useBrowseView } from './settings';
 import { SourceIcon } from './SourceIcon';
 import { extensionIconUrl } from '../../lib/extensions';
+import { TabUnderline } from '../../components/ui/tab-underline';
 
 export interface BrowseSearch {
   tab: BrowseKind;
@@ -126,11 +127,12 @@ export function SourceBrowsePage({
                   aria-selected={tab === kind}
                   onClick={() => onSearchChange({ ...search, tab: kind })}
                   className={cn(
-                    '-mb-px border-b-2 border-transparent pb-3 text-muted-foreground transition-colors hover:text-foreground',
-                    tab === kind && 'border-primary font-semibold text-foreground',
+                    'relative -mb-px border-b-2 border-transparent pb-3 text-muted-foreground transition-colors hover:text-foreground',
+                    tab === kind && 'font-semibold text-foreground',
                   )}
                 >
                   {label}
+                  {tab === kind && <TabUnderline layoutId="browse-tab-underline" />}
                 </button>
               ))}
             </nav>

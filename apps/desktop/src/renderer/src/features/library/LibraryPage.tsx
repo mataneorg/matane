@@ -36,6 +36,8 @@ import { CategoryDialog } from './CategoryDialog';
 import { LibraryToolbar } from './LibraryToolbar';
 import { EMPTY_SELECTION, type Selection, select, visibleSelection } from './selection';
 import { filterCount, filtersOf, useLibrarySettings } from './settings';
+import { TabUnderline } from '../../components/ui/tab-underline';
+import { AnimatePresence, m, slideUpBar } from '../../lib/motion';
 
 const PADDING = 24;
 const LIST_ROW = 64;
@@ -224,14 +226,17 @@ export function LibraryPage({ tab: requestedTab, onTab }: { tab: LibraryTab; onT
         )}
       </div>
 
-      {selecting && (
-        <SelectionBar
-          ids={selected}
-          items={items}
-          onSelectAll={() => setSelection({ ids: new Set(order), anchor: null })}
-          onClear={clearSelection}
-        />
-      )}
+      <AnimatePresence>
+        {selecting && (
+          <SelectionBar
+            key="selection-bar"
+            ids={selected}
+            items={items}
+            onSelectAll={() => setSelection({ ids: new Set(order), anchor: null })}
+            onClear={clearSelection}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -254,10 +259,11 @@ function TabButton({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        'flex h-9 shrink-0 items-center gap-2 border-b-2 border-transparent px-2 text-muted-foreground transition-colors hover:text-foreground',
-        active && 'border-primary font-semibold text-foreground',
+        'relative flex h-9 shrink-0 items-center gap-2 border-b-2 border-transparent px-2 text-muted-foreground transition-colors hover:text-foreground',
+        active && 'font-semibold text-foreground',
       )}
     >
+      {active && <TabUnderline layoutId="library-tab-underline" />}
       <span className="max-w-48 truncate">{children}</span>
       {count !== undefined && (
         <span
@@ -568,74 +574,80 @@ function SelectionBar({
   );
 
   return (
-    <div
-      role="toolbar"
-      aria-label={t('library.selection.toolbar')}
-      className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-xl border bg-popover/95 p-1.5 shadow-2xl backdrop-blur"
-    >
-      <span className="flex items-center gap-2 px-3 font-medium text-primary-text">
-        <span className="size-2 rounded-full bg-primary" />
-        {t('library.selection.count', { count: ids.length })}
-      </span>
-      <span className="h-5 w-px bg-border" />
-      <Button variant="ghost" size="sm" onClick={onSelectAll}>
-        <ListChecks />
-        {t('library.selection.all')}
-      </Button>
-      <Button variant="ghost" size="sm" onClick={() => markRead.mutate(true)}>
-        <CheckCheck />
-        {t('library.selection.markRead')}
-      </Button>
-      <Button variant="ghost" size="sm" onClick={() => markRead.mutate(false)}>
-        <EyeOff />
-        {t('library.selection.markUnread')}
-      </Button>
-      <Button variant="ghost" size="sm" onClick={() => checkUpdates.mutate()} disabled={checkUpdates.isPending}>
-        <RefreshCw />
-        {t('library.selection.checkUpdates')}
-      </Button>
-      <Button variant="ghost" size="sm" onClick={() => setCategoriesOpen(true)}>
-        <Folder />
-        {t('library.selection.categories')}
-      </Button>
-      <Button variant="ghost" size="sm" onClick={() => void navigate({ to: '/library/migrate', search: { ids } })}>
-        <ArrowRightLeft />
-        {t('library.selection.migrate')}
-      </Button>
-      {ids.length === 1 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => void navigate({ to: '/manga/$mangaId', params: { mangaId: String(ids[0]) } })}
-        >
-          {t('library.selection.open')}
+    <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2">
+      <m.div
+        role="toolbar"
+        aria-label={t('library.selection.toolbar')}
+        variants={slideUpBar}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+        className="flex items-center gap-1 rounded-xl border bg-popover/95 p-1.5 shadow-2xl backdrop-blur"
+      >
+        <span className="flex items-center gap-2 px-3 font-medium text-primary-text">
+          <span className="size-2 rounded-full bg-primary" />
+          {t('library.selection.count', { count: ids.length })}
+        </span>
+        <span className="h-5 w-px bg-border" />
+        <Button variant="ghost" size="sm" onClick={onSelectAll}>
+          <ListChecks />
+          {t('library.selection.all')}
         </Button>
-      )}
-      <Button variant="ghost" size="sm" className="text-danger-text" onClick={() => setConfirmRemove(true)}>
-        <BookmarkMinus />
-        {t('library.selection.remove')}
-      </Button>
-      <span className="h-5 w-px bg-border" />
-      <Button variant="ghost" size="icon-sm" title={t('library.selection.clear')} onClick={onClear}>
-        <X />
-      </Button>
+        <Button variant="ghost" size="sm" onClick={() => markRead.mutate(true)}>
+          <CheckCheck />
+          {t('library.selection.markRead')}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => markRead.mutate(false)}>
+          <EyeOff />
+          {t('library.selection.markUnread')}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => checkUpdates.mutate()} disabled={checkUpdates.isPending}>
+          <RefreshCw />
+          {t('library.selection.checkUpdates')}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => setCategoriesOpen(true)}>
+          <Folder />
+          {t('library.selection.categories')}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => void navigate({ to: '/library/migrate', search: { ids } })}>
+          <ArrowRightLeft />
+          {t('library.selection.migrate')}
+        </Button>
+        {ids.length === 1 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => void navigate({ to: '/manga/$mangaId', params: { mangaId: String(ids[0]) } })}
+          >
+            {t('library.selection.open')}
+          </Button>
+        )}
+        <Button variant="ghost" size="sm" className="text-danger-text" onClick={() => setConfirmRemove(true)}>
+          <BookmarkMinus />
+          {t('library.selection.remove')}
+        </Button>
+        <span className="h-5 w-px bg-border" />
+        <Button variant="ghost" size="icon-sm" title={t('library.selection.clear')} onClick={onClear}>
+          <X />
+        </Button>
 
-      <CategoryDialog
-        open={categoriesOpen}
-        onOpenChange={setCategoriesOpen}
-        title={t('library.categories.setTitle', { count: ids.length })}
-        initial={shared}
-        confirmLabel={t('common.save')}
-        onConfirm={(categoryIds) => setCategories.mutate(categoryIds)}
-      />
-      <ConfirmDialog
-        open={confirmRemove}
-        onOpenChange={setConfirmRemove}
-        title={t('library.remove.title', { count: ids.length })}
-        description={t('library.remove.description')}
-        confirmLabel={t('library.remove.confirm')}
-        onConfirm={() => remove.mutate()}
-      />
+        <CategoryDialog
+          open={categoriesOpen}
+          onOpenChange={setCategoriesOpen}
+          title={t('library.categories.setTitle', { count: ids.length })}
+          initial={shared}
+          confirmLabel={t('common.save')}
+          onConfirm={(categoryIds) => setCategories.mutate(categoryIds)}
+        />
+        <ConfirmDialog
+          open={confirmRemove}
+          onOpenChange={setConfirmRemove}
+          title={t('library.remove.title', { count: ids.length })}
+          description={t('library.remove.description')}
+          confirmLabel={t('library.remove.confirm')}
+          onConfirm={() => remove.mutate()}
+        />
+      </m.div>
     </div>
   );
 }

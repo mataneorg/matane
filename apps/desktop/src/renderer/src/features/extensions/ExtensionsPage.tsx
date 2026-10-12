@@ -38,6 +38,7 @@ import { LogDialog } from './LogDialog';
 import { ExtensionIcon, LangBadges, TrustLine } from './parts';
 import { PreferencesDialog } from './PreferencesDialog';
 import { RepositoriesPanel } from './RepositoriesPanel';
+import { TabUnderline } from '../../components/ui/tab-underline';
 
 export type ExtensionsTab = 'installed' | 'available' | 'updates';
 type Tab = ExtensionsTab;
@@ -131,10 +132,11 @@ export function ExtensionsPage({ initialTab = 'installed' }: { initialTab?: Exte
               aria-selected={tab === key}
               onClick={() => setTab(key)}
               className={cn(
-                '-mb-px flex items-center gap-2 border-b-2 border-transparent pb-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground',
-                tab === key && 'border-primary font-semibold text-foreground',
+                'relative -mb-px flex items-center gap-2 border-b-2 border-transparent pb-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground',
+                tab === key && 'font-semibold text-foreground',
               )}
             >
+              {tab === key && <TabUnderline layoutId="extensions-tab-underline" />}
               {t(`extensions.tabs.${key}`)}
               <span
                 className={cn(
