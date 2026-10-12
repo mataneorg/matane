@@ -1,4 +1,4 @@
-import type { DbChangeTag, FilterState, InvokeInput, InvokeOutput } from '@manga-reader/shared';
+import type { DbChangeTag, FilterState, InvokeInput, InvokeOutput, MangaInfo } from '@manga-reader/shared';
 import {
   type QueryClient,
   infiniteQueryOptions,
@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { ipc } from './ipc';
+import { createPrefetcher } from './prefetch';
 import { localQueryDefaults } from './query';
 
 // Queries for extensions, sources, manga and chapters (ADR 0010):
@@ -146,14 +147,45 @@ export const pagesQuery = (chapterId: number) =>
     staleTime: 30 * 60_000,
   });
 
-/** Fetches details + chapters from the source; `db.changed` then refreshes the local queries. */
+type RefreshResult = InvokeOutput<'manga.refresh'>;
+const refreshing = new Map<number, Promise<RefreshResult>>();
+
+/**
+ * Fetches details + chapters from the source; `db.changed` then refreshes the local queries. A second call for the
+ * same manga while one runs joins it, so a click on a card that is being fetched ahead (`prefetchManga`) waits for
+ * that one request instead of sending another.
+ */
+export function refreshManga(queryClient: QueryClient, mangaId: number, signal?: AbortSignal): Promise<RefreshResult> {
+  const running = refreshing.get(mangaId);
+  if (running) return running;
+  const promise = invokeCancellable('manga.refresh', { mangaId }, signal)
+    .then((result) => {
+      queryClient.setQueryData(queryKeys.manga(mangaId), result.manga);
+      return result;
+    })
+    .finally(() => refreshing.delete(mangaId));
+  refreshing.set(mangaId, promise);
+  return promise;
+}
+
 export function useRefreshManga(mangaId: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ['refreshManga', mangaId],
-    mutationFn: () => invokeCancellable('manga.refresh', { mangaId }),
-    onSuccess: (result) => queryClient.setQueryData(queryKeys.manga(mangaId), result.manga),
+    mutationFn: () => refreshManga(queryClient, mangaId),
   });
+}
+
+let prefetcher: ReturnType<typeof createPrefetcher> | undefined;
+
+/**
+ * Fetches a manga that was only seen in a listing, ahead of the click. Does nothing for one that was fetched before
+ * (in this session or earlier); see `createPrefetcher` for the limits.
+ */
+export function prefetchManga(queryClient: QueryClient, mangaId: number): void {
+  if (queryClient.getQueryData<MangaInfo>(queryKeys.manga(mangaId))?.lastFetchedAt != null) return;
+  prefetcher ??= createPrefetcher((id) => refreshManga(queryClient, id));
+  prefetcher.request(mangaId);
 }
 
 /** Query keys that go stale when main reports a changed entity (ADR 0010). */

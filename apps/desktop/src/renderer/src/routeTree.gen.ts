@@ -8,160 +8,159 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppRouteImport } from './routes/_app'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as AppDownloadsRouteImport } from './routes/_app/downloads'
-import { Route as AppHistoryRouteImport } from './routes/_app/history'
-import { Route as AppLibraryRouteImport } from './routes/_app/library'
-import { Route as AppStatisticsRouteImport } from './routes/_app/statistics'
-import { Route as AppUpdatesRouteImport } from './routes/_app/updates'
-import { Route as ReaderChapterIdRouteImport } from './routes/reader/$chapterId'
-import { Route as AppBrowseExtensionsRouteImport } from './routes/_app/browse/extensions'
-import { Route as AppBrowseGlobalSearchRouteImport } from './routes/_app/browse/global-search'
-import { Route as AppLibraryMigrateRouteImport } from './routes/_app/library_.migrate'
-import { Route as AppMangaMangaIdRouteImport } from './routes/_app/manga/$mangaId'
-import { Route as AppSettingsSectionRouteImport } from './routes/_app/settings/$section'
-import { Route as AppBrowseSourcesIndexRouteImport } from './routes/_app/browse/sources.index'
-import { Route as AppBrowseSourcesExtensionIdSourceKeyRouteImport } from './routes/_app/browse/sources.$extensionId.$sourceKey'
+import { Route as rootRouteImport } from './routes/__root';
+import { Route as IndexRouteImport } from './routes/index';
+import { Route as AppRouteImport } from './routes/_app';
+import { Route as OnboardingRouteImport } from './routes/onboarding';
+import { Route as AppDownloadsRouteImport } from './routes/_app/downloads';
+import { Route as AppHistoryRouteImport } from './routes/_app/history';
+import { Route as AppLibraryRouteImport } from './routes/_app/library';
+import { Route as AppStatisticsRouteImport } from './routes/_app/statistics';
+import { Route as AppUpdatesRouteImport } from './routes/_app/updates';
+import { Route as ReaderChapterIdRouteImport } from './routes/reader/$chapterId';
+import { Route as AppBrowseExtensionsRouteImport } from './routes/_app/browse/extensions';
+import { Route as AppBrowseGlobalSearchRouteImport } from './routes/_app/browse/global-search';
+import { Route as AppLibraryMigrateRouteImport } from './routes/_app/library_.migrate';
+import { Route as AppMangaMangaIdRouteImport } from './routes/_app/manga/$mangaId';
+import { Route as AppSettingsSectionRouteImport } from './routes/_app/settings/$section';
+import { Route as AppBrowseSourcesIndexRouteImport } from './routes/_app/browse/sources.index';
+import { Route as AppBrowseSourcesExtensionIdSourceKeyRouteImport } from './routes/_app/browse/sources.$extensionId.$sourceKey';
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AppDownloadsRoute = AppDownloadsRouteImport.update({
   id: '/downloads',
   path: '/downloads',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppHistoryRoute = AppHistoryRouteImport.update({
   id: '/history',
   path: '/history',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppLibraryRoute = AppLibraryRouteImport.update({
   id: '/library',
   path: '/library',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppStatisticsRoute = AppStatisticsRouteImport.update({
   id: '/statistics',
   path: '/statistics',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppUpdatesRoute = AppUpdatesRouteImport.update({
   id: '/updates',
   path: '/updates',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const ReaderChapterIdRoute = ReaderChapterIdRouteImport.update({
   id: '/reader/$chapterId',
   path: '/reader/$chapterId',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AppBrowseExtensionsRoute = AppBrowseExtensionsRouteImport.update({
   id: '/browse/extensions',
   path: '/browse/extensions',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppBrowseGlobalSearchRoute = AppBrowseGlobalSearchRouteImport.update({
   id: '/browse/global-search',
   path: '/browse/global-search',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppLibraryMigrateRoute = AppLibraryMigrateRouteImport.update({
   id: '/library_/migrate',
   path: '/library/migrate',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppMangaMangaIdRoute = AppMangaMangaIdRouteImport.update({
   id: '/manga/$mangaId',
   path: '/manga/$mangaId',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppSettingsSectionRoute = AppSettingsSectionRouteImport.update({
   id: '/settings/$section',
   path: '/settings/$section',
   getParentRoute: () => AppRoute,
-} as any)
+} as any);
 const AppBrowseSourcesIndexRoute = AppBrowseSourcesIndexRouteImport.update({
   id: '/browse/sources/',
   path: '/browse/sources/',
   getParentRoute: () => AppRoute,
-} as any)
-const AppBrowseSourcesExtensionIdSourceKeyRoute =
-  AppBrowseSourcesExtensionIdSourceKeyRouteImport.update({
-    id: '/browse/sources/$extensionId/$sourceKey',
-    path: '/browse/sources/$extensionId/$sourceKey',
-    getParentRoute: () => AppRoute,
-  } as any)
+} as any);
+const AppBrowseSourcesExtensionIdSourceKeyRoute = AppBrowseSourcesExtensionIdSourceKeyRouteImport.update({
+  id: '/browse/sources/$extensionId/$sourceKey',
+  path: '/browse/sources/$extensionId/$sourceKey',
+  getParentRoute: () => AppRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/onboarding': typeof OnboardingRoute
-  '/downloads': typeof AppDownloadsRoute
-  '/history': typeof AppHistoryRoute
-  '/library': typeof AppLibraryRoute
-  '/statistics': typeof AppStatisticsRoute
-  '/updates': typeof AppUpdatesRoute
-  '/reader/$chapterId': typeof ReaderChapterIdRoute
-  '/browse/extensions': typeof AppBrowseExtensionsRoute
-  '/browse/global-search': typeof AppBrowseGlobalSearchRoute
-  '/library/migrate': typeof AppLibraryMigrateRoute
-  '/manga/$mangaId': typeof AppMangaMangaIdRoute
-  '/settings/$section': typeof AppSettingsSectionRoute
-  '/browse/sources/': typeof AppBrowseSourcesIndexRoute
-  '/browse/sources/$extensionId/$sourceKey': typeof AppBrowseSourcesExtensionIdSourceKeyRoute
+  '/': typeof IndexRoute;
+  '/onboarding': typeof OnboardingRoute;
+  '/downloads': typeof AppDownloadsRoute;
+  '/history': typeof AppHistoryRoute;
+  '/library': typeof AppLibraryRoute;
+  '/statistics': typeof AppStatisticsRoute;
+  '/updates': typeof AppUpdatesRoute;
+  '/reader/$chapterId': typeof ReaderChapterIdRoute;
+  '/browse/extensions': typeof AppBrowseExtensionsRoute;
+  '/browse/global-search': typeof AppBrowseGlobalSearchRoute;
+  '/library/migrate': typeof AppLibraryMigrateRoute;
+  '/manga/$mangaId': typeof AppMangaMangaIdRoute;
+  '/settings/$section': typeof AppSettingsSectionRoute;
+  '/browse/sources/': typeof AppBrowseSourcesIndexRoute;
+  '/browse/sources/$extensionId/$sourceKey': typeof AppBrowseSourcesExtensionIdSourceKeyRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/onboarding': typeof OnboardingRoute
-  '/downloads': typeof AppDownloadsRoute
-  '/history': typeof AppHistoryRoute
-  '/library': typeof AppLibraryRoute
-  '/statistics': typeof AppStatisticsRoute
-  '/updates': typeof AppUpdatesRoute
-  '/reader/$chapterId': typeof ReaderChapterIdRoute
-  '/browse/extensions': typeof AppBrowseExtensionsRoute
-  '/browse/global-search': typeof AppBrowseGlobalSearchRoute
-  '/library/migrate': typeof AppLibraryMigrateRoute
-  '/manga/$mangaId': typeof AppMangaMangaIdRoute
-  '/settings/$section': typeof AppSettingsSectionRoute
-  '/browse/sources': typeof AppBrowseSourcesIndexRoute
-  '/browse/sources/$extensionId/$sourceKey': typeof AppBrowseSourcesExtensionIdSourceKeyRoute
+  '/': typeof IndexRoute;
+  '/onboarding': typeof OnboardingRoute;
+  '/downloads': typeof AppDownloadsRoute;
+  '/history': typeof AppHistoryRoute;
+  '/library': typeof AppLibraryRoute;
+  '/statistics': typeof AppStatisticsRoute;
+  '/updates': typeof AppUpdatesRoute;
+  '/reader/$chapterId': typeof ReaderChapterIdRoute;
+  '/browse/extensions': typeof AppBrowseExtensionsRoute;
+  '/browse/global-search': typeof AppBrowseGlobalSearchRoute;
+  '/library/migrate': typeof AppLibraryMigrateRoute;
+  '/manga/$mangaId': typeof AppMangaMangaIdRoute;
+  '/settings/$section': typeof AppSettingsSectionRoute;
+  '/browse/sources': typeof AppBrowseSourcesIndexRoute;
+  '/browse/sources/$extensionId/$sourceKey': typeof AppBrowseSourcesExtensionIdSourceKeyRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_app': typeof AppRouteWithChildren
-  '/onboarding': typeof OnboardingRoute
-  '/_app/downloads': typeof AppDownloadsRoute
-  '/_app/history': typeof AppHistoryRoute
-  '/_app/library': typeof AppLibraryRoute
-  '/_app/statistics': typeof AppStatisticsRoute
-  '/_app/updates': typeof AppUpdatesRoute
-  '/reader/$chapterId': typeof ReaderChapterIdRoute
-  '/_app/browse/extensions': typeof AppBrowseExtensionsRoute
-  '/_app/browse/global-search': typeof AppBrowseGlobalSearchRoute
-  '/_app/library_/migrate': typeof AppLibraryMigrateRoute
-  '/_app/manga/$mangaId': typeof AppMangaMangaIdRoute
-  '/_app/settings/$section': typeof AppSettingsSectionRoute
-  '/_app/browse/sources/': typeof AppBrowseSourcesIndexRoute
-  '/_app/browse/sources/$extensionId/$sourceKey': typeof AppBrowseSourcesExtensionIdSourceKeyRoute
+  __root__: typeof rootRouteImport;
+  '/': typeof IndexRoute;
+  '/_app': typeof AppRouteWithChildren;
+  '/onboarding': typeof OnboardingRoute;
+  '/_app/downloads': typeof AppDownloadsRoute;
+  '/_app/history': typeof AppHistoryRoute;
+  '/_app/library': typeof AppLibraryRoute;
+  '/_app/statistics': typeof AppStatisticsRoute;
+  '/_app/updates': typeof AppUpdatesRoute;
+  '/reader/$chapterId': typeof ReaderChapterIdRoute;
+  '/_app/browse/extensions': typeof AppBrowseExtensionsRoute;
+  '/_app/browse/global-search': typeof AppBrowseGlobalSearchRoute;
+  '/_app/library_/migrate': typeof AppLibraryMigrateRoute;
+  '/_app/manga/$mangaId': typeof AppMangaMangaIdRoute;
+  '/_app/settings/$section': typeof AppSettingsSectionRoute;
+  '/_app/browse/sources/': typeof AppBrowseSourcesIndexRoute;
+  '/_app/browse/sources/$extensionId/$sourceKey': typeof AppBrowseSourcesExtensionIdSourceKeyRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/'
     | '/onboarding'
@@ -177,8 +176,8 @@ export interface FileRouteTypes {
     | '/manga/$mangaId'
     | '/settings/$section'
     | '/browse/sources/'
-    | '/browse/sources/$extensionId/$sourceKey'
-  fileRoutesByTo: FileRoutesByTo
+    | '/browse/sources/$extensionId/$sourceKey';
+  fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
     | '/onboarding'
@@ -194,7 +193,7 @@ export interface FileRouteTypes {
     | '/manga/$mangaId'
     | '/settings/$section'
     | '/browse/sources'
-    | '/browse/sources/$extensionId/$sourceKey'
+    | '/browse/sources/$extensionId/$sourceKey';
   id:
     | '__root__'
     | '/'
@@ -212,146 +211,146 @@ export interface FileRouteTypes {
     | '/_app/manga/$mangaId'
     | '/_app/settings/$section'
     | '/_app/browse/sources/'
-    | '/_app/browse/sources/$extensionId/$sourceKey'
-  fileRoutesById: FileRoutesById
+    | '/_app/browse/sources/$extensionId/$sourceKey';
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRouteWithChildren
-  OnboardingRoute: typeof OnboardingRoute
-  ReaderChapterIdRoute: typeof ReaderChapterIdRoute
+  IndexRoute: typeof IndexRoute;
+  AppRoute: typeof AppRouteWithChildren;
+  OnboardingRoute: typeof OnboardingRoute;
+  ReaderChapterIdRoute: typeof ReaderChapterIdRoute;
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/';
+      path: '/';
+      fullPath: '/';
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/_app';
+      path: '';
+      fullPath: '/';
+      preLoaderRoute: typeof AppRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/onboarding';
+      path: '/onboarding';
+      fullPath: '/onboarding';
+      preLoaderRoute: typeof OnboardingRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/_app/downloads': {
-      id: '/_app/downloads'
-      path: '/downloads'
-      fullPath: '/downloads'
-      preLoaderRoute: typeof AppDownloadsRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/downloads';
+      path: '/downloads';
+      fullPath: '/downloads';
+      preLoaderRoute: typeof AppDownloadsRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/history': {
-      id: '/_app/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof AppHistoryRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/history';
+      path: '/history';
+      fullPath: '/history';
+      preLoaderRoute: typeof AppHistoryRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/library': {
-      id: '/_app/library'
-      path: '/library'
-      fullPath: '/library'
-      preLoaderRoute: typeof AppLibraryRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/library';
+      path: '/library';
+      fullPath: '/library';
+      preLoaderRoute: typeof AppLibraryRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/statistics': {
-      id: '/_app/statistics'
-      path: '/statistics'
-      fullPath: '/statistics'
-      preLoaderRoute: typeof AppStatisticsRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/statistics';
+      path: '/statistics';
+      fullPath: '/statistics';
+      preLoaderRoute: typeof AppStatisticsRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/updates': {
-      id: '/_app/updates'
-      path: '/updates'
-      fullPath: '/updates'
-      preLoaderRoute: typeof AppUpdatesRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/updates';
+      path: '/updates';
+      fullPath: '/updates';
+      preLoaderRoute: typeof AppUpdatesRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/reader/$chapterId': {
-      id: '/reader/$chapterId'
-      path: '/reader/$chapterId'
-      fullPath: '/reader/$chapterId'
-      preLoaderRoute: typeof ReaderChapterIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/reader/$chapterId';
+      path: '/reader/$chapterId';
+      fullPath: '/reader/$chapterId';
+      preLoaderRoute: typeof ReaderChapterIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/_app/browse/extensions': {
-      id: '/_app/browse/extensions'
-      path: '/browse/extensions'
-      fullPath: '/browse/extensions'
-      preLoaderRoute: typeof AppBrowseExtensionsRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/browse/extensions';
+      path: '/browse/extensions';
+      fullPath: '/browse/extensions';
+      preLoaderRoute: typeof AppBrowseExtensionsRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/browse/global-search': {
-      id: '/_app/browse/global-search'
-      path: '/browse/global-search'
-      fullPath: '/browse/global-search'
-      preLoaderRoute: typeof AppBrowseGlobalSearchRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/browse/global-search';
+      path: '/browse/global-search';
+      fullPath: '/browse/global-search';
+      preLoaderRoute: typeof AppBrowseGlobalSearchRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/library_/migrate': {
-      id: '/_app/library_/migrate'
-      path: '/library/migrate'
-      fullPath: '/library/migrate'
-      preLoaderRoute: typeof AppLibraryMigrateRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/library_/migrate';
+      path: '/library/migrate';
+      fullPath: '/library/migrate';
+      preLoaderRoute: typeof AppLibraryMigrateRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/manga/$mangaId': {
-      id: '/_app/manga/$mangaId'
-      path: '/manga/$mangaId'
-      fullPath: '/manga/$mangaId'
-      preLoaderRoute: typeof AppMangaMangaIdRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/manga/$mangaId';
+      path: '/manga/$mangaId';
+      fullPath: '/manga/$mangaId';
+      preLoaderRoute: typeof AppMangaMangaIdRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/settings/$section': {
-      id: '/_app/settings/$section'
-      path: '/settings/$section'
-      fullPath: '/settings/$section'
-      preLoaderRoute: typeof AppSettingsSectionRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/settings/$section';
+      path: '/settings/$section';
+      fullPath: '/settings/$section';
+      preLoaderRoute: typeof AppSettingsSectionRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/browse/sources/': {
-      id: '/_app/browse/sources/'
-      path: '/browse/sources'
-      fullPath: '/browse/sources/'
-      preLoaderRoute: typeof AppBrowseSourcesIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/browse/sources/';
+      path: '/browse/sources';
+      fullPath: '/browse/sources/';
+      preLoaderRoute: typeof AppBrowseSourcesIndexRouteImport;
+      parentRoute: typeof AppRoute;
+    };
     '/_app/browse/sources/$extensionId/$sourceKey': {
-      id: '/_app/browse/sources/$extensionId/$sourceKey'
-      path: '/browse/sources/$extensionId/$sourceKey'
-      fullPath: '/browse/sources/$extensionId/$sourceKey'
-      preLoaderRoute: typeof AppBrowseSourcesExtensionIdSourceKeyRouteImport
-      parentRoute: typeof AppRoute
-    }
+      id: '/_app/browse/sources/$extensionId/$sourceKey';
+      path: '/browse/sources/$extensionId/$sourceKey';
+      fullPath: '/browse/sources/$extensionId/$sourceKey';
+      preLoaderRoute: typeof AppBrowseSourcesExtensionIdSourceKeyRouteImport;
+      parentRoute: typeof AppRoute;
+    };
   }
 }
 
 interface AppRouteChildren {
-  AppDownloadsRoute: typeof AppDownloadsRoute
-  AppHistoryRoute: typeof AppHistoryRoute
-  AppLibraryRoute: typeof AppLibraryRoute
-  AppStatisticsRoute: typeof AppStatisticsRoute
-  AppUpdatesRoute: typeof AppUpdatesRoute
-  AppBrowseExtensionsRoute: typeof AppBrowseExtensionsRoute
-  AppBrowseGlobalSearchRoute: typeof AppBrowseGlobalSearchRoute
-  AppLibraryMigrateRoute: typeof AppLibraryMigrateRoute
-  AppMangaMangaIdRoute: typeof AppMangaMangaIdRoute
-  AppSettingsSectionRoute: typeof AppSettingsSectionRoute
-  AppBrowseSourcesIndexRoute: typeof AppBrowseSourcesIndexRoute
-  AppBrowseSourcesExtensionIdSourceKeyRoute: typeof AppBrowseSourcesExtensionIdSourceKeyRoute
+  AppDownloadsRoute: typeof AppDownloadsRoute;
+  AppHistoryRoute: typeof AppHistoryRoute;
+  AppLibraryRoute: typeof AppLibraryRoute;
+  AppStatisticsRoute: typeof AppStatisticsRoute;
+  AppUpdatesRoute: typeof AppUpdatesRoute;
+  AppBrowseExtensionsRoute: typeof AppBrowseExtensionsRoute;
+  AppBrowseGlobalSearchRoute: typeof AppBrowseGlobalSearchRoute;
+  AppLibraryMigrateRoute: typeof AppLibraryMigrateRoute;
+  AppMangaMangaIdRoute: typeof AppMangaMangaIdRoute;
+  AppSettingsSectionRoute: typeof AppSettingsSectionRoute;
+  AppBrowseSourcesIndexRoute: typeof AppBrowseSourcesIndexRoute;
+  AppBrowseSourcesExtensionIdSourceKeyRoute: typeof AppBrowseSourcesExtensionIdSourceKeyRoute;
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -366,18 +365,15 @@ const AppRouteChildren: AppRouteChildren = {
   AppMangaMangaIdRoute: AppMangaMangaIdRoute,
   AppSettingsSectionRoute: AppSettingsSectionRoute,
   AppBrowseSourcesIndexRoute: AppBrowseSourcesIndexRoute,
-  AppBrowseSourcesExtensionIdSourceKeyRoute:
-    AppBrowseSourcesExtensionIdSourceKeyRoute,
-}
+  AppBrowseSourcesExtensionIdSourceKeyRoute: AppBrowseSourcesExtensionIdSourceKeyRoute,
+};
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   ReaderChapterIdRoute: ReaderChapterIdRoute,
-}
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+};
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();

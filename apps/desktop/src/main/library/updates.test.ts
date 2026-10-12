@@ -134,6 +134,15 @@ describe('UpdatesRepository', () => {
     expect(repo.unseen(0)).toBe(1);
   });
 
+  it('does not list the chapters of a manga that was only fetched ahead from a listing', () => {
+    const id = manga.ensure('demo/en', { url: '/Hovered', title: 'Hovered' });
+    chapters.sync(id, [ch('Hovered-2', 2), ch('Hovered-1', 1)], now);
+    expect(repo.list()).toEqual([]);
+    // Joining the library later does not turn what was already fetched into news either.
+    library.add(id, [], now + 50);
+    expect(repo.list()).toEqual([]);
+  });
+
   it('gives the targets of a check with what the skip rules need', () => {
     const a = libraryManga('Alpha');
     const b = libraryManga('Beta', { status: 'completed' });

@@ -1,5 +1,5 @@
 import type { BrowseItem, BrowseSettings } from '@manga-reader/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { Link } from '@tanstack/react-router';
 import { Bookmark, Loader2 } from 'lucide-react';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { CoverImage } from '../../components/CoverImage';
 import { Skeleton } from '../../components/ui/skeleton';
 import { libraryIdsQuery } from '../../lib/library';
+import { prefetchManga } from '../../lib/sources';
 import { MangaCardMenu } from './MangaCardMenu';
 
 type Display = BrowseSettings['display'];
@@ -21,14 +22,35 @@ export function gridStyle(display: Display, coverSize: number): CSSProperties {
   };
 }
 
+/** How long the pointer (or keyboard focus) rests on a card before its manga is fetched ahead. */
+const HOVER_INTENT_MS = 350;
+
+/**
+ * Handlers that fetch a manga's details and chapters when its card has been hovered or focused for a moment, so the
+ * page opens full (ADR 0040). Leaving the card early cancels it, so moving across a grid fetches nothing.
+ */
+function useFetchAhead(item: BrowseItem) {
+  const queryClient = useQueryClient();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const stop = () => clearTimeout(timer.current);
+  useEffect(() => stop, []);
+  const start = () => {
+    stop();
+    if (item.detailsFetched || !navigator.onLine) return;
+    timer.current = setTimeout(() => prefetchManga(queryClient, item.mangaId), HOVER_INTENT_MS);
+  };
+  return { onPointerEnter: start, onFocus: start, onPointerLeave: stop, onBlur: stop };
+}
+
 export function MangaCard({ item, display = 'comfortable' }: { item: BrowseItem; display?: Display }) {
   const { t } = useTranslation();
   // Browse results are cached remote data; library membership comes from the local query (ADR 0010).
   const { data: libraryIds } = useQuery(libraryIdsQuery);
   const inLibrary = libraryIds ? libraryIds.has(item.mangaId) : item.inLibrary;
   const params = { mangaId: String(item.mangaId) };
+  const fetchAhead = useFetchAhead(item);
 
-  const card = renderCard({ item, display, inLibrary, params, t });
+  const card = renderCard({ item, display, inLibrary, params, t, fetchAhead });
   return (
     <MangaCardMenu item={item} inLibrary={inLibrary}>
       {card}
@@ -43,7 +65,9 @@ function renderCard({
   inLibrary,
   params,
   t,
+  fetchAhead,
 }: {
+  fetchAhead: ReturnType<typeof useFetchAhead>;
   item: BrowseItem;
   display: Display;
   inLibrary: boolean;
@@ -56,6 +80,7 @@ function renderCard({
         to="/manga/$mangaId"
         params={params}
         title={item.title}
+        {...fetchAhead}
         className="group flex h-16 min-w-0 items-center gap-3 border-b px-2 transition-colors hover:bg-accent/60"
       >
         <CoverImage
@@ -81,6 +106,7 @@ function renderCard({
       params={params}
       className="group flex min-w-0 flex-col gap-2 rounded-lg outline-offset-4"
       title={item.title}
+      {...fetchAhead}
     >
       <div className="relative overflow-hidden rounded-lg">
         <CoverImage
