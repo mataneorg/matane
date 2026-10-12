@@ -11,6 +11,11 @@ permissions:
   contents: read
   id-token: write
 
+# One publish at a time: two tags pushed together would race for the same versions.
+concurrency:
+  group: publish-sdk
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -36,6 +41,9 @@ jobs:
           done
       - run: pnpm --filter "@matane/extension-cli..." typecheck
       - run: pnpm --filter "@matane/extension-cli..." test
+      # Packs the four packages, installs the tarballs into an empty project and runs the CLI from there
+      # (scaffold, build, sign and verify a repository); nothing is uploaded.
+      - run: pnpm verify:packages
       # prepack builds dist/; publishConfig points the published manifests at it.
       - run: pnpm --filter "@matane/extension-cli..." publish --no-git-checks --access public
         env:
