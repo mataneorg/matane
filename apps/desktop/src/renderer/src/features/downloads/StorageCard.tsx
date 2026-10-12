@@ -5,13 +5,7 @@ import { limitBytesOf } from '../../lib/downloads';
 import { formatBytes } from '../../lib/format';
 import { ipc, settingsQuery } from '../../lib/ipc';
 import { cn } from '../../lib/utils';
-
-/** Share of the limit that is used (0–100) and whether it is reached; no limit, no share. */
-export function usageShare(usedBytes: number, limitBytes: number | null): { percent: number; over: boolean } {
-  if (limitBytes === null || limitBytes <= 0) return { percent: 0, over: false };
-  const percent = Math.min(100, (usedBytes / limitBytes) * 100);
-  return { percent, over: usedBytes >= limitBytes };
-}
+import { usageShare } from './usage';
 
 /** What downloads use against their limit, the free space on the drive, and where chapters go. */
 export function StorageCard() {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { usageShare } from './StorageCard';
+import { usageShare } from './usage';
 
 describe('usageShare', () => {
   it('is the used part of the limit, capped at 100', () => {
