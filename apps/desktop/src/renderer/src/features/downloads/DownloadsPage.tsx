@@ -25,6 +25,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { Button } from '../../components/ui/button';
+import { StorageCard } from './StorageCard';
 import { downloadStatsQuery, isOverLimit, limitBytesOf, listedDownloadsQuery } from '../../lib/downloads';
 import { formatBytes } from '../../lib/format';
 import { ipc, settingsQuery } from '../../lib/ipc';
@@ -60,6 +61,7 @@ export function DownloadsPage() {
       <div ref={setScrollElement} className="relative min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-6xl flex-col gap-5 px-6 py-5">
           <DownloadsHeader queue={byTab.queue} completed={byTab.completed.length} />
+          <StorageCard />
           <LimitBanner />
           {!online && byTab.queue.some((i) => i.status !== 'error' && i.status !== 'paused') && (
             <div
@@ -146,7 +148,6 @@ function DownloadsHeader({ queue, completed }: { queue: DownloadItem[]; complete
   const [confirmCancel, setConfirmCancel] = useState(false);
   const limit = limitBytesOf(settings?.downloads.limitGb ?? null);
   const used = stats?.totalBytes ?? 0;
-  const percent = limit ? Math.min(100, Math.round((used / limit) * 100)) : 0;
   const runnable = (stats?.queued ?? 0) + (stats?.downloading ?? 0);
   const pause = useMutation({ mutationFn: () => ipc.invoke('downloads.pause') });
   const resume = useMutation({ mutationFn: () => ipc.invoke('downloads.resume') });
@@ -173,19 +174,6 @@ function DownloadsHeader({ queue, completed }: { queue: DownloadItem[]; complete
             ? t('downloads.page.usedOfLimit', { used: size(used), limit: size(limit) })
             : t('downloads.page.used', { used: size(used) })}
         </p>
-        {limit !== null && (
-          <div className="flex items-center gap-3">
-            <div className="h-1.5 w-52 overflow-hidden rounded-full bg-muted">
-              <div
-                className={cn('h-full rounded-full', percent >= 100 ? 'bg-destructive' : 'bg-ctp-peach')}
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-            <span className={cn('text-xs', percent >= 100 ? 'text-danger-text' : 'text-warning-text')}>
-              {t('downloads.page.percent', { percent, used: size(used), limit: size(limit) })}
-            </span>
-          </div>
-        )}
       </div>
       <div className="ml-auto flex items-center gap-2">
         {runnable > 0 || (stats?.paused ?? 0) === 0 ? (

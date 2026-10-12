@@ -34,6 +34,7 @@ import type { AppLicense, AppSettings, PackageKind } from '@manga-reader/shared'
 import type { ReadingService } from '../reading/service';
 import { type IpcHandlers, broadcast } from './register';
 import type { RequestRegistry } from './requests';
+import { freeBytesOf } from '../downloads/disk-space';
 
 export interface IpcDeps {
   settings: SettingsRepository;
@@ -154,10 +155,12 @@ export function createIpcHandlers({
       return text;
     },
     'app.licenses': () => diagnostics.licenses(),
-    'storage.info': () => ({
+    'storage.info': async () => ({
       pageCacheBytes: imageCache.bytesOf('page'),
       browseCoverBytes: imageCache.bytesOf('browse_cover'),
       downloadBytes: downloadsRepo.stats().totalBytes,
+      downloadFolder: downloadFolder(),
+      freeBytes: await freeBytesOf(downloadFolder()),
       dataPath: paths.data,
       logPath: paths.logs,
     }),

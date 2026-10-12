@@ -1283,6 +1283,11 @@
         }
       },
       "offline": "Offline: the queue waits and carries on by itself once you're back online."
+    },
+    "storage": {
+      "title": "Storage",
+      "free": "free",
+      "overLimit": "The size limit is reached: automatic downloads are stopped."
     }
   },
   "updates": {

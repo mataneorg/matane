@@ -1255,6 +1255,11 @@
         }
       },
       "offline": "Offline: antrean menunggu dan lanjut sendiri setelah kamu online lagi."
+    },
+    "storage": {
+      "title": "Penyimpanan",
+      "free": "kosong",
+      "overLimit": "Batas ukuran tercapai: unduhan otomatis dihentikan."
     }
   },
   "updates": {

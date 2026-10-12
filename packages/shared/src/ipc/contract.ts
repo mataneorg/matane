@@ -107,6 +107,9 @@ export const invokeContract = {
       pageCacheBytes: z.number(),
       browseCoverBytes: z.number(),
       downloadBytes: z.number(),
+      /** Where chapters are downloaded, and the free space on that drive (null when it cannot be read). */
+      downloadFolder: z.string(),
+      freeBytes: z.number().nullable(),
       dataPath: z.string(),
       logPath: z.string(),
     }),
