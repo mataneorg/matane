@@ -1,6 +1,6 @@
 import type { ExtensionLogEntry } from '@manga-reader/shared';
 import { Check, Copy, Trash2, X } from 'lucide-react';
-import { Dialog } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/button';

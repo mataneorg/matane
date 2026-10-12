@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Scale, X } from 'lucide-react';
-import { Dialog } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/button';

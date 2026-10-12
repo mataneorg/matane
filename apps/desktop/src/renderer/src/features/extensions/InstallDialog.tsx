@@ -1,7 +1,7 @@
 import type { InstallPreview } from '@manga-reader/shared';
 import { useMutation } from '@tanstack/react-query';
 import { AlertTriangle, CircleCheck, Download, Info, Loader2, Shield, ShieldAlert, X } from 'lucide-react';
-import { Dialog } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '../../components/ui/badge';

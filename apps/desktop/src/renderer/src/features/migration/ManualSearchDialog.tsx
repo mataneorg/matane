@@ -1,7 +1,7 @@
 import type { BrowseItem, SourceEntry } from '@manga-reader/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
-import { Dialog } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CoverImage } from '../../components/CoverImage';

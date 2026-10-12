@@ -7,7 +7,7 @@ import {
 } from '@manga-reader/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ExternalLink, Loader2, Search } from 'lucide-react';
-import { Dialog } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';

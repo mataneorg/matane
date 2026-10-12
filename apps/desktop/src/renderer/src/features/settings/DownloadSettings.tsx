@@ -1,7 +1,7 @@
 import type { DownloadMoveProgress, DownloadSettings as Settings } from '@manga-reader/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { FolderOpen, FolderPen } from 'lucide-react';
-import { Dialog } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { useCallback, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/button';

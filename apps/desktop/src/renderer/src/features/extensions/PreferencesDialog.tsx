@@ -1,7 +1,8 @@
 import type { Preference } from '@manga-reader/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, X } from 'lucide-react';
-import { Dialog, Switch } from 'radix-ui';
+import { Switch } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { useTranslation } from 'react-i18next';
 import { ErrorState } from '../../components/ErrorState';
 import { Button } from '../../components/ui/button';

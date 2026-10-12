@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Sparkles, X } from 'lucide-react';
-import { Dialog } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { create } from 'zustand';

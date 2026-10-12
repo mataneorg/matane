@@ -13,7 +13,8 @@ import {
   Loader2,
   TriangleAlert,
 } from 'lucide-react';
-import { Dialog, DropdownMenu } from 'radix-ui';
+import { DropdownMenu } from 'radix-ui';
+import { Dialog } from '../../components/ui/dialog';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
