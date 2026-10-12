@@ -8,7 +8,7 @@ import {
   type MangaInfo,
 } from '@manga-reader/shared';
 import { isHiddenScanlator, scanlatorKey } from '@manga-reader/shared/chapters';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -16,6 +16,7 @@ import {
   ArrowUpNarrowWide,
   Bookmark,
   BookmarkMinus,
+  BookOpen,
   CalendarDays,
   CheckCheck,
   CircleArrowDown,
@@ -36,6 +37,13 @@ import { DropdownMenu } from 'radix-ui';
 import { type FormEvent, type MouseEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '../../components/ui/badge';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '../../components/ui/context-menu';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { formatRelative } from '../../lib/format';
@@ -265,60 +273,101 @@ function ChapterRow({
   onToggle: () => void;
 }) {
   const { t } = useTranslation();
+  const { markRead, markPrevious, bookmark, enqueue, deleteDownload } = useChapterActions(chapter);
+  const navigate = useNavigate();
   return (
-    <div
-      className={cn(
-        'group flex h-full items-center border-b',
-        chapter.read && 'text-muted-foreground',
-        selected && 'bg-primary/10',
-      )}
-    >
-      <button
-        type="button"
-        aria-label={selected ? t('library.selection.deselect') : t('library.selection.select')}
-        aria-pressed={selected}
-        onClick={onToggle}
-        className={cn(
-          'flex h-full w-7 shrink-0 items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-          selected && 'text-primary-text opacity-100',
-        )}
-      >
-        {selected ? <CircleCheck className="size-4" /> : <Circle className="size-4" />}
-      </button>
-      <Link
-        to="/reader/$chapterId"
-        params={{ chapterId: String(chapter.id) }}
-        onClick={onClick}
-        data-testid="chapter-row"
-        className="flex h-full min-w-0 flex-1 items-center gap-3 pr-2 transition-colors hover:bg-accent/60"
-      >
-        {chapter.read ? (
-          <CheckCheck className="size-4 shrink-0" aria-label={t('manga.read')} />
-        ) : (
-          <span className="mx-1 size-2 shrink-0 rounded-full bg-primary" aria-label={t('manga.unread')} />
-        )}
-        <span className={cn('truncate', !chapter.read && 'font-medium')}>{chapter.name}</span>
-        {isNew && <Badge variant="primary">{t('manga.new')}</Badge>}
-        {chapter.sourceMissing && (
-          <Badge variant="warning" title={t('manga.sourceMissingHint')}>
-            <CircleAlert />
-            {t('manga.sourceMissing')}
-          </Badge>
-        )}
-        {chapter.scanlator && <span className="truncate text-xs text-muted-foreground">· {chapter.scanlator}</span>}
-        <span className="ml-auto flex shrink-0 items-center gap-3 text-xs text-muted-foreground">
-          {chapter.lastPage > 0 && !chapter.read && chapter.totalPages !== null && (
-            <span className="text-primary-text">
-              {t('manga.pageProgress', { page: chapter.lastPage + 1, total: chapter.totalPages })}
-            </span>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          className={cn(
+            'group flex h-full items-center border-b',
+            chapter.read && 'text-muted-foreground',
+            selected && 'bg-primary/10',
           )}
-          {chapter.uploadedAt !== null && <span>{formatRelative(chapter.uploadedAt, language)}</span>}
-        </span>
-      </Link>
-      {!local && <DownloadButton chapterId={chapter.id} download={download} />}
-      <BookmarkToggle chapter={chapter} />
-      <ChapterMenu chapter={chapter} download={download} local={local} />
-    </div>
+        >
+          <button
+            type="button"
+            aria-label={selected ? t('library.selection.deselect') : t('library.selection.select')}
+            aria-pressed={selected}
+            onClick={onToggle}
+            className={cn(
+              'flex h-full w-7 shrink-0 items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+              selected && 'text-primary-text opacity-100',
+            )}
+          >
+            {selected ? <CircleCheck className="size-4" /> : <Circle className="size-4" />}
+          </button>
+          <Link
+            to="/reader/$chapterId"
+            params={{ chapterId: String(chapter.id) }}
+            onClick={onClick}
+            data-testid="chapter-row"
+            className="flex h-full min-w-0 flex-1 items-center gap-3 pr-2 transition-colors hover:bg-accent/60"
+          >
+            {chapter.read ? (
+              <CheckCheck className="size-4 shrink-0" aria-label={t('manga.read')} />
+            ) : (
+              <span className="mx-1 size-2 shrink-0 rounded-full bg-primary" aria-label={t('manga.unread')} />
+            )}
+            <span className={cn('truncate', !chapter.read && 'font-medium')}>{chapter.name}</span>
+            {isNew && <Badge variant="primary">{t('manga.new')}</Badge>}
+            {chapter.sourceMissing && (
+              <Badge variant="warning" title={t('manga.sourceMissingHint')}>
+                <CircleAlert />
+                {t('manga.sourceMissing')}
+              </Badge>
+            )}
+            {chapter.scanlator && <span className="truncate text-xs text-muted-foreground">· {chapter.scanlator}</span>}
+            <span className="ml-auto flex shrink-0 items-center gap-3 text-xs text-muted-foreground">
+              {chapter.lastPage > 0 && !chapter.read && chapter.totalPages !== null && (
+                <span className="text-primary-text">
+                  {t('manga.pageProgress', { page: chapter.lastPage + 1, total: chapter.totalPages })}
+                </span>
+              )}
+              {chapter.uploadedAt !== null && <span>{formatRelative(chapter.uploadedAt, language)}</span>}
+            </span>
+          </Link>
+          {!local && <DownloadButton chapterId={chapter.id} download={download} />}
+          <BookmarkToggle chapter={chapter} />
+          <ChapterMenu chapter={chapter} download={download} local={local} />
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem
+          onSelect={() => void navigate({ to: '/reader/$chapterId', params: { chapterId: String(chapter.id) } })}
+        >
+          <BookOpen aria-hidden />
+          {t('manga.menu.read')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onSelect={() => markRead.mutate(!chapter.read)}>
+          <CheckCheck aria-hidden />
+          {chapter.read ? t('manga.menu.markUnread') : t('manga.menu.markRead')}
+        </ContextMenuItem>
+        <ContextMenuItem onSelect={() => markPrevious.mutate()}>
+          <ListChecks aria-hidden />
+          {t('manga.menu.markPrevious')}
+        </ContextMenuItem>
+        <ContextMenuItem onSelect={() => bookmark.mutate(!chapter.bookmarked)}>
+          {chapter.bookmarked ? <BookmarkMinus aria-hidden /> : <Bookmark aria-hidden />}
+          {chapter.bookmarked ? t('manga.menu.unbookmark') : t('manga.menu.bookmark')}
+        </ContextMenuItem>
+        {local ? null : download ? (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem destructive onSelect={() => deleteDownload.mutate()}>
+              <Trash2 aria-hidden />
+              {download.status === 'done' ? t('downloads.delete') : t('downloads.cancel')}
+            </ContextMenuItem>
+          </>
+        ) : (
+          <ContextMenuItem onSelect={() => enqueue([chapter.id])}>
+            <CircleArrowDown aria-hidden />
+            {t('downloads.download')}
+          </ContextMenuItem>
+        )}
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -404,17 +453,8 @@ function BookmarkToggle({ chapter }: { chapter: ChapterInfo }) {
   );
 }
 
-/** Per-chapter actions (docs/BRAINSTORM.md §6.3): mark read/unread, mark everything before as read. */
-function ChapterMenu({
-  chapter,
-  download,
-  local,
-}: {
-  chapter: ChapterInfo;
-  download: DownloadItem | undefined;
-  local: boolean;
-}) {
-  const { t } = useTranslation();
+/** The actions on one chapter (docs/BRAINSTORM.md §6.3), shared by the "more" button and the right-click menu. */
+function useChapterActions(chapter: ChapterInfo) {
   const markRead = useMutation({
     mutationFn: (read: boolean) => ipc.invoke('chapters.markRead', { chapterIds: [chapter.id], read }),
   });
@@ -428,6 +468,21 @@ function ChapterMenu({
   const deleteDownload = useMutation({
     mutationFn: () => ipc.invoke('downloads.delete', { chapterIds: [chapter.id] }),
   });
+  return { markRead, markPrevious, bookmark, enqueue, deleteDownload };
+}
+
+/** Per-chapter actions in the "more" button of a row. */
+function ChapterMenu({
+  chapter,
+  download,
+  local,
+}: {
+  chapter: ChapterInfo;
+  download: DownloadItem | undefined;
+  local: boolean;
+}) {
+  const { t } = useTranslation();
+  const { markRead, markPrevious, bookmark, enqueue, deleteDownload } = useChapterActions(chapter);
   const item =
     'flex h-8 cursor-default items-center gap-2 rounded-md px-2 text-sm outline-none data-[highlighted]:bg-accent';
   return (

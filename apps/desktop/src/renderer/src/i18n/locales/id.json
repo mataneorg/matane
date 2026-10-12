@@ -802,7 +802,8 @@
       "markUnread": "Tandai belum dibaca",
       "markPrevious": "Tandai sebelumnya sudah dibaca",
       "bookmark": "Tandai (bookmark)",
-      "unbookmark": "Hapus bookmark"
+      "unbookmark": "Hapus bookmark",
+      "read": "Baca"
     },
     "cover": {
       "change": "Ganti cover…",

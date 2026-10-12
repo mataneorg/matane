@@ -812,7 +812,8 @@
       "markUnread": "Mark as unread",
       "markPrevious": "Mark previous as read",
       "bookmark": "Bookmark",
-      "unbookmark": "Remove bookmark"
+      "unbookmark": "Remove bookmark",
+      "read": "Read"
     },
     "cover": {
       "change": "Change cover…",
