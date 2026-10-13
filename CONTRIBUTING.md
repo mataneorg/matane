@@ -51,6 +51,10 @@ Before you push: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test`
 - **Decisions**: a change that settles an architectural question gets an ADR in `docs/adr/` (next number, same format as the others, and a line in its README).
 - **Extensions never ship with the app**: nothing in this repository adds, names or points to a real source, repository or key.
 
+## Docs site
+
+The documentation site is a [VitePress](https://vitepress.dev) project in `apps/docs` (`pnpm --filter @manga-reader/docs dev` and `build`; a dead link fails the build). The pages are English Markdown: `docs/` has the user guides and FAQ, `extensions/` the author guides. Screenshots are WebP files in `apps/docs/public/img`, shown with `<Shot name="library" alt="..." />`. To retake them, build the app and run `pnpm --filter @manga-reader/desktop docs:shots --repo <url>` (it needs a display, ImageMagick and the network: it adds an extension repository and installs from it like a user; read the header of `apps/desktop/scripts/docs-shots.mts` first, and look at every image before you commit it). The Changelogs page reads GitHub Releases in the browser, so a release needs no docs change.
+
 ## Releases
 
 Maintainers follow [docs/releasing.md](docs/releasing.md).
