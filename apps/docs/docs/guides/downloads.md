@@ -2,6 +2,8 @@
 
 ## Downloading
 
+<Shot name="downloads" alt="The Downloads queue" />
+
 On a manga's page, select chapters and choose **Download** (or download the next unread ones). The **Downloads** page shows the queue: pause, resume, reorder, retry or cancel.
 
 Settings → Downloads:
@@ -13,6 +15,12 @@ Settings → Downloads:
 - **Download ahead:** while you read a manga from your library, the next unread chapters download.
 - **Delete after reading**, right away or after a few more chapters are read.
 - New chapters found by the library update can download by themselves.
+
+## Automatic downloads
+
+- **Download new chapters automatically** (Settings, Library, Library updates) queues unread new chapters after a check. It can be limited to manga you started, and set per category: **Include** (only those categories) or **Exclude** (never this one). The size limit applies.
+- **Download ahead** (Settings, Downloads) saves the next unread chapters while you read a manga from your library.
+- **Delete after reading** removes a chapter once you finish it, right away or after a few more, and can keep bookmarked chapters and whole categories.
 
 ## Reading offline
 

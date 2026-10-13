@@ -2,6 +2,8 @@
 
 ## Modes
 
+<Shot name="reader" alt="The reader bars (the pages are left out of the screenshot)" />
+
 | Mode     | What it does                                                                |
 | -------- | --------------------------------------------------------------------------- |
 | Single   | One page at a time                                                          |

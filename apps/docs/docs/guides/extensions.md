@@ -4,6 +4,8 @@ A **source** is a website Matane can read from; an **extension** provides one or
 
 ## Installing
 
+<Shot name="extensions-available" alt="The Available tab lists what the repositories offer" />
+
 Open **Extensions**. The list shows what the repositories you added offer, filtered by your content languages. **Install** shows:
 
 - the repository and whether it is **trusted**,
@@ -14,6 +16,8 @@ Updates appear on the same page; **Update all** installs them. Settings → Brow
 **Uninstall** removes an extension with its settings, data and cookies. Its manga stay in your library as "source not installed" until you install it again.
 
 ## Repositories
+
+<Shot name="repositories" alt="The repositories panel next to the installed extensions" />
 
 Matane comes without any repository. Add one by its URL (Extensions → Repositories). Every repository index is **signed**:
 

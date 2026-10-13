@@ -1,22 +1,8 @@
-# Install
+# Install and updating
 
 Download Matane from [GitHub Releases](https://github.com/mataneorg/matane/releases). Pre-releases (betas) are marked as such.
 
-<DownloadButton :guide="false" />
-
-| System                        | File                                       | Updates                                |
-| ----------------------------- | ------------------------------------------ | -------------------------------------- |
-| Windows 10/11                 | `Matane-<version>-win-x64.exe` (installer) | installs them itself                   |
-| Windows, no install           | `Matane-<version>-win-x64-portable.exe`    | tells you, links the release           |
-| macOS (Apple silicon / Intel) | `-mac-arm64.dmg` / `-mac-x64.dmg`          | tells you, links the release           |
-| Linux (any distribution)      | `Matane-<version>-linux-x86_64.AppImage`   | installs them itself                   |
-| Debian, Ubuntu, Mint          | `Matane-<version>-linux-amd64.deb`         | tells you; update with the new package |
-| Fedora, openSUSE              | `Matane-<version>-linux-x86_64.rpm`        | tells you; update with the new package |
-| Arch Linux                    | AUR `matane-bin`                           | through your AUR helper                |
-| Flatpak                       | Flathub `dev.sukun.matane`                 | through Flathub                        |
-| Linux, by hand                | `Matane-<version>-linux-x64.tar.gz`        | tells you, links the release           |
-
-The AUR and Flathub packages follow each release once they are published there.
+Pick the right file on the [Download page](/download), which lists every package and how each one updates.
 
 The builds are **not code-signed yet**, so your system warns the first time you open Matane.
 

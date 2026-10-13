@@ -4,6 +4,8 @@ A tracker keeps your reading list on a website such as AniList. Matane can send 
 
 ## Connect
 
+<Shot name="settings-tracking" alt="Settings, Tracking" />
+
 Open **Settings → Tracking** and press **Connect** next to a tracker. Your browser opens its login; allow Matane, and the browser page says you can come back. The page returns to Matane through a small address on your own computer (`http://127.0.0.1:47653/callback` for AniList, `…:47654/callback` for MyAnimeList) that exists only while you log in, and Matane never sees your password.
 
 - An **AniList** login lasts a year. A **MyAnimeList** login is renewed by itself in the background, for as long as you use it.

@@ -4,6 +4,8 @@ All of this is in **Settings → Network** and applies immediately, without a re
 
 ## DNS-over-HTTPS
 
+<Shot name="settings-network" alt="Settings, Network" />
+
 Many internet providers block sites by answering DNS lookups with a wrong address. This is common in Indonesia (Internet Positif), where several manga sites are unreachable with the provider's DNS. DNS-over-HTTPS looks addresses up over an encrypted connection the provider cannot change.
 
 | Mode      | Behaviour                                                                 |
@@ -33,3 +35,7 @@ How Matane introduces itself to websites. By default it is a regular browser's. 
 ## Test connection
 
 Loads a small page through these settings and shows the time it took or the error, so you can check a change right away.
+
+## Cloudflare checks
+
+Some sites check visitors with Cloudflare. Matane solves the check itself when it can, and opens a window when you need to help: press **Verify** where it is offered, complete the check, and the request is repeated.

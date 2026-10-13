@@ -1,10 +1,12 @@
-# Backup and restore
+# Backups
 
 A backup is a single file, `matane-backup-YYYY-MM-DD.zip`. It contains your library, categories, chapter read status, bookmarks and progress, history, reading statistics, per-manga reader settings, custom covers, repositories, the list of installed extensions with their settings, and the app settings.
 
 It does **not** contain downloaded chapters (they stay in your download folder), caches, or passwords.
 
 ## Making backups
+
+<Shot name="settings-data" alt="Settings, Data & storage" />
 
 **Settings → Data & storage → Backup:**
 

@@ -4,6 +4,8 @@ Matane can read manga that are already on your computer: CBZ files from other ap
 
 ## Setting it up
 
+<Shot name="settings-browse" alt="Settings, Browse & extensions, where the Local files folder is chosen" />
+
 1. Make a folder with **one folder per manga** inside it:
 
    ```

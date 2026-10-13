@@ -161,7 +161,7 @@ onMounted(async () => {
       <a href="https://aur.archlinux.org/packages/matane-bin">Arch (AUR)</a>
       <a href="https://flathub.org/apps/dev.sukun.matane">Flathub</a>
       <a href="https://github.com/mataneorg/matane/releases">All releases</a>
-      <a v-if="guide" :href="withBase('/guide/install')">Install guide</a>
+      <a v-if="guide" :href="withBase('/docs/guides/install')">Install guide</a>
     </p>
   </div>
 </template>
